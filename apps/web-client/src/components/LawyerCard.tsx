@@ -75,7 +75,7 @@ export function LawyerCard({ lawyer }: { lawyer: LawyerCardDto }) {
           </span>
         </div>
         <Link to={`/lawyers/${lawyer.slug}`}>
-          <Button className="!px-4 !py-2 !text-xs">{isAr ? "استشر" : "Consult"}</Button>
+          <Button size="sm">{isAr ? "استشر" : "Consult"}</Button>
         </Link>
       </div>
     </Card>

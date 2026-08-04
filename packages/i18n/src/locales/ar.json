@@ -5,10 +5,43 @@
   },
   "nav": {
     "home": "الرئيسية",
+    "services": "الخدمات",
+    "lawyerDirectory": "دليل المحامين",
     "orders": "طلباتي",
     "account": "حسابي",
+    "dashboard": "لوحة التحكم",
+    "signIn": "تسجيل الدخول",
+    "login": "دخول",
     "logout": "خروج",
-    "search": "ابحث عن محامٍ أو خدمة"
+    "search": "ابحث عن محامٍ أو خدمة",
+    "openMenu": "فتح القائمة",
+    "closeMenu": "إغلاق القائمة"
+  },
+  "shell": {
+    "lawyer": {
+      "tagline": "لوحة المحامي",
+      "nav": {
+        "dashboard": "لوحة التحكم",
+        "incomingRequests": "الطلبات الواردة",
+        "biddingFeed": "طلبات عروض الأسعار",
+        "earningsAndReviews": "الأرباح والتقييمات",
+        "subscription": "الاشتراك",
+        "profileAndPricing": "الملف والتسعير"
+      }
+    },
+    "admin": {
+      "tagline": "لوحة الإدارة",
+      "nav": {
+        "dashboard": "لوحة التحكم",
+        "lawyerVerification": "توثيق المحامين",
+        "payments": "المدفوعات",
+        "reconciliation": "التسوية المحاسبية",
+        "catalogAndPricing": "الخدمات والتسعير",
+        "subscriptionPlans": "خطط الاشتراك",
+        "usersAndRoles": "المستخدمون والصلاحيات",
+        "auditLog": "سجل التدقيق"
+      }
+    }
   },
   "common": {
     "next": "التالي",

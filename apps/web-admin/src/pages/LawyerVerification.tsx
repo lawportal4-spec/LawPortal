@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, XCircle } from "lucide-react";
-import { Button, Card, Ltr } from "@law-portal/ui";
+import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getPendingLawyers, rejectLawyer, verifyLawyer } from "../lib/adminApi";
@@ -49,7 +49,7 @@ export default function LawyerVerification() {
                   <Ltr className="font-mono">{lawyer.email}</Ltr>
                 </p>
               </div>
-              <span className="rounded-full bg-paper px-3 py-1 text-xs font-medium text-ink-soft">{lawyer.verificationStatus}</span>
+              <StatusTag status={lawyer.verificationStatus} />
             </div>
             <div className="mb-3 grid grid-cols-3 gap-3 text-sm">
               <div>

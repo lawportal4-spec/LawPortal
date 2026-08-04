@@ -5,10 +5,43 @@
   },
   "nav": {
     "home": "Home",
+    "services": "Services",
+    "lawyerDirectory": "Lawyer Directory",
     "orders": "My Orders",
     "account": "My Account",
+    "dashboard": "Dashboard",
+    "signIn": "Sign in",
+    "login": "Log in",
     "logout": "Log out",
-    "search": "Search for a lawyer or service"
+    "search": "Search for a lawyer or service",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
+  "shell": {
+    "lawyer": {
+      "tagline": "Lawyer Portal",
+      "nav": {
+        "dashboard": "Dashboard",
+        "incomingRequests": "Incoming Requests",
+        "biddingFeed": "Bidding Feed",
+        "earningsAndReviews": "Earnings & Reviews",
+        "subscription": "Subscription",
+        "profileAndPricing": "Profile & Pricing"
+      }
+    },
+    "admin": {
+      "tagline": "Admin Backoffice",
+      "nav": {
+        "dashboard": "Dashboard",
+        "lawyerVerification": "Lawyer Verification",
+        "payments": "Payments",
+        "reconciliation": "Reconciliation",
+        "catalogAndPricing": "Catalog & Pricing",
+        "subscriptionPlans": "Subscription Plans",
+        "usersAndRoles": "Users & Roles",
+        "auditLog": "Audit Log"
+      }
+    }
   },
   "common": {
     "next": "Next",

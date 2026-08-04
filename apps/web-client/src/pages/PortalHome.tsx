@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { Scale, Gavel, FileCheck2, Briefcase, FolderOpen, Search } from "lucide-react";
-import { Card, Input, StatusPill, StepProgress, Chip, type ChipCategory } from "@law-portal/ui";
+import { Card, Input, Chip, SectionHeading, Button, type ChipCategory } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { LawyerCard } from "../components/LawyerCard";
@@ -24,28 +24,52 @@ export default function PortalHome() {
     queryFn: async () => (await api.get<SpecialtyDto[]>("/api/v1/catalog/specialties")).data,
   });
 
-  const topLawyerQuery = useQuery({
+  const topLawyersQuery = useQuery({
     queryKey: ["lawyers", "top"],
-    queryFn: () => searchLawyers({ sort: "Rating", page: 1, pageSize: 1 }),
+    queryFn: () => searchLawyers({ sort: "Rating", page: 1, pageSize: 3 }),
   });
 
   return (
     <AppShell>
-      {/* The page's own heading — every other page here has one, this dashboard-style home
-          page didn't (its five sections all start at h2, with nothing above them). Visually
-          hidden since the header already carries the brand name; screen-reader navigation-by-
-          heading still needs exactly one h1 per page. */}
-      <h1 className="sr-only">{isAr ? "الرئيسية" : "Home"}</h1>
-      <Input
-        icon={<Search className="h-4 w-4" />}
-        placeholder={t("nav.search") ?? undefined}
-        className="mb-8 max-w-md"
-      />
+      <section className="mb-12">
+        <span className="font-mono text-xs font-semibold uppercase tracking-wide text-rubric">
+          {isAr ? "ابحث بثقة" : "Search with confidence"}
+        </span>
+        <h1 className="mt-3 font-display text-3xl font-bold text-ink sm:text-4xl">
+          {isAr ? "ابحث عن محامٍ متخصص في دقائق" : "Find the right licensed lawyer in minutes"}
+        </h1>
+        <p className="mt-3 max-w-2xl text-ink-soft">
+          {isAr
+            ? "استشر محامين مرخّصين من وزارة العدل، أو قدّم طلب توثيق وتفاوض على السعر قبل الالتزام."
+            : "Consult MoJ-licensed lawyers, or submit a notarization request and negotiate price before committing."}
+        </p>
+        <Input
+          icon={<Search className="h-4 w-4" />}
+          placeholder={t("nav.search") ?? undefined}
+          className="mt-6 max-w-md"
+        />
+        {specialtiesQuery.data && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {specialtiesQuery.data.slice(0, 6).map((s) => (
+              <Link key={s.id} to="/lawyers">
+                <Chip className="hover:border-seal hover:text-seal">{isAr ? s.nameAr : s.nameEn}</Chip>
+              </Link>
+            ))}
+          </div>
+        )}
+        {specialtiesQuery.isError && (
+          <p className="mt-4 text-sm text-rubric">
+            {isAr
+              ? "تعذّر الاتصال بالـ API. تأكد من تشغيله على http://localhost:5280."
+              : "Could not reach the API. Make sure it's running on http://localhost:5280."}
+          </p>
+        )}
+      </section>
 
-      <section className="mb-10">
-        <h2 className="mb-4 font-display text-lg font-bold">
+      <section className="mb-12">
+        <SectionHeading className="mb-4">
           {isAr ? "كيف يمكننا مساعدتك؟" : "How can we help?"}
-        </h2>
+        </SectionHeading>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           {CATEGORIES.map(({ key, icon: Icon, to }) => (
             <Link key={key} to={to}>
@@ -66,70 +90,40 @@ export default function PortalHome() {
         </div>
       </section>
 
-      <section className="mb-10 grid gap-8 lg:grid-cols-2">
-        <div>
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold">
-              {isAr ? "أعلى المحامين تقييمًا" : "Top-rated lawyer"}
-            </h2>
-            <Link to="/lawyers" className="text-sm text-seal hover:underline">
-              {isAr ? "عرض الدليل ←" : "View directory →"}
-            </Link>
-          </div>
-          {topLawyerQuery.data?.items[0] ? (
-            <LawyerCard lawyer={topLawyerQuery.data.items[0]} />
-          ) : (
-            <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>
-          )}
+      <section className="mb-12">
+        <div className="mb-4 flex items-center justify-between">
+          <SectionHeading className="mb-0">
+            {isAr ? "أعلى المحامين تقييمًا" : "Top-rated lawyers"}
+          </SectionHeading>
+          <Link to="/lawyers" className="text-sm font-semibold text-seal hover:underline">
+            {isAr ? "عرض الدليل ←" : "View directory →"}
+          </Link>
         </div>
-
-        <div>
-          <h2 className="mb-4 font-display text-lg font-bold">
-            {isAr ? "مؤشّر خطوات الطلب" : "Request wizard steps"}
-          </h2>
-          <StepProgress
-            current={2}
-            steps={[
-              { label: isAr ? "التخصص" : "Specialty" },
-              { label: isAr ? "المحامي" : "Lawyer" },
-              { label: isAr ? "التفاصيل" : "Details" },
-            ]}
-          />
-
-          <h2 className="mt-8 mb-4 font-display text-lg font-bold">
-            {isAr ? "حالات الطلب" : "Request statuses"}
-          </h2>
-          <div className="flex flex-wrap gap-2">
-            <StatusPill status="draft" label={t("status.draft")} />
-            <StatusPill status="pendingPayment" label={t("status.pendingPayment")} />
-            <StatusPill status="inProgress" label={t("status.inProgress")} />
-            <StatusPill status="completed" label={t("status.completed")} />
-            <StatusPill status="disputed" label={t("status.disputed")} />
+        {topLawyersQuery.data?.items.length ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {topLawyersQuery.data.items.map((lawyer) => (
+              <LawyerCard key={lawyer.id} lawyer={lawyer} />
+            ))}
           </div>
-        </div>
+        ) : (
+          <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>
+        )}
       </section>
 
       <section>
-        <h2 className="mb-4 font-display text-lg font-bold">
-          {isAr ? "التخصصات (من الـ API الحي)" : "Specialties (live from the API)"}
-        </h2>
-        {specialtiesQuery.isLoading && (
-          <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>
-        )}
-        {specialtiesQuery.isError && (
-          <p className="text-sm text-rubric">
+        <div className="flex flex-col items-center gap-4 rounded-xl bg-seal-tint py-10 text-center">
+          <SectionHeading className="mb-0">
+            {isAr ? "لديك طلب جاهز؟" : "Have a request ready?"}
+          </SectionHeading>
+          <p className="max-w-md text-ink-soft">
             {isAr
-              ? "تعذّر الاتصال بالـ API. تأكد من تشغيله على http://localhost:5280."
-              : "Could not reach the API. Make sure it's running on http://localhost:5280."}
+              ? "صف حالتك، واستقبل عروضًا من محامين مرخّصين خلال ساعات."
+              : "Describe your case and receive offers from licensed lawyers within hours."}
           </p>
-        )}
-        {specialtiesQuery.data && (
-          <div className="flex flex-wrap gap-2">
-            {specialtiesQuery.data.map((s) => (
-              <Chip key={s.id}>{isAr ? s.nameAr : s.nameEn}</Chip>
-            ))}
-          </div>
-        )}
+          <Link to="/bidding/new">
+            <Button>{isAr ? "ابدأ طلبك الآن" : "Start your request"}</Button>
+          </Link>
+        </div>
       </section>
     </AppShell>
   );

@@ -3,6 +3,11 @@ export type Locale = "ar" | "en";
 export const LAWYER_APP_URL = import.meta.env.PUBLIC_LAWYER_APP_URL ?? "http://localhost:5174";
 export const CLIENT_APP_URL = import.meta.env.PUBLIC_CLIENT_APP_URL ?? "http://localhost:5173";
 
+export const app = {
+  ar: { name: "بوابة القانون" },
+  en: { name: "Law Portal" },
+};
+
 export const nav = {
   ar: {
     home: "الرئيسية",
