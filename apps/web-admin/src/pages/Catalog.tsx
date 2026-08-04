@@ -14,6 +14,13 @@ import {
   type AdminServiceVariantDto,
 } from "../lib/catalogApi";
 
+const PRICING_MODEL_LABEL: Record<string, { ar: string; en: string }> = {
+  PerLawyerFixed: { ar: "سعر ثابت لكل محامٍ", en: "Per-lawyer fixed price" },
+  CompetitiveBidding: { ar: "عروض أسعار تنافسية", en: "Competitive bidding" },
+  PredefinedCatalog: { ar: "سعر محدد مسبقًا", en: "Predefined fixed price" },
+  DetailsOnly: { ar: "تفاصيل مباشرة", en: "Direct submission" },
+};
+
 function VariantRow({ variant, isAr }: { variant: AdminServiceVariantDto; isAr: boolean }) {
   const queryClient = useQueryClient();
   const [editing, setEditing] = useState(false);
@@ -110,7 +117,9 @@ function ServiceRow({ service, isAr }: { service: AdminServiceCatalogItemDto; is
           <span className={service.isActive ? "font-medium text-ink" : "font-medium text-ink-faint line-through"}>
             {isAr ? service.nameAr : service.nameEn}
           </span>
-          <span className="rounded-full bg-paper px-2 py-0.5 text-[10px] text-ink-faint">{service.pricingModel}</span>
+          <span className="rounded-full bg-paper px-2 py-0.5 text-[10px] text-ink-faint">
+            {PRICING_MODEL_LABEL[service.pricingModel] ? (isAr ? PRICING_MODEL_LABEL[service.pricingModel].ar : PRICING_MODEL_LABEL[service.pricingModel].en) : service.pricingModel}
+          </span>
         </button>
         {editing ? (
           <div className="flex items-center gap-2">

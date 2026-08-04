@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight, Gavel } from "lucide-react";
-import { Card, Ltr } from "@law-portal/ui";
+import { Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getBiddingFeed } from "../lib/biddingApi";
@@ -66,22 +66,16 @@ export default function BiddingFeed() {
                         <Ltr>{formatCurrency(r.myLatestOfferAmount)}</Ltr>
                       </span>
                     )}
-                    <span
-                      className={
-                        "rounded-full px-3 py-1 text-xs font-medium " +
-                        (r.myOfferStatus ? "bg-seal-tint text-seal-strong" : "border border-border text-ink-faint")
-                      }
-                    >
-                      {r.myOfferStatus
-                        ? OFFER_STATUS_LABEL[r.myOfferStatus]
-                          ? isAr
-                            ? OFFER_STATUS_LABEL[r.myOfferStatus].ar
-                            : OFFER_STATUS_LABEL[r.myOfferStatus].en
-                          : r.myOfferStatus
-                        : isAr
-                          ? "لم تُقدّم عرضًا بعد"
-                          : "No offer yet"}
-                    </span>
+                    {r.myOfferStatus ? (
+                      <StatusTag
+                        status={r.myOfferStatus}
+                        label={OFFER_STATUS_LABEL[r.myOfferStatus] ? (isAr ? OFFER_STATUS_LABEL[r.myOfferStatus].ar : OFFER_STATUS_LABEL[r.myOfferStatus].en) : r.myOfferStatus}
+                      />
+                    ) : (
+                      <span className="rounded-full border border-border px-3 py-1 text-xs font-medium text-ink-faint">
+                        {isAr ? "لم تُقدّم عرضًا بعد" : "No offer yet"}
+                      </span>
+                    )}
                   </div>
                 </Card>
               </Link>

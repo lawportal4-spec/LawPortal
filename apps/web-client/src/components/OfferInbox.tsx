@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Star, Check, X } from "lucide-react";
-import { Button, Card, Ltr } from "@law-portal/ui";
+import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
 import { acceptOffer, counterOffer, getOfferInbox, rejectOffer, type OfferSummaryDto } from "../lib/biddingApi";
 
@@ -67,13 +67,10 @@ function OfferCard({ offer, requestId }: { offer: OfferSummaryDto; requestId: st
             </p>
           )}
         </div>
-        <span className="rounded-full bg-paper px-2.5 py-1 text-xs font-medium text-ink-soft">
-          {OFFER_STATUS_LABEL[offer.status]
-            ? isAr
-              ? OFFER_STATUS_LABEL[offer.status].ar
-              : OFFER_STATUS_LABEL[offer.status].en
-            : offer.status}
-        </span>
+        <StatusTag
+          status={offer.status}
+          label={OFFER_STATUS_LABEL[offer.status] ? (isAr ? OFFER_STATUS_LABEL[offer.status].ar : OFFER_STATUS_LABEL[offer.status].en) : offer.status}
+        />
       </div>
 
       <p className="mb-3 font-mono text-lg font-bold text-seal">

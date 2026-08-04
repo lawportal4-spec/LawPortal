@@ -31,7 +31,7 @@ export default function ServicesHub() {
 
   return (
     <AppShell>
-      <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "خدمات بينه" : "Our Services"}</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "خدماتنا" : "Our Services"}</h1>
 
       {query.isLoading && <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>}
 

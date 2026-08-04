@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Check, CreditCard, Megaphone, Percent, TriangleAlert } from "lucide-react";
-import { Button, Card, Ltr } from "@law-portal/ui";
+import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import {
@@ -94,10 +94,13 @@ export default function Subscription() {
               <p className="font-display text-lg font-bold">{isAr ? mine.effectivePlan.nameAr : mine.effectivePlan.nameEn}</p>
             </div>
             {mine.status && (
-              <span className="rounded-full bg-paper px-3 py-1 text-xs font-medium text-ink-soft">
-                {STATUS_LABEL[mine.status] ? (isAr ? STATUS_LABEL[mine.status].ar : STATUS_LABEL[mine.status].en) : mine.status}
-                {mine.cancelAtPeriodEnd && ` · ${isAr ? "لن تُجدَّد" : "won't renew"}`}
-              </span>
+              <StatusTag
+                status={mine.status}
+                label={
+                  (STATUS_LABEL[mine.status] ? (isAr ? STATUS_LABEL[mine.status].ar : STATUS_LABEL[mine.status].en) : mine.status) +
+                  (mine.cancelAtPeriodEnd ? ` · ${isAr ? "لن تُجدَّد" : "won't renew"}` : "")
+                }
+              />
             )}
           </div>
           {mine.currentPeriodEndUtc && (
@@ -197,11 +200,10 @@ export default function Subscription() {
               <span className="font-mono text-sm text-ink-soft">
                 <Ltr>{formatCurrency(invoice.total)}</Ltr>
               </span>
-              <span className="rounded-full bg-paper px-2.5 py-1 text-xs font-medium text-ink-soft">
-                {INVOICE_STATUS_LABEL[invoice.status]
-                  ? isAr ? INVOICE_STATUS_LABEL[invoice.status].ar : INVOICE_STATUS_LABEL[invoice.status].en
-                  : invoice.status}
-              </span>
+              <StatusTag
+                status={invoice.status}
+                label={INVOICE_STATUS_LABEL[invoice.status] ? (isAr ? INVOICE_STATUS_LABEL[invoice.status].ar : INVOICE_STATUS_LABEL[invoice.status].en) : invoice.status}
+              />
               {invoice.status === "Pending" && (
                 <Button onClick={() => payMutation.mutate(invoice.id)} disabled={payMutation.isPending}>
                   <CreditCard className="h-4 w-4" />
