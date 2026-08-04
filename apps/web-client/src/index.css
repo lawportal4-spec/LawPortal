@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "@law-portal/design-tokens/theme.css";
+
+/* Tailwind v4's automatic content detection skips node_modules by default, and pnpm workspace
+   packages are symlinked there — so without this, any utility class used only inside
+   packages/ui's own source (and not also verbatim in this app's source) is silently never
+   generated. Found via a real missing focus-visible ring on every Input across every app. */
+@source "../../../packages/ui/src";
+
+@theme {
+  --font-sans: var(--font-body);
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    margin: 0;
+  }
+
+  ::selection {
+    background: var(--color-seal);
+    color: var(--color-seal-on);
+  }
+}

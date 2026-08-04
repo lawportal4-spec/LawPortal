@@ -1,0 +1,36 @@
+{
+  "app": {
+    "nameAr": "بوابة القانون",
+    "nameEn": "Law Portal"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "orders": "طلباتي",
+    "account": "حسابي",
+    "logout": "خروج",
+    "search": "ابحث عن محامٍ أو خدمة"
+  },
+  "common": {
+    "next": "التالي",
+    "back": "السابق",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "needHelp": "تحتاج مساعدة؟",
+    "step": "الخطوة {{current}} من {{total}}"
+  },
+  "categories": {
+    "consultations": "الاستشارات القانونية",
+    "judiciary": "القضاء والتنفيذ",
+    "notarization": "خدمات التوثيق",
+    "business": "خدمات الأعمال",
+    "other": "خدمات أخرى"
+  },
+  "status": {
+    "draft": "مسودة",
+    "pendingPayment": "بانتظار الدفع",
+    "inProgress": "قيد التنفيذ",
+    "completed": "مكتمل",
+    "disputed": "نزاع",
+    "cancelled": "ملغى"
+  }
+}

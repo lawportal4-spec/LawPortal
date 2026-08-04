@@ -1,0 +1,36 @@
+{
+  "app": {
+    "nameAr": "بوابة القانون",
+    "nameEn": "Law Portal"
+  },
+  "nav": {
+    "home": "Home",
+    "orders": "My Orders",
+    "account": "My Account",
+    "logout": "Log out",
+    "search": "Search for a lawyer or service"
+  },
+  "common": {
+    "next": "Next",
+    "back": "Back",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "needHelp": "Need help?",
+    "step": "Step {{current}} of {{total}}"
+  },
+  "categories": {
+    "consultations": "Legal Consultations",
+    "judiciary": "Judiciary & Execution",
+    "notarization": "Notarization Services",
+    "business": "Business Services",
+    "other": "Other Services"
+  },
+  "status": {
+    "draft": "Draft",
+    "pendingPayment": "Pending payment",
+    "inProgress": "In progress",
+    "completed": "Completed",
+    "disputed": "Disputed",
+    "cancelled": "Cancelled"
+  }
+}

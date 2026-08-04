@@ -1,0 +1,36 @@
+---
+interface Props {
+  iconKey: string;
+  class?: string;
+}
+
+const { iconKey, class: className = "h-6 w-6" } = Astro.props;
+
+const paths: Record<string, string> = {
+  scale:
+    "M12 3v18M5 8h14M5 8l-2.5 5.5a4 4 0 008 0zM19 8l-2.5 5.5a4 4 0 008 0z",
+  gavel:
+    "M8 5l6 6M4 9l5-5 3 3-5 5-3-3zM13 12l7 7M17 12l4 4M3 21h9",
+  document:
+    "M7 3h7l4 4v14H7V3zM14 3v4h4M10 12h6M10 15h6M10 9h3",
+  briefcase:
+    "M4 8h16v11H4V8zM8 8V6a2 2 0 012-2h4a2 2 0 012 2v2M4 13h16",
+  folder:
+    "M4 6h6l2 2h8v11H4V6z",
+};
+
+const d = paths[iconKey] ?? paths.folder;
+---
+
+<svg
+  class={className}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"
+>
+  <path d={d} />
+</svg>

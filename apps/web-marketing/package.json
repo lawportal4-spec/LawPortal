@@ -1,0 +1,23 @@
+{
+  "name": "@law-portal/web-marketing",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev --port 5176",
+    "build": "astro check && astro build",
+    "lint": "astro check",
+    "preview": "astro preview --port 5176"
+  },
+  "dependencies": {
+    "@law-portal/design-tokens": "workspace:*",
+    "astro": "^7.1.6"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "@astrojs/sitemap": "^3.6.0",
+    "@tailwindcss/vite": "^4.1.16",
+    "tailwindcss": "^4.1.16",
+    "typescript": "~6.0.2"
+  }
+}

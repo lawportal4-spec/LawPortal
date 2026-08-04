@@ -1,0 +1,54 @@
+---
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { blogPosts } from "../../../lib/blogPosts";
+
+const post = blogPosts.find((p) => p.slug === "inheritance-basics")!;
+---
+
+<BlogLayout
+  locale="en"
+  path="/en/blog/inheritance-basics"
+  altPath="/blog/inheritance-basics"
+  title={post.titleEn}
+  description={post.excerptEn}
+  publishDate={post.publishDate}
+>
+  <p>
+    Most inheritance cases in Saudi Arabia move through a similar general sequence, even though the details vary by
+    the nature of the estate and the number of heirs. This is a general overview of the usual order — not a
+    substitute for consulting a lawyer specialized in inheritance and estate matters for your specific case.
+  </p>
+
+  <h2>1. Determining the heirs</h2>
+  <p>
+    The first step is usually obtaining a "determination of heirs" document that officially establishes who the
+    legal heirs are. This document is the foundation every subsequent step builds on — from dividing the estate to
+    transferring ownership of assets.
+  </p>
+
+  <h2>2. Inventorying the estate</h2>
+  <p>
+    In parallel, the deceased's assets are inventoried — real estate, bank accounts, shares, or other assets — along
+    with their liabilities (debts), because the estate is divided based on the net value after settling outstanding
+    obligations, not the gross value of assets.
+  </p>
+
+  <h2>3. Division</h2>
+  <p>
+    Once the heirs and the estate are determined, shares are divided according to the legal entitlements. If all
+    heirs agree, the division can proceed by consent; if a dispute arises among heirs over the division or over a
+    specific asset, the matter may require filing a case before the competent court.
+  </p>
+
+  <h2>4. Transfer of ownership</h2>
+  <p>
+    The final step is usually the formal transfer of asset ownership (such as real estate) to each heir according to
+    their share — a separate notarization step from the determination of heirs and the estate inventory itself.
+  </p>
+
+  <p>
+    Every inheritance case carries its own details — a will, heirs residing outside the Kingdom, business assets, or
+    a dispute among heirs — and each of these changes the actual path of the procedure. For your case, you can
+    submit a direct consultation request under the "Inheritance & Estates" specialty on the platform.
+  </p>
+</BlogLayout>

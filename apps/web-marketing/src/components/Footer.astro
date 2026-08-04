@@ -1,0 +1,45 @@
+---
+import { footer, nav, type Locale } from "../lib/copy";
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const isAr = locale === "ar";
+const prefix = isAr ? "" : "/en";
+const t = footer[locale];
+const n = nav[locale];
+const year = new Date().getFullYear();
+---
+
+<footer class="border-t border-border bg-surface">
+  <div class="mx-auto grid max-w-6xl gap-8 px-4 py-10 sm:px-6 sm:grid-cols-3">
+    <div>
+      <span class="font-display text-lg font-bold text-seal">{isAr ? "بوابة القانون" : "Law Portal"}</span>
+      <p class="mt-2 max-w-xs text-sm text-ink-faint">{t.tagline}</p>
+    </div>
+    <div>
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-faint">{t.linksHeading}</h3>
+      <ul class="mt-3 flex flex-col gap-2 text-sm text-ink-soft">
+        <li><a href={`${prefix}/services`} class="hover:text-seal">{n.services}</a></li>
+        <li><a href={`${prefix}/faq`} class="hover:text-seal">{n.faq}</a></li>
+        <li><a href={`${prefix}/blog`} class="hover:text-seal">{n.blog}</a></li>
+        <li><a href={`${prefix}/join-as-lawyer`} class="hover:text-seal">{n.joinAsLawyer}</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3 class="text-xs font-semibold uppercase tracking-wide text-ink-faint">{t.legalHeading}</h3>
+      <ul class="mt-3 flex flex-col gap-2 text-sm text-ink-soft">
+        <li><a href={`${prefix}/privacy`} class="hover:text-seal">{t.privacy}</a></li>
+        <li><a href={`${prefix}/terms`} class="hover:text-seal">{t.terms}</a></li>
+        <li>
+          <a href="mailto:support@lawportal.sa" class="font-mono hover:text-seal" dir="ltr">support@lawportal.sa</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-border px-4 py-4 text-center text-xs text-ink-faint sm:px-6">
+    <bdi>{isAr ? "بوابة القانون" : "Law Portal"}</bdi> © <span class="font-mono">{year}</span> — {t.rights}
+  </div>
+</footer>

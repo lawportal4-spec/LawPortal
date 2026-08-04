@@ -1,0 +1,33 @@
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Generated 0ms","label":"types","level":"info"}
+{"message":"connected.","label":"vite","level":"info"}
+{"message":"Re-optimizing dependencies because vite config has changed","label":"vite","level":"info"}
+{"message":" astro  v7.1.6 ready in 920 ms\n┃ Local    http://localhost:5176/\n┃ Network  use --host to expose","label":"SKIP_FORMAT","level":"info"}
+{"message":"watching for file changes...","label":null,"level":"info"}
+{"message":"[200] / 39ms","label":null,"level":"info"}
+{"message":"[200] /en/ 20ms","label":null,"level":"info"}
+{"message":"[200] / 23ms","label":null,"level":"info"}
+{"message":"[200] /en/ 26ms","label":null,"level":"info"}
+{"message":"[200] /services 40ms","label":null,"level":"info"}
+{"message":"[200] /join-as-lawyer 8ms","label":null,"level":"info"}
+{"message":"[200] /faq 7ms","label":null,"level":"info"}
+{"message":"[200] /en/blog/execution-process-overview 16ms","label":null,"level":"info"}
+{"message":"[200] /services 30ms","label":null,"level":"info"}
+{"message":"[200] / 33ms","label":null,"level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"TypeError: fetch failed\n    at node:internal/deps/undici/undici:13484:13\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async fetchServiceCategories (/Users/ahmedomran/Tuwaiq/Projects/law-portal/apps/web-marketing/src/lib/api.ts:25:15)\n    at async eval (/Users/ahmedomran/Tuwaiq/Projects/law-portal/apps/web-marketing/src/pages/index.astro:8:1)\n    at async callComponentAsTemplateResultOrResponse (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/runtime/server/render/astro/render.js:203:25)\n    at async renderToAsyncIterable (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/runtime/server/render/astro/render.js:235:26)\n    at async renderPage (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/runtime/server/render/page.js:43:24)\n    at async PagesHandler.handle (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/core/pages/handler.js:37:22)\n    at async callMiddleware (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/core/middleware/callMiddleware.js:11:10)\n    at async AstroMiddleware.handle (/Users/ahmedomran/Tuwaiq/Projects/law-portal/node_modules/.pnpm/astro@7.1.6_@emnapi+core@1.11.1_@emnapi+runtime@1.11.1_@types+node@24.13.3_jiti@2.7.0_yaml@2.9.0/node_modules/astro/dist/core/middleware/astro-middleware.js:39:18)","label":null,"level":"error"}
+{"message":"fetch failed\n  Stack trace:\n    at node:internal/deps/undici/undici:13484:13\n    at async fetchServiceCategories (/Users/ahmedomran/Tuwaiq/Projects/law-portal/apps/web-marketing/src/lib/api.ts:35:23)\n    [...] See full stack trace in the browser, or rerun with --verbose.\n  Caused by:\n  \n    at internalConnectMultiple (node:net:1128:18)\n    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:130:17)","label":null,"level":"error"}
+{"message":"[200] / 94ms","label":null,"level":"info"}
+{"message":"[200] / 44ms","label":null,"level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}
+{"message":"/src/styles/global.css","label":"watch","level":"info"}

@@ -1,0 +1,6 @@
+@LawPortal.Api_HostAddress = http://localhost:5228
+
+GET {{LawPortal.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

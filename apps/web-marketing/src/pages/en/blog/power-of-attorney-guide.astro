@@ -1,0 +1,52 @@
+---
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { blogPosts } from "../../../lib/blogPosts";
+
+const post = blogPosts.find((p) => p.slug === "power-of-attorney-guide")!;
+---
+
+<BlogLayout
+  locale="en"
+  path="/en/blog/power-of-attorney-guide"
+  altPath="/blog/power-of-attorney-guide"
+  title={post.titleEn}
+  description={post.excerptEn}
+  publishDate={post.publishDate}
+>
+  <p>
+    A power of attorney (PoA) is a formal document authorizing another person (the agent) to act on your behalf in
+    specific matters — administrative, financial, or legal. In Saudi Arabia, a PoA is notarized through the Ministry
+    of Justice's official platforms, and it can also be requested through a licensed lawyer who drafts its wording
+    to fit the intended purpose.
+  </p>
+
+  <h2>Individual power of attorney</h2>
+  <p>
+    This is the most common form: one individual authorizes another to act on a specific personal matter, such as
+    selling a property, collecting dues, or following up on a government procedure. Its wording is usually simpler,
+    with directly and clearly stated authority.
+  </p>
+
+  <h2>Corporate power of attorney</h2>
+  <p>
+    When the principal is a company rather than an individual, a PoA differs in two ways. First, the authority of
+    the person signing on the company's behalf must be established (typically whoever holds signing authority per
+    the commercial registration or articles of incorporation). Second, the granted authority is often broader or
+    tied specifically to company business (signing contracts, opening bank accounts, representing the company before
+    government entities) — which calls for more detailed wording to avoid any ambiguity in the scope of authority
+    granted.
+  </p>
+
+  <h2>General points worth noting</h2>
+  <ul>
+    <li>Define the granted authority clearly — a broad, general PoA carries more risk than a purpose-specific one.</li>
+    <li>Check the expiry date if one exists, and whether it can be revoked if you need to later.</li>
+    <li>Keep an official, notarized copy, not an unnotarized scan, especially for financial PoAs.</li>
+  </ul>
+
+  <p>
+    This article is general information only. To have a PoA drafted precisely for your situation — individual or
+    corporate — you can submit a direct notarization request under the "Notarization Services" category on the
+    platform, and a licensed lawyer will prepare it.
+  </p>
+</BlogLayout>

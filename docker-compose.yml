@@ -1,0 +1,90 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: law-portal-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev_only
+      MYSQL_DATABASE: lawportal
+      MYSQL_USER: lawportal
+      MYSQL_PASSWORD: lawportal_dev_only
+    ports:
+      - "3309:3306"
+    volumes:
+      - law_portal_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_dev_only"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: law-portal-redis
+    restart: unless-stopped
+    ports:
+      - "6389:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: law-portal-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5682:5672"
+      - "15682:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: lawportal
+      RABBITMQ_DEFAULT_PASS: lawportal_dev_only
+
+  minio:
+    image: minio/minio:latest
+    container_name: law-portal-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9091"
+    environment:
+      MINIO_ROOT_USER: lawportal
+      MINIO_ROOT_PASSWORD: lawportal_dev_only
+    ports:
+      - "9010:9000" # S3 API
+      - "9011:9091" # web console
+    volumes:
+      - law_portal_minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  clamav:
+    image: clamav/clamav-debian:stable
+    container_name: law-portal-clamav
+    restart: unless-stopped
+    ports:
+      - "3319:3310" # clamd INSTREAM protocol
+    volumes:
+      - law_portal_clamav_data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD", "clamdcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s # first-run freshclam signature download
+
+  # Self-hosted per the plan's data-residency requirement for privileged legal conversations
+  # (PDPL). --dev mode skips TURN/NAT-traversal setup, which is fine for same-host testing but
+  # is not how this would run in production — a real deployment needs a TURN server and public
+  # UDP reachability, neither of which exists in this dev environment.
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: law-portal-livekit
+    restart: unless-stopped
+    command: ["--dev", "--keys", "lawportaldevkey: lawportal_dev_only_secret_32chars"]
+    ports:
+      - "7880:7880" # signaling (WebSocket/HTTP)
+      - "7881:7881" # TCP fallback for WebRTC media
+      - "50000-50100:50000-50100/udp" # WebRTC media (narrowed from LiveKit's default 50000-60000 range for local dev)
+
+volumes:
+  law_portal_mysql_data:
+  law_portal_minio_data:
+  law_portal_clamav_data:

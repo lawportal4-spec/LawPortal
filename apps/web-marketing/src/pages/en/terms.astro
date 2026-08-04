@@ -1,0 +1,86 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  locale="en"
+  path="/en/terms"
+  altPath="/terms"
+  title="Terms of Service · Law Portal"
+  description="The terms governing your use of the Law Portal platform, for both clients and lawyers."
+>
+  <section class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <h1 class="font-display text-3xl font-bold text-ink">Terms of Service</h1>
+
+    <div class="mt-4 rounded-lg border border-warning bg-warning-tint p-4 text-sm text-ink">
+      <strong>Note:</strong> this is a first-draft template for this stage of the product, not final legal text. It
+      must be reviewed by licensed counsel before launch and adoption as a binding terms of use contract.
+    </div>
+
+    <div class="mt-8 flex flex-col gap-6 text-sm leading-7 text-ink-soft">
+      <p>Last updated: <span class="font-mono">2026-08-03</span></p>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">1. Nature of the service</h2>
+        <p class="mt-2">
+          Law Portal is an intermediary platform connecting clients seeking legal services with lawyers licensed by
+          the Saudi Ministry of Justice. The platform itself does not provide legal advice or opinion, and is not a
+          substitute for the direct professional relationship between a client and the lawyer delivering the
+          service.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">2. Accounts and verification</h2>
+        <p class="mt-2">
+          Users must provide accurate information at registration. Every lawyer's registration is subject to an
+          administrative review of their Ministry of Justice licence before their profile appears in the directory
+          or they may receive any request. The platform reserves the right to reject or suspend any account that
+          submits inaccurate licence information.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">3. Payment and commission</h2>
+        <p class="mt-2">
+          A client's funds are held in escrow until the service is complete or a price offer is accepted, then
+          released to the lawyer net of the platform's agreed commission. A tax invoice is issued for every
+          completed payment under Saudi VAT regulation.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">4. Cancellation and refunds</h2>
+        <p class="mt-2">
+          If a lawyer declines a paid request, the full amount is automatically refunded to the client. Cancellations
+          after service delivery has begun are assessed on a case-by-case basis.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">5. Limitation of liability</h2>
+        <p class="mt-2">
+          The platform is responsible for the reliable operation of its technical service (payment, messaging,
+          scheduling), and is not responsible for the quality or outcome of the legal consultation or service
+          delivered by a lawyer, which remains that lawyer's direct professional responsibility to the client.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">6. Governing law</h2>
+        <p class="mt-2">
+          These terms are governed by the laws of the Kingdom of Saudi Arabia, and its courts have exclusive
+          jurisdiction over any dispute arising from them.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">7. Account deletion</h2>
+        <p class="mt-2">
+          Any user may request account deletion at any time from their account settings, subject to retaining
+          financial records for the period required by law.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

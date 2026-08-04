@@ -1,0 +1,44 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { joinAsLawyer, LAWYER_APP_URL } from "../lib/copy";
+
+const t = joinAsLawyer.ar;
+const registerUrl = `${LAWYER_APP_URL}/register`;
+---
+
+<BaseLayout
+  locale="ar"
+  path="/join-as-lawyer"
+  altPath="/en/join-as-lawyer"
+  title="انضم كمحامٍ · بوابة القانون"
+  description="سجّل ترخيصك من وزارة العدل وابدأ باستقبال عملاء جدد على بوابة القانون."
+>
+  <section class="mx-auto max-w-3xl px-4 py-16 text-center sm:px-6">
+    <h1 class="font-display text-3xl font-bold text-ink sm:text-4xl">{t.title}</h1>
+    <p class="mt-3 text-lg text-ink-soft">{t.subtitle}</p>
+    <a
+      href={registerUrl}
+      class="mt-8 inline-block rounded-md bg-seal px-6 py-3 text-sm font-medium text-seal-on hover:bg-seal-strong"
+    >
+      {t.cta}
+    </a>
+    <p class="mt-3 text-xs text-ink-faint">{t.reviewNote}</p>
+  </section>
+
+  <section class="border-t border-border bg-surface">
+    <div class="mx-auto grid max-w-4xl gap-6 px-4 py-14 sm:grid-cols-3 sm:px-6">
+      <div class="rounded-lg border border-border bg-surface-raised p-5">
+        <h3 class="font-semibold text-ink">{t.benefit1}</h3>
+        <p class="mt-2 text-sm text-ink-soft">{t.benefit1Body}</p>
+      </div>
+      <div class="rounded-lg border border-border bg-surface-raised p-5">
+        <h3 class="font-semibold text-ink">{t.benefit2}</h3>
+        <p class="mt-2 text-sm text-ink-soft">{t.benefit2Body}</p>
+      </div>
+      <div class="rounded-lg border border-border bg-surface-raised p-5">
+        <h3 class="font-semibold text-ink">{t.benefit3}</h3>
+        <p class="mt-2 text-sm text-ink-soft">{t.benefit3Body}</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

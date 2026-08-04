@@ -1,0 +1,83 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  locale="en"
+  path="/en/privacy"
+  altPath="/privacy"
+  title="Privacy Policy · Law Portal"
+  description="How Law Portal collects, uses, and protects your personal data, in line with Saudi Arabia's Personal Data Protection Law (PDPL)."
+>
+  <section class="mx-auto max-w-3xl px-4 py-14 sm:px-6">
+    <h1 class="font-display text-3xl font-bold text-ink">Privacy Policy</h1>
+
+    <div class="mt-4 rounded-lg border border-warning bg-warning-tint p-4 text-sm text-ink">
+      <strong>Note:</strong> this is a first-draft template for this stage of the product, not final legal text. It
+      must be reviewed by counsel specializing in Saudi Arabia's Personal Data Protection Law (PDPL) before a real
+      launch.
+    </div>
+
+    <div class="mt-8 flex flex-col gap-6 text-sm leading-7 text-ink-soft">
+      <p>Last updated: <span class="font-mono">2026-08-03</span></p>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">1. Data we collect</h2>
+        <p class="mt-2">
+          We collect account data (name, phone number or email, a hashed password), lawyer licence data (licence
+          number, issue and expiry dates), request and message content tied to the legal service requested, and
+          payment data (via a licensed payment gateway — we never store full card details on our own servers).
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">2. Basis and purpose of processing</h2>
+        <p class="mt-2">
+          We process your data to perform our contract with you (delivering the requested legal service), to comply
+          with statutory obligations (such as tax invoicing), and for our legitimate interest in improving and
+          securing the platform. Legal correspondence data is never used for marketing purposes.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">3. Data sharing</h2>
+        <p class="mt-2">
+          Your request data is shared only with the lawyer assigned to that request. We use trusted service
+          providers (payment gateway, cloud hosting, SMS provider) as data processors on our behalf, under data
+          processing agreements, and we never sell your data to any third party for marketing purposes.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">4. Data retention</h2>
+        <p class="mt-2">
+          We retain account and request data for as long as the account is active, and financial/invoicing records
+          for the period required under Saudi tax and accounting regulation, even after account deletion.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">5. Your rights</h2>
+        <p class="mt-2">
+          You can request access to or correction of your data from your account settings. You may also request
+          full account deletion; your personal data is deleted immediately, except for records the law requires us
+          to retain, such as tax invoices.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">6. Data transfer outside the Kingdom</h2>
+        <p class="mt-2">
+          Some supporting technical systems (such as voice/video calling) are hosted on infrastructure with local
+          data residency wherever possible, specifically because of the sensitivity of legal content. Any transfer
+          of data outside the Kingdom is carried out under the terms permitted by the Personal Data Protection Law.
+        </p>
+      </div>
+
+      <div>
+        <h2 class="font-display text-lg font-semibold text-ink">7. Contact us</h2>
+        <p class="mt-2">For any privacy-related question, please reach us at the email listed in the page footer.</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

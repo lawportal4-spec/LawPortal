@@ -1,0 +1,26 @@
+@import "tailwindcss";
+@import "@law-portal/design-tokens/theme.css";
+
+@theme {
+  --font-sans: var(--font-body);
+}
+
+@layer base {
+  body {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    margin: 0;
+  }
+
+  ::selection {
+    background: var(--color-seal);
+    color: var(--color-seal-on);
+  }
+}
+
+/* Marketing-only: numbered margin markers, matching the design system's manuscript-marginalia device */
+.margin-rule {
+  border-inline-start: 1px solid var(--color-rule);
+  padding-inline-start: var(--spacing-4);
+}

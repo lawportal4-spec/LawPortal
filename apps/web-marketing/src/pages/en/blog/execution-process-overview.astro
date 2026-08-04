@@ -1,0 +1,48 @@
+---
+import BlogLayout from "../../../layouts/BlogLayout.astro";
+import { blogPosts } from "../../../lib/blogPosts";
+
+const post = blogPosts.find((p) => p.slug === "execution-process-overview")!;
+---
+
+<BlogLayout
+  locale="en"
+  path="/en/blog/execution-process-overview"
+  altPath="/blog/execution-process-overview"
+  title={post.titleEn}
+  description={post.excerptEn}
+  publishDate={post.publishDate}
+>
+  <p>
+    It's often assumed that a court judgment automatically means the prevailing party receives what they're owed —
+    in reality, a judgment only marks the end of one phase and the start of an entirely separate one: execution.
+  </p>
+
+  <h2>A judgment doesn't enforce itself</h2>
+  <p>
+    Once a judgment is issued and becomes final (after any appeal or cassation stages are exhausted), the prevailing
+    party must file an execution request with the competent court, attaching a copy of the final judgment. Actual
+    execution proceedings do not begin automatically without this request.
+  </p>
+
+  <h2>What happens once the execution request is accepted?</h2>
+  <p>
+    The court takes steps to compel the judgment debtor to comply — this may start with direct notice, and escalate
+    to firmer measures if there's no response, depending on the nature of the judgment (monetary, delivery of
+    property, etc.) and the debtor's conduct.
+  </p>
+
+  <h2>What if execution stalls?</h2>
+  <p>
+    An execution request can run into obstacles — such as being unable to locate the debtor's assets, or the debtor
+    not responding to notices. This is exactly what the "Judiciary & Execution" services on the platform cover: you
+    can describe your case and receive price offers from specialized lawyers to pursue it, and negotiate the price
+    before committing to any offer.
+  </p>
+
+  <p>
+    Every execution case differs depending on the type of judgment and the other party's posture. For an accurate
+    assessment of your case, submit your request under the "Judiciary & Execution" category and you'll receive
+    offers from licensed lawyers you can negotiate with directly.
+  </p>
+</BlogLayout>

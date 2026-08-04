@@ -1,0 +1,51 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import IconGlyph from "../components/IconGlyph.astro";
+import { services } from "../lib/copy";
+import { fetchServiceCategories, CATEGORY_COLOR_CLASS } from "../lib/api";
+
+const t = services.ar;
+const categories = await fetchServiceCategories();
+---
+
+<BaseLayout
+  locale="ar"
+  path="/services"
+  altPath="/en/services"
+  title="الخدمات · بوابة القانون"
+  description="استكشف فئات الخدمات المتاحة على بوابة القانون وطريقة التسعير لكل منها."
+>
+  <section class="mx-auto max-w-4xl px-4 py-14 sm:px-6">
+    <h1 class="font-display text-3xl font-bold text-ink">{t.title}</h1>
+    <p class="mt-2 text-ink-soft">{t.subtitle}</p>
+
+    <div class="mt-10 flex flex-col gap-12">
+      {categories.map((category) => {
+        const colors = CATEGORY_COLOR_CLASS[category.slug] ?? CATEGORY_COLOR_CLASS.other;
+        return (
+          <div id={category.slug} class="scroll-mt-20">
+            <div class="flex items-center gap-3">
+              <span class="flex h-10 w-10 items-center justify-center rounded-md" style={`background:${colors.bg};color:${colors.fg}`}>
+                <IconGlyph iconKey={category.iconKey} class="h-5 w-5" />
+              </span>
+              <h2 class="font-display text-xl font-semibold text-ink">{category.nameAr}</h2>
+            </div>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              {category.services.map((service) => (
+                <div class="rounded-lg border border-border bg-surface-raised p-4">
+                  <div class="flex items-start justify-between gap-2">
+                    <h3 class="font-medium text-ink">{service.nameAr}</h3>
+                    <span class="whitespace-nowrap rounded-full bg-seal-tint px-2 py-0.5 text-[11px] font-medium text-seal">
+                      {t.pricingLabels[service.pricingModel] ?? service.pricingModel}
+                    </span>
+                  </div>
+                  {service.descriptionAr && <p class="mt-1.5 text-sm text-ink-faint">{service.descriptionAr}</p>}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  </section>
+</BaseLayout>

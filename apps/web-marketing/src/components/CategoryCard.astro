@@ -1,0 +1,33 @@
+---
+import IconGlyph from "./IconGlyph.astro";
+import { CATEGORY_COLOR_CLASS, type ServiceCategoryDto } from "../lib/api";
+import type { Locale } from "../lib/copy";
+
+interface Props {
+  category: ServiceCategoryDto;
+  locale: Locale;
+  href: string;
+}
+
+const { category, locale, href } = Astro.props;
+const isAr = locale === "ar";
+const colors = CATEGORY_COLOR_CLASS[category.slug] ?? CATEGORY_COLOR_CLASS.other;
+const name = isAr ? category.nameAr : category.nameEn;
+const serviceCountLabel = isAr
+  ? `${category.services.length} خدمات`
+  : `${category.services.length} services`;
+---
+
+<a
+  href={href}
+  class="flex flex-col gap-3 rounded-lg border border-border bg-surface-raised p-5 transition hover:border-seal"
+>
+  <span
+    class="flex h-11 w-11 items-center justify-center rounded-md"
+    style={`background:${colors.bg};color:${colors.fg}`}
+  >
+    <IconGlyph iconKey={category.iconKey} />
+  </span>
+  <span class="font-display text-lg font-semibold text-ink">{name}</span>
+  <span class="font-mono text-xs text-ink-faint">{serviceCountLabel}</span>
+</a>

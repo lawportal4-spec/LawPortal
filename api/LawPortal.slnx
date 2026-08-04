@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LawPortal.Api/LawPortal.Api.csproj" />
+    <Project Path="src/LawPortal.Application/LawPortal.Application.csproj" />
+    <Project Path="src/LawPortal.DbMigrator/LawPortal.DbMigrator.csproj" />
+    <Project Path="src/LawPortal.Domain/LawPortal.Domain.csproj" />
+    <Project Path="src/LawPortal.Infrastructure/LawPortal.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LawPortal.Api.FunctionalTests/LawPortal.Api.FunctionalTests.csproj" />
+    <Project Path="tests/LawPortal.Application.UnitTests/LawPortal.Application.UnitTests.csproj" />
+    <Project Path="tests/LawPortal.Domain.UnitTests/LawPortal.Domain.UnitTests.csproj" />
+  </Folder>
+</Solution>

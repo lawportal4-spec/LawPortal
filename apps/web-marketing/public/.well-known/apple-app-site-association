@@ -1,0 +1,20 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "AB12CD34EF.sa.lawportal.app",
+        "appIDs": ["AB12CD34EF.sa.lawportal.app"],
+        "paths": [
+          "/join-as-lawyer",
+          "/en/join-as-lawyer",
+          "/services*",
+          "/en/services*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": ["AB12CD34EF.sa.lawportal.app"]
+  }
+}

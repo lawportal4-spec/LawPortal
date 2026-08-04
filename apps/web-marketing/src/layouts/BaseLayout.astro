@@ -1,0 +1,67 @@
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import "../styles/global.css";
+import type { Locale } from "../lib/copy";
+
+interface Props {
+  locale: Locale;
+  /** This page's own path, e.g. "/services" (ar) or "/en/services". */
+  path: string;
+  /** The sibling page in the other locale, e.g. "/en/services" (from ar) or "/services" (from en). */
+  altPath: string;
+  title: string;
+  description: string;
+}
+
+const { locale, path, altPath, title, description } = Astro.props;
+const isAr = locale === "ar";
+const siteUrl = "https://lawportal.sa";
+const canonicalUrl = `${siteUrl}${path}`;
+const arUrl = isAr ? canonicalUrl : `${siteUrl}${altPath}`;
+const enUrl = isAr ? `${siteUrl}${altPath}` : canonicalUrl;
+
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Law Portal",
+  alternateName: "بوابة القانون",
+  url: siteUrl,
+  logo: `${siteUrl}/favicon.svg`,
+  description: "A Saudi legal-services marketplace connecting clients with Ministry of Justice-licensed lawyers.",
+};
+---
+
+<!doctype html>
+<html lang={locale} dir={isAr ? "rtl" : "ltr"}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="ar" href={arUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="x-default" href={arUrl} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={isAr ? "بوابة القانون" : "Law Portal"} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={isAr ? "ar_SA" : "en_US"} />
+    <meta name="twitter:card" content="summary" />
+
+    <script type="application/ld+json" set:html={JSON.stringify(organizationJsonLd)} is:inline />
+  </head>
+  <body class="flex min-h-screen flex-col">
+    <Header locale={locale} altPath={altPath} />
+    <main class="flex-1">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>

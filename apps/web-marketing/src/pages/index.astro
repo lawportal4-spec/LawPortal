@@ -1,0 +1,73 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import CategoryCard from "../components/CategoryCard.astro";
+import { home, CLIENT_APP_URL } from "../lib/copy";
+import { fetchServiceCategories } from "../lib/api";
+
+const t = home.ar;
+const categories = await fetchServiceCategories();
+---
+
+<BaseLayout
+  locale="ar"
+  path="/"
+  altPath="/en/"
+  title="بوابة القانون · الوصول إلى محامين مرخّصين في السعودية"
+  description="استشر محامين مرخّصين من وزارة العدل، قدّم طلبات التوثيق والتأسيس، وتفاوض على عروض الأسعار — كل ذلك من مكان واحد."
+>
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+    <div class="margin-rule max-w-2xl">
+      <p class="font-mono text-xs uppercase tracking-wide text-rubric">{t.heroEyebrow}</p>
+      <h1 class="mt-3 font-display text-4xl font-bold leading-tight text-ink sm:text-5xl">{t.heroTitle}</h1>
+      <p class="mt-4 text-lg text-ink-soft">{t.heroSubtitle}</p>
+      <div class="mt-8 flex flex-wrap gap-3">
+        <a href={CLIENT_APP_URL} class="rounded-md bg-seal px-5 py-3 text-sm font-medium text-seal-on hover:bg-seal-strong">
+          {t.ctaPrimary}
+        </a>
+        <a href="/join-as-lawyer" class="rounded-md border border-border px-5 py-3 text-sm font-medium text-ink hover:border-seal hover:text-seal">
+          {t.ctaSecondary}
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-y border-border bg-surface">
+    <div class="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+      <h2 class="font-display text-2xl font-bold text-ink">{t.trustHeading}</h2>
+      <div class="mt-8 grid gap-6 sm:grid-cols-3">
+        <div class="rounded-lg border border-border bg-surface-raised p-5">
+          <h3 class="font-semibold text-ink">{t.trust1Title}</h3>
+          <p class="mt-2 text-sm text-ink-soft">{t.trust1Body}</p>
+        </div>
+        <div class="rounded-lg border border-border bg-surface-raised p-5">
+          <h3 class="font-semibold text-ink">{t.trust2Title}</h3>
+          <p class="mt-2 text-sm text-ink-soft">{t.trust2Body}</p>
+        </div>
+        <div class="rounded-lg border border-border bg-surface-raised p-5">
+          <h3 class="font-semibold text-ink">{t.trust3Title}</h3>
+          <p class="mt-2 text-sm text-ink-soft">{t.trust3Body}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+    <h2 class="font-display text-2xl font-bold text-ink">{t.categoriesHeading}</h2>
+    <p class="mt-2 text-ink-soft">{t.categoriesSubheading}</p>
+    <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      {categories.map((category) => (
+        <CategoryCard category={category} locale="ar" href={`/services#${category.slug}`} />
+      ))}
+    </div>
+  </section>
+
+  <section class="border-t border-border bg-seal-tint">
+    <div class="mx-auto max-w-6xl px-4 py-14 text-center sm:px-6">
+      <h2 class="font-display text-2xl font-bold text-ink">{t.finalCtaTitle}</h2>
+      <p class="mt-2 text-ink-soft">{t.finalCtaBody}</p>
+      <a href={CLIENT_APP_URL} class="mt-6 inline-block rounded-md bg-seal px-6 py-3 text-sm font-medium text-seal-on hover:bg-seal-strong">
+        {t.ctaPrimary}
+      </a>
+    </div>
+  </section>
+</BaseLayout>
