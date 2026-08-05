@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { MapPin } from "lucide-react";
 import { Avatar, Button, Card, Chip, CredentialCard, Ltr, VerifiedBadge } from "@law-portal/ui";
@@ -155,7 +155,11 @@ export default function LawyerProfile() {
             locale={isAr ? "ar" : "en"}
           />
 
-          <Button className="w-full justify-center">{isAr ? "استشر الآن" : "Consult Now"}</Button>
+          {lawyer.pricing && (
+            <Link to={`/lawyers/${lawyer.slug}/consult`}>
+              <Button className="w-full justify-center">{isAr ? "استشر الآن" : "Consult Now"}</Button>
+            </Link>
+          )}
         </aside>
       </div>
     </AppShell>
