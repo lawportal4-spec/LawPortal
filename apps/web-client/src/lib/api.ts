@@ -123,6 +123,7 @@ export interface LawyerProfileDetailDto {
   experienceDisplay: string | null;
   isVerified: boolean;
   isVatRegistered: boolean;
+  acceptingNewRequests: boolean;
   avgRating: number | null;
   ratingCount: number;
   completedRequestCount: number;

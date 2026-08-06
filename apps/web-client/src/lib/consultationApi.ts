@@ -1,12 +1,13 @@
 import { api } from "./api";
 
 export type ConsultationType = "Instant" | "Written" | "Scheduled";
+export type ConsultationDuration = 15 | 30 | 45;
 
 export interface CreateConsultationDraftParams {
   specialtyId: number;
   lawyerProfileId: string;
   consultationType: ConsultationType;
-  durationMinutes: number | null;
+  durationMinutes: ConsultationDuration | null;
 }
 
 export async function createConsultationDraft(params: CreateConsultationDraftParams): Promise<string> {

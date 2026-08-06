@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import { ArrowLeft, ArrowRight, Check, CalendarClock, FileText, Phone } from "lucide-react";
-import { Button, Card, Chip, Input, StepProgress } from "@law-portal/ui";
-import { useTranslation, formatCurrency } from "@law-portal/i18n";
+import { Button, Card, Chip, Input, Ltr, StepProgress } from "@law-portal/ui";
+import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { api, getLawyerProfile } from "../lib/api";
-import { createConsultationDraft, updateConsultationDetails, type ConsultationType } from "../lib/consultationApi";
+import {
+  createConsultationDraft,
+  updateConsultationDetails,
+  type ConsultationDuration,
+  type ConsultationType,
+} from "../lib/consultationApi";
 
-const DURATIONS = [15, 30, 45] as const;
+const DURATIONS: readonly ConsultationDuration[] = [15, 30, 45];
 
 /**
  * The consultation-booking wizard — the flow "Consult Now" always should have opened. Mirrors
@@ -26,7 +32,7 @@ export default function NewConsultationRequest() {
   const [step, setStep] = useState(1);
   const [consultationType, setConsultationType] = useState<ConsultationType | null>(null);
   const [pickedSpecialtyId, setPickedSpecialtyId] = useState<number | null>(null);
-  const [durationMinutes, setDurationMinutes] = useState<15 | 30 | 45 | null>(null);
+  const [durationMinutes, setDurationMinutes] = useState<ConsultationDuration | null>(null);
   const [scheduledStart, setScheduledStart] = useState("");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -56,8 +62,16 @@ export default function NewConsultationRequest() {
       await api.post(`/api/v1/client/requests/${requestId}/submit`);
       return requestId;
     },
+    onMutate: () => setError(null),
     onSuccess: (requestId) => navigate(`/orders/${requestId}`),
-    onError: () => setError(isAr ? "تعذّر إرسال الطلب." : "Could not submit the request."),
+    onError: (err) => {
+      const fallback = isAr ? "تعذّر إرسال الطلب." : "Could not submit the request.";
+      if (axios.isAxiosError<{ detail?: string; title?: string }>(err)) {
+        setError(err.response?.data?.detail ?? err.response?.data?.title ?? fallback);
+      } else {
+        setError(fallback);
+      }
+    },
   });
 
   if (lawyerQuery.isLoading) {
@@ -77,7 +91,7 @@ export default function NewConsultationRequest() {
 
   const lawyer = lawyerQuery.data;
 
-  if (!lawyer.pricing) {
+  if (!lawyer.pricing || !lawyer.acceptingNewRequests || lawyer.specialties.length === 0) {
     return (
       <AppShell>
         <p className="text-sm text-rubric">
@@ -101,7 +115,8 @@ export default function NewConsultationRequest() {
     (step === 1 && consultationType !== null && effectiveSpecialtyId !== null) ||
     (step === 2 &&
       durationMinutes !== null &&
-      (consultationType !== "Scheduled" || scheduledStart.trim().length > 0)) ||
+      (consultationType !== "Scheduled" ||
+        (scheduledStart.trim().length > 0 && new Date(scheduledStart) > new Date()))) ||
     (step === 3 && title.trim().length > 0 && description.trim().length > 0) ||
     step === 4;
 
@@ -114,12 +129,16 @@ export default function NewConsultationRequest() {
     setStep((s) => Math.max(1, s - 1));
   }
 
-  function durationPrice(minutes: 15 | 30 | 45) {
+  function durationPrice(minutes: ConsultationDuration) {
     return minutes === 15 ? pricing.price15 : minutes === 30 ? pricing.price30 : pricing.price45;
   }
 
   const typeLabel = (t: ConsultationType) =>
     t === "Written" ? (isAr ? "كتابية" : "Written") : t === "Instant" ? (isAr ? "فورية" : "Instant") : isAr ? "مجدولة" : "Scheduled";
+
+  const selectedSpecialty = lawyer.specialties.find((s) => s.id === effectiveSpecialtyId);
+  const resolvedPrice =
+    consultationType === "Written" ? pricing.writtenPrice : durationMinutes !== null ? durationPrice(durationMinutes) : null;
 
   return (
     <AppShell>
@@ -152,7 +171,9 @@ export default function NewConsultationRequest() {
                   <FileText className="h-4 w-4" />
                   <span>
                     <span className="block font-medium">{isAr ? "استشارة كتابية" : "Written consultation"}</span>
-                    <span className="block text-xs text-ink-faint">{formatCurrency(pricing.writtenPrice)}</span>
+                    <span className="block text-xs text-ink-faint">
+                      <Ltr className="font-mono">{formatCurrency(pricing.writtenPrice)}</Ltr>
+                    </span>
                   </span>
                 </span>
                 {consultationType === "Written" && <Check className="h-4 w-4" />}
@@ -170,7 +191,7 @@ export default function NewConsultationRequest() {
                     <span className="block font-medium">{isAr ? "اتصال فوري" : "Call now"}</span>
                     <span className="block text-xs text-ink-faint">
                       {isAr ? "من " : "From "}
-                      {formatCurrency(pricing.price15)}
+                      <Ltr className="font-mono">{formatCurrency(pricing.price15)}</Ltr>
                     </span>
                   </span>
                 </span>
@@ -189,7 +210,7 @@ export default function NewConsultationRequest() {
                     <span className="block font-medium">{isAr ? "جدولة اتصال" : "Schedule a call"}</span>
                     <span className="block text-xs text-ink-faint">
                       {isAr ? "من " : "From "}
-                      {formatCurrency(pricing.price15)}
+                      <Ltr className="font-mono">{formatCurrency(pricing.price15)}</Ltr>
                     </span>
                   </span>
                 </span>
@@ -230,7 +251,7 @@ export default function NewConsultationRequest() {
                   }
                 >
                   <span>{isAr ? `${minutes} دقيقة` : `${minutes} minutes`}</span>
-                  <span className="font-mono text-xs">{formatCurrency(durationPrice(minutes))}</span>
+                  <Ltr className="font-mono text-xs">{formatCurrency(durationPrice(minutes))}</Ltr>
                 </button>
               ))}
             </div>
@@ -244,6 +265,7 @@ export default function NewConsultationRequest() {
                   type="datetime-local"
                   value={scheduledStart}
                   onChange={(e) => setScheduledStart(e.target.value)}
+                  min={new Date().toISOString().slice(0, 16)}
                   className="w-full rounded-md border border-border bg-surface-raised px-4 py-2.5 text-sm"
                 />
               </div>
@@ -286,16 +308,32 @@ export default function NewConsultationRequest() {
                 <dt className="text-ink-faint">{isAr ? "النوع" : "Type"}</dt>
                 <dd className="font-medium">{typeLabel(consultationType!)}</dd>
               </div>
+              <div className="flex justify-between border-b border-border pb-2">
+                <dt className="text-ink-faint">{isAr ? "التخصص" : "Specialty"}</dt>
+                <dd className="font-medium">{isAr ? selectedSpecialty?.nameAr : selectedSpecialty?.nameEn}</dd>
+              </div>
               {consultationType !== "Written" && (
                 <div className="flex justify-between border-b border-border pb-2">
                   <dt className="text-ink-faint">{isAr ? "المدة" : "Length"}</dt>
-                  <dd className="font-medium">{isAr ? `${durationMinutes} دقيقة` : `${durationMinutes} min`}</dd>
+                  <dd className="font-medium">
+                    <Ltr className="font-mono">{durationMinutes}</Ltr> {isAr ? "دقيقة" : "min"}
+                  </dd>
                 </div>
               )}
               {consultationType === "Scheduled" && (
                 <div className="flex justify-between border-b border-border pb-2">
                   <dt className="text-ink-faint">{isAr ? "الوقت" : "Time"}</dt>
-                  <dd className="font-medium">{scheduledStart}</dd>
+                  <dd className="font-medium">
+                    <Ltr className="font-mono">{scheduledStart && formatDateTime(new Date(scheduledStart))}</Ltr>
+                  </dd>
+                </div>
+              )}
+              {resolvedPrice != null && (
+                <div className="flex justify-between border-b border-border pb-2">
+                  <dt className="text-ink-faint">{isAr ? "السعر" : "Price"}</dt>
+                  <dd className="font-medium">
+                    <Ltr className="font-mono">{formatCurrency(resolvedPrice)}</Ltr>
+                  </dd>
                 </div>
               )}
               <div>

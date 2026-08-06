@@ -33,6 +33,8 @@ export interface LawyerRequestDetailDto {
   specialtyNameAr: string | null;
   specialtyNameEn: string | null;
   consultationType: string | null;
+  scheduledStartUtc: string | null;
+  selectedDurationMinutes: number | null;
   title: string | null;
   description: string | null;
   subtotal: number | null;

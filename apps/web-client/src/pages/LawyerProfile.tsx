@@ -155,7 +155,7 @@ export default function LawyerProfile() {
             locale={isAr ? "ar" : "en"}
           />
 
-          {lawyer.pricing && (
+          {lawyer.pricing && lawyer.acceptingNewRequests && (
             <Link to={`/lawyers/${lawyer.slug}/consult`}>
               <Button className="w-full justify-center">{isAr ? "استشر الآن" : "Consult Now"}</Button>
             </Link>

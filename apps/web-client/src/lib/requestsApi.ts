@@ -41,6 +41,7 @@ export interface RequestDetailDto {
   lawyerProfileId: string | null;
   lawyerFullName: string | null;
   scheduledStartUtc: string | null;
+  selectedDurationMinutes: number | null;
   voiceNoteDurationSeconds: number | null;
   variantNameAr: string | null;
   variantNameEn: string | null;

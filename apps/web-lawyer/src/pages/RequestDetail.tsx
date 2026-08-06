@@ -87,6 +87,16 @@ export default function RequestDetail() {
             {query.data.specialtyNameAr && (
               <Row label={isAr ? "التخصص" : "Specialty"}>{isAr ? query.data.specialtyNameAr : query.data.specialtyNameEn}</Row>
             )}
+            {query.data.selectedDurationMinutes != null && (
+              <Row label={isAr ? "المدة" : "Length"}>
+                <Ltr className="font-mono">{query.data.selectedDurationMinutes}</Ltr> {isAr ? "دقيقة" : "min"}
+              </Row>
+            )}
+            {query.data.scheduledStartUtc && (
+              <Row label={isAr ? "موعد الاستشارة" : "Scheduled for"}>
+                <Ltr className="font-mono">{formatDateTime(query.data.scheduledStartUtc)}</Ltr>
+              </Row>
+            )}
             {query.data.subtotal != null && (
               <Row label={isAr ? "المبلغ" : "Amount"}>
                 <Ltr className="font-mono">{formatCurrency(query.data.subtotal)}</Ltr>
