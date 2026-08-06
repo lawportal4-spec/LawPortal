@@ -27,6 +27,7 @@ public class GetRequestDetailHandler(ILawPortalDbContext db, ICurrentUser curren
         Guid? lawyerProfileId = null;
         string? lawyerFullName = null;
         DateTime? scheduledStartUtc = null;
+        int? selectedDurationMinutes = null;
         int? voiceNoteDurationSeconds = null;
         string? variantNameAr = null;
         string? variantNameEn = null;
@@ -41,6 +42,7 @@ public class GetRequestDetailHandler(ILawPortalDbContext db, ICurrentUser curren
             consultationType = consultation.ConsultationType.ToString();
             lawyerProfileId = consultation.LawyerProfileId;
             scheduledStartUtc = consultation.ScheduledStartUtc;
+            selectedDurationMinutes = consultation.SelectedDurationMinutes;
             voiceNoteDurationSeconds = consultation.VoiceNoteDurationSeconds;
             lawyerFullName = await db.LawyerProfiles
                 .Where(l => l.Id == consultation.LawyerProfileId)
@@ -88,6 +90,7 @@ public class GetRequestDetailHandler(ILawPortalDbContext db, ICurrentUser curren
             lawyerProfileId,
             lawyerFullName,
             scheduledStartUtc,
+            selectedDurationMinutes,
             voiceNoteDurationSeconds,
             variantNameAr,
             variantNameEn,

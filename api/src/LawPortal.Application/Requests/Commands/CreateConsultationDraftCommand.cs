@@ -44,7 +44,7 @@ public class CreateConsultationDraftHandler(ILawPortalDbContext db, ICurrentUser
         var clientId = await ResolveClientProfileIdAsync(db, currentUser, cancellationToken);
 
         var lawyerHasPricing = await db.LawyerProfiles
-            .AnyAsync(l => l.Id == request.LawyerProfileId && l.IsVerified && l.Pricing != null, cancellationToken);
+            .AnyAsync(l => l.Id == request.LawyerProfileId && l.IsVerified && l.Pricing != null && l.AcceptingNewRequests, cancellationToken);
         if (!lawyerHasPricing)
             throw new InvalidOperationException("This lawyer is not currently bookable.");
 

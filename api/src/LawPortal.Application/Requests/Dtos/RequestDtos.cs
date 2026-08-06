@@ -35,6 +35,7 @@ public record RequestDetailDto(
     Guid? LawyerProfileId,
     string? LawyerFullName,
     DateTime? ScheduledStartUtc,
+    int? SelectedDurationMinutes,
     int? VoiceNoteDurationSeconds,
     // Catalog-only
     string? VariantNameAr,

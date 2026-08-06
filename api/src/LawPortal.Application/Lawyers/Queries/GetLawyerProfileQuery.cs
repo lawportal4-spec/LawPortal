@@ -31,6 +31,7 @@ public class GetLawyerProfileHandler(ILawPortalDbContext db) : IRequestHandler<G
                     : null,
                 l.IsVerified,
                 l.IsVatRegistered,
+                l.AcceptingNewRequests,
                 l.AvgRating,
                 l.RatingCount,
                 l.CompletedRequestCount,

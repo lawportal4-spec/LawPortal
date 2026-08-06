@@ -44,6 +44,7 @@ public record LawyerProfileDetailDto(
     string? ExperienceDisplay,
     bool IsVerified,
     bool IsVatRegistered,
+    bool AcceptingNewRequests,
     decimal? AvgRating,
     int RatingCount,
     int CompletedRequestCount,
