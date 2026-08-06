@@ -38,5 +38,10 @@ mobile/**/GeneratedPluginRegistrant.*
 .vscode/
 .idea/
 
+# Agent tooling scratch — brainstorm/SDD workspaces, browser-automation session state
+.superpowers/
+.playwright-cli/
+.playwright-mcp/
+
 # Generated API client (regenerated via Orval; still committed per plan — do not ignore)
 !packages/api-client/src/generated/
