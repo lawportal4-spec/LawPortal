@@ -10,6 +10,12 @@ export interface SubSpecialtyDto {
   nameEn: string;
 }
 
+export interface LawyerSpecialtyDto {
+  id: number;
+  nameAr: string;
+  nameEn: string;
+}
+
 export interface SpecialtyDto {
   id: number;
   nameAr: string;
@@ -117,6 +123,7 @@ export interface LawyerProfileDetailDto {
   experienceDisplay: string | null;
   isVerified: boolean;
   isVatRegistered: boolean;
+  acceptingNewRequests: boolean;
   avgRating: number | null;
   ratingCount: number;
   completedRequestCount: number;
@@ -124,6 +131,7 @@ export interface LawyerProfileDetailDto {
   pricing: LawyerPricingDto | null;
   specialtyNamesAr: string[];
   specialtyNamesEn: string[];
+  specialties: LawyerSpecialtyDto[];
   languageNamesAr: string[];
   languageNamesEn: string[];
   qualifications: LawyerQualificationDto[];

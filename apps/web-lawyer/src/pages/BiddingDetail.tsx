@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Lock, Paperclip, Send, XCircle } from "lucide-react";
-import { Button, Card, Ltr } from "@law-portal/ui";
+import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getBiddingRequestDetail, submitOffer, withdrawOffer } from "../lib/biddingApi";
@@ -130,22 +130,21 @@ export default function BiddingDetail() {
             <h2 className="mb-3 text-sm font-semibold text-ink-soft">{isAr ? "عرضك" : "Your offer"}</h2>
 
             {query.data.myOfferStatus && (
-              <p className="mb-3 text-sm">
-                <span className="text-ink-faint">{isAr ? "الحالة: " : "Status: "}</span>
-                <span className="font-medium">
-                  {OFFER_STATUS_LABEL[query.data.myOfferStatus]
-                    ? isAr
-                      ? OFFER_STATUS_LABEL[query.data.myOfferStatus].ar
-                      : OFFER_STATUS_LABEL[query.data.myOfferStatus].en
-                    : query.data.myOfferStatus}
-                </span>
+              <div className="mb-3 flex items-center gap-2 text-sm">
+                <StatusTag
+                  status={query.data.myOfferStatus}
+                  label={
+                    OFFER_STATUS_LABEL[query.data.myOfferStatus]
+                      ? isAr
+                        ? OFFER_STATUS_LABEL[query.data.myOfferStatus].ar
+                        : OFFER_STATUS_LABEL[query.data.myOfferStatus].en
+                      : query.data.myOfferStatus
+                  }
+                />
                 {query.data.myLatestOfferAmount != null && (
-                  <>
-                    {" · "}
-                    <Ltr className="font-mono">{formatCurrency(query.data.myLatestOfferAmount)}</Ltr>
-                  </>
+                  <Ltr className="font-mono text-ink-soft">{formatCurrency(query.data.myLatestOfferAmount)}</Ltr>
                 )}
-              </p>
+              </div>
             )}
 
             {canOffer ? (

@@ -141,6 +141,16 @@ export default function OrderDetail() {
                   : query.data.consultationType}
               </Row>
             )}
+            {query.data.selectedDurationMinutes != null && (
+              <Row label={isAr ? "المدة" : "Length"}>
+                <Ltr className="font-mono">{query.data.selectedDurationMinutes}</Ltr> {isAr ? "دقيقة" : "min"}
+              </Row>
+            )}
+            {query.data.scheduledStartUtc && (
+              <Row label={isAr ? "موعد الاستشارة" : "Scheduled for"}>
+                <Ltr className="font-mono">{formatDateTime(query.data.scheduledStartUtc)}</Ltr>
+              </Row>
+            )}
             {query.data.lawyerFullName && (
               <Row label={isAr ? "المحامي" : "Lawyer"}>{query.data.lawyerFullName}</Row>
             )}

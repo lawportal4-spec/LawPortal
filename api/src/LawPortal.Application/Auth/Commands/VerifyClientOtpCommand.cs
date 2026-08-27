@@ -5,6 +5,7 @@ using LawPortal.Domain.FreeMinutes;
 using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace LawPortal.Application.Auth.Commands;
 
@@ -19,9 +20,15 @@ public class VerifyClientOtpValidator : AbstractValidator<VerifyClientOtpCommand
     }
 }
 
-public class VerifyClientOtpHandler(ILawPortalDbContext db, TokenIssuer tokenIssuer, IAuditLogger auditLogger)
+public class VerifyClientOtpHandler(ILawPortalDbContext db, TokenIssuer tokenIssuer, IAuditLogger auditLogger, IHostEnvironment environment)
     : IRequestHandler<VerifyClientOtpCommand, AuthResultDto>
 {
+    /// <summary>Dev-only universal code so QA/local testing doesn't need access to the server's
+    /// OTP log. Still requires a real, unexpired challenge (i.e. "Send code" was actually
+    /// clicked) — only the code-matching step is skipped. Never honoured outside Development;
+    /// remove before any non-local deployment.</summary>
+    public const string DevBypassCode = "000000";
+
     public async Task<AuthResultDto> Handle(VerifyClientOtpCommand request, CancellationToken cancellationToken)
     {
         var challenge = await db.OtpChallenges
@@ -35,12 +42,16 @@ public class VerifyClientOtpHandler(ILawPortalDbContext db, TokenIssuer tokenIss
         if (challenge.IsLocked)
             throw new InvalidOperationException("Too many incorrect attempts. Request a new code.");
 
-        var expectedHash = RequestClientOtpHandler.HashCode(request.PhoneE164, request.Code);
-        if (challenge.CodeHash != expectedHash)
+        var isDevBypass = environment.IsDevelopment() && request.Code == DevBypassCode;
+        if (!isDevBypass)
         {
-            challenge.Attempts++;
-            await db.SaveChangesAsync(cancellationToken);
-            throw new InvalidOperationException("Incorrect code.");
+            var expectedHash = RequestClientOtpHandler.HashCode(request.PhoneE164, request.Code);
+            if (challenge.CodeHash != expectedHash)
+            {
+                challenge.Attempts++;
+                await db.SaveChangesAsync(cancellationToken);
+                throw new InvalidOperationException("Incorrect code.");
+            }
         }
 
         challenge.ConsumedAtUtc = DateTime.UtcNow;

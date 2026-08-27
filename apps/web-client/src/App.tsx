@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Orders from "./pages/Orders";
 import OrderDetail from "./pages/OrderDetail";
 import NewBiddingRequest from "./pages/NewBiddingRequest";
+import NewConsultationRequest from "./pages/NewConsultationRequest";
 import Chat from "./pages/Chat";
 import { AuthProvider } from "./lib/authContext";
 import { RequireAuth } from "./components/RequireAuth";
@@ -20,6 +21,14 @@ export default function App() {
           <Route path="/services" element={<ServicesHub />} />
           <Route path="/lawyers" element={<LawyerDirectory />} />
           <Route path="/lawyers/:slug" element={<LawyerProfile />} />
+          <Route
+            path="/lawyers/:slug/consult"
+            element={
+              <RequireAuth>
+                <NewConsultationRequest />
+              </RequireAuth>
+            }
+          />
           <Route path="/login" element={<Login />} />
           <Route
             path="/bidding/new"

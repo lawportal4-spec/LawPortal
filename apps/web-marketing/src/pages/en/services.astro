@@ -32,7 +32,7 @@ const categories = await fetchServiceCategories();
             </div>
             <div class="mt-4 grid gap-3 sm:grid-cols-2">
               {category.services.map((service) => (
-                <div class="rounded-lg border border-border bg-surface-raised p-4">
+                <div class="rounded-lg border border-border bg-surface-raised p-4 shadow-card">
                   <div class="flex items-start justify-between gap-2">
                     <h3 class="font-medium text-ink">{service.nameEn}</h3>
                     <span class="whitespace-nowrap rounded-full bg-seal-tint px-2 py-0.5 text-[11px] font-medium text-seal">

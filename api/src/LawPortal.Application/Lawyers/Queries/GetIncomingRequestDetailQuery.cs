@@ -24,7 +24,7 @@ public class GetIncomingRequestDetailHandler(ILawPortalDbContext db, ICurrentUse
 
         return new LawyerRequestDetailDto(
             c.Id, c.Number, c.Client?.FullName ?? "—", c.Service!.NameAr, c.Service.NameEn, c.Status.ToString(),
-            c.Specialty?.NameAr, c.Specialty?.NameEn, c.ConsultationType.ToString(), c.Title, c.Description,
-            c.Subtotal, c.CurrencyCode, c.CreatedAtUtc, c.SubmittedAtUtc);
+            c.Specialty?.NameAr, c.Specialty?.NameEn, c.ConsultationType.ToString(), c.ScheduledStartUtc, c.SelectedDurationMinutes,
+            c.Title, c.Description, c.Subtotal, c.CurrencyCode, c.CreatedAtUtc, c.SubmittedAtUtc);
     }
 }

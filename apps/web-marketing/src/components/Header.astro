@@ -1,5 +1,5 @@
 ---
-import { nav, CLIENT_APP_URL, type Locale } from "../lib/copy";
+import { nav, app, CLIENT_APP_URL, type Locale } from "../lib/copy";
 
 interface Props {
   locale: Locale;
@@ -10,12 +10,13 @@ const { locale, altPath } = Astro.props;
 const isAr = locale === "ar";
 const prefix = isAr ? "" : "/en";
 const t = nav[locale];
+const brand = app[locale];
 ---
 
 <header class="border-b border-border bg-surface-raised">
   <div class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
     <a href={isAr ? "/" : "/en/"} class="flex items-baseline gap-2">
-      <span class="font-display text-lg font-bold text-seal">{isAr ? "بوابة القانون" : "Law Portal"}</span>
+      <span class="font-display text-lg font-bold text-seal">{brand.name}</span>
     </a>
 
     <nav class="hidden items-center gap-6 text-sm font-medium text-ink-soft md:flex">

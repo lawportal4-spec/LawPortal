@@ -1,6 +1,6 @@
 // Single source of truth: src/tokens.json -> dist/theme.css (Tailwind v4 @theme) + dist/tokens.dart (Flutter).
 // Committed output — CI fails the build if regenerating this produces a diff (see root CLAUDE.md / P0 exit criteria).
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
@@ -29,6 +29,26 @@ const categories = tokens.color.category;
 // ---------------------------------------------------------------------------
 // theme.css — Tailwind v4 @theme block (light defaults) + runtime overrides
 // ---------------------------------------------------------------------------
+// Web ships light theme only — the mobile app's dark theme (LpColorsDark in tokens.dart,
+// wired up in mobile/lib/core/theme/app_theme.dart) is real and stays untouched below; only
+// the web CSS output drops the dark selectors, which no web app ever set (prefers-color-scheme
+// fell back to a palette missing category-token dark variants — broken, not disabled-by-design).
+function buildFontFaceCss() {
+  mkdirSync(path.join(__dirname, "dist/fonts"), { recursive: true });
+  return tokens.fontFace
+    .map(({ family, weight, file }) => {
+      copyFileSync(path.join(__dirname, "src/fonts", file), path.join(__dirname, "dist/fonts", file));
+      return `@font-face {
+  font-family: "${family}";
+  font-weight: ${weight};
+  font-style: normal;
+  font-display: swap;
+  src: url("./fonts/${file}") format("woff2");
+}`;
+    })
+    .join("\n\n");
+}
+
 function buildThemeCss() {
   const themeLines = LIGHT_KEYS.map((k) => `  --color-${k}: ${lightVal(k)};`);
   for (const [name, { bg, fg }] of Object.entries(categories)) {
@@ -44,31 +64,21 @@ function buildThemeCss() {
   const spaceLines = Object.entries(tokens.size.space).map(
     ([name, t]) => `  --spacing-${name}: ${t.value};`,
   );
-
-  const darkOverrideLines = LIGHT_KEYS.map((k) => `    --color-${k}: ${darkVal(k)};`);
+  const shadowLines = Object.entries(tokens.size.shadow).map(
+    ([name, t]) => `  --shadow-${name}: ${t.value};`,
+  );
 
   return `/* GENERATED FILE — do not edit by hand. Source: packages/design-tokens/src/tokens.json */
 /* Regenerate with: pnpm --filter @law-portal/design-tokens build */
+
+${buildFontFaceCss()}
 
 @theme {
 ${themeLines.join("\n")}
 ${fontLines.join("\n")}
 ${radiusLines.join("\n")}
 ${spaceLines.join("\n")}
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-${darkOverrideLines.join("\n")}
-  }
-}
-
-:root[data-theme="dark"] {
-${darkOverrideLines.join("\n")}
-}
-
-:root[data-theme="light"] {
-${LIGHT_KEYS.map((k) => `  --color-${k}: ${lightVal(k)};`).join("\n")}
+${shadowLines.join("\n")}
 }
 `;
 }

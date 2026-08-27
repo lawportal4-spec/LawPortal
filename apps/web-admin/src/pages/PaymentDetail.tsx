@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Wallet as WalletIcon } from "lucide-react";
-import { Button, Card, Ltr } from "@law-portal/ui";
+import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getPaymentDetail, refundPayment, releasePayout } from "../lib/financeApi";
@@ -70,7 +70,7 @@ export default function PaymentDetail() {
               <h1 className="font-display text-2xl font-bold">{p.number}</h1>
               <p className="mt-1 text-sm text-ink-faint">{p.purpose}</p>
             </div>
-            <span className="rounded-full bg-paper px-3 py-1 text-xs font-medium text-ink-soft">{p.status}</span>
+            <StatusTag status={p.status} />
           </div>
 
           <Card className="mb-4">

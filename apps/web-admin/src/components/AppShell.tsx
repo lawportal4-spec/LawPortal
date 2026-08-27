@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "@law-portal/i18n";
 import { useLocale } from "../lib/useLocale";
 import { useAuth } from "../lib/authContext";
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
   const isAr = locale === "ar";
   const location = useLocation();
@@ -12,14 +14,14 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   const navItems = isAuthenticated
     ? [
-        { to: "/", label: isAr ? "لوحة التحكم" : "Dashboard" },
-        { to: "/lawyers", label: isAr ? "توثيق المحامين" : "Lawyer Verification" },
-        { to: "/payments", label: isAr ? "المدفوعات" : "Payments" },
-        { to: "/ledger", label: isAr ? "التسوية المحاسبية" : "Reconciliation" },
-        { to: "/catalog", label: isAr ? "الخدمات والتسعير" : "Catalog & Pricing" },
-        { to: "/subscriptions", label: isAr ? "خطط الاشتراك" : "Subscription Plans" },
-        { to: "/users", label: isAr ? "المستخدمون والصلاحيات" : "Users & Roles" },
-        { to: "/audit", label: isAr ? "سجل التدقيق" : "Audit Log" },
+        { to: "/", label: t("shell.admin.nav.dashboard") },
+        { to: "/lawyers", label: t("shell.admin.nav.lawyerVerification") },
+        { to: "/payments", label: t("shell.admin.nav.payments") },
+        { to: "/ledger", label: t("shell.admin.nav.reconciliation") },
+        { to: "/catalog", label: t("shell.admin.nav.catalogAndPricing") },
+        { to: "/subscriptions", label: t("shell.admin.nav.subscriptionPlans") },
+        { to: "/users", label: t("shell.admin.nav.usersAndRoles") },
+        { to: "/audit", label: t("shell.admin.nav.auditLog") },
       ]
     : [];
 
@@ -38,7 +40,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <Link to="/" className="flex items-baseline gap-2 font-display text-xl font-bold">
             <span>{isAr ? "بوابة القانون" : "Law Portal"}</span>
-            <span className="text-sm font-normal text-ink-faint">{isAr ? "لوحة الإدارة" : "Admin Backoffice"}</span>
+            <span className="text-sm font-normal text-ink-faint">{t("shell.admin.tagline")}</span>
           </Link>
 
           <nav className="hidden flex-wrap items-center gap-5 text-sm font-medium text-ink-soft lg:flex">
@@ -65,7 +67,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </div>
             <button onClick={handleAuthClick} className="rounded-md border border-border px-3 py-2 text-sm font-medium">
-              {isAuthenticated ? (isAr ? "خروج" : "Log out") : isAr ? "دخول" : "Log in"}
+              {isAuthenticated ? t("nav.logout") : t("nav.login")}
             </button>
           </div>
         </div>

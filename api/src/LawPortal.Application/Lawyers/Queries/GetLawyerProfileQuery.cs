@@ -31,6 +31,7 @@ public class GetLawyerProfileHandler(ILawPortalDbContext db) : IRequestHandler<G
                     : null,
                 l.IsVerified,
                 l.IsVatRegistered,
+                l.AcceptingNewRequests,
                 l.AvgRating,
                 l.RatingCount,
                 l.CompletedRequestCount,
@@ -40,6 +41,7 @@ public class GetLawyerProfileHandler(ILawPortalDbContext db) : IRequestHandler<G
                     : null,
                 l.LawyerSpecialties.Select(ls => ls.Specialty!.NameAr).ToList(),
                 l.LawyerSpecialties.Select(ls => ls.Specialty!.NameEn).ToList(),
+                l.LawyerSpecialties.Select(ls => new LawyerSpecialtyDto(ls.Specialty!.Id, ls.Specialty.NameAr, ls.Specialty.NameEn)).ToList(),
                 l.LawyerLanguages.Select(ll => ll.Language!.NameAr).ToList(),
                 l.LawyerLanguages.Select(ll => ll.Language!.NameEn).ToList(),
                 l.Qualifications

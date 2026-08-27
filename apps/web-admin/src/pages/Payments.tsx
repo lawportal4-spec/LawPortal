@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, Ltr } from "@law-portal/ui";
+import { Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getPayments } from "../lib/financeApi";
@@ -63,7 +63,7 @@ export default function Payments() {
                 <span className="font-mono text-sm text-ink-soft">
                   <Ltr>{formatCurrency(p.total)}</Ltr>
                 </span>
-                <span className="rounded-full bg-paper px-2.5 py-1 text-xs font-medium text-ink-soft">{p.status}</span>
+                <StatusTag status={p.status} />
               </div>
             </Card>
           </Link>

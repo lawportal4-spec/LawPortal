@@ -21,6 +21,8 @@ public record LawyerRequestDetailDto(
     string? SpecialtyNameAr,
     string? SpecialtyNameEn,
     string? ConsultationType,
+    DateTime? ScheduledStartUtc,
+    int? SelectedDurationMinutes,
     string? Title,
     string? Description,
     decimal? Subtotal,

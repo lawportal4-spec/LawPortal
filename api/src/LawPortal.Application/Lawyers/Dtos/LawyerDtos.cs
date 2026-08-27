@@ -26,6 +26,8 @@ public record LawyerPricingDto(decimal WrittenPrice, decimal Price15, decimal Pr
 
 public record LawyerQualificationDto(string Kind, string TitleAr, string TitleEn, string? Institution, int? FromYear, int? ToYear);
 
+public record LawyerSpecialtyDto(int Id, string NameAr, string NameEn);
+
 public record LawyerLicenseDto(string LicenseNumber, DateOnly IssueDate, DateOnly ExpiryDate);
 
 public record LawyerProfileDetailDto(
@@ -42,6 +44,7 @@ public record LawyerProfileDetailDto(
     string? ExperienceDisplay,
     bool IsVerified,
     bool IsVatRegistered,
+    bool AcceptingNewRequests,
     decimal? AvgRating,
     int RatingCount,
     int CompletedRequestCount,
@@ -49,6 +52,7 @@ public record LawyerProfileDetailDto(
     LawyerPricingDto? Pricing,
     IReadOnlyList<string> SpecialtyNamesAr,
     IReadOnlyList<string> SpecialtyNamesEn,
+    IReadOnlyList<LawyerSpecialtyDto> Specialties,
     IReadOnlyList<string> LanguageNamesAr,
     IReadOnlyList<string> LanguageNamesEn,
     IReadOnlyList<LawyerQualificationDto> Qualifications);

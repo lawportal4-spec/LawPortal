@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { Scale, Gavel, FileCheck2, Briefcase, FolderOpen, Send } from "lucide-react";
+import { Scale, Gavel, FileCheck2, Briefcase, FolderOpen, Send, Search } from "lucide-react";
 import { Button, Card } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
@@ -31,7 +31,7 @@ export default function ServicesHub() {
 
   return (
     <AppShell>
-      <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "خدمات بينه" : "Our Services"}</h1>
+      <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "خدماتنا" : "Our Services"}</h1>
 
       {query.isLoading && <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>}
 
@@ -75,6 +75,12 @@ export default function ServicesHub() {
                       >
                         <Send className="h-4 w-4" />
                         {isAr ? "اطلب عروض أسعار" : "Request offers"}
+                      </Button>
+                    )}
+                    {s.pricingModel === "PerLawyerFixed" && (
+                      <Button variant="secondary" className="mt-auto self-start" onClick={() => navigate("/lawyers")}>
+                        <Search className="h-4 w-4" />
+                        {isAr ? "ابحث عن محامٍ" : "Find a lawyer"}
                       </Button>
                     )}
                   </Card>
