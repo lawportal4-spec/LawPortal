@@ -11,6 +11,7 @@ using LawPortal.Infrastructure.Persistence;
 using LawPortal.Infrastructure.Persistence.Seeding;
 using LawPortal.Infrastructure.Realtime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -26,16 +27,20 @@ builder.Host.UseSerilog((context, services, configuration) => configuration
     .WriteTo.Console());
 
 const string ClientOrigins = "ClientOrigins";
+// A single comma-separated Cors:AllowedOrigins value (not .NET's indexed-array env var
+// convention, e.g. Cors__AllowedOrigins__0) so a human setting one Railway variable by hand can
+// just type "https://a.com,https://b.com" instead of enumerating numbered keys. Local dev default
+// covers all four apps' fixed Vite/Astro ports so `dotnet run` keeps working with zero setup; a
+// real deployment overrides this since the frontends' actual URLs aren't known at build time.
+var corsOrigins = builder.Configuration["Cors:AllowedOrigins"]?
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ??
+    ["http://localhost:5173", "http://localhost:5174", "http://localhost:5175", "http://localhost:5176"];
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(ClientOrigins, policy =>
     {
         policy
-            .WithOrigins(
-                "http://localhost:5173", // web-client
-                "http://localhost:5174", // web-lawyer
-                "http://localhost:5175", // web-admin
-                "http://localhost:5176") // web-marketing (Astro) — 5176, not Astro's own 4321 default; see astro.config.mjs
+            .WithOrigins(corsOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -164,6 +169,21 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 app.UseSerilogRequestLogging();
+// Railway (like most PaaS) terminates TLS at its edge and forwards plain HTTP to the container,
+// so ASP.NET Core needs the proxy's X-Forwarded-* headers to know the original request was HTTPS
+// — otherwise UseHttpsRedirection below either no-ops or, worse, redirect-loops. Railway's proxy
+// IPs aren't fixed/published, so KnownNetworks/KnownProxies are cleared (trusting the immediate
+// proxy is the standard posture for a locked-down PaaS ingress; harmless locally with no proxy).
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+};
+// KnownIPNetworks/KnownProxies default to loopback-only, which would reject Railway's edge (not
+// loopback from the container's perspective) — .Clear(), not a `{ }` initializer, is required
+// since these are get-only collections that an object initializer can only Add() into.
+forwardedHeadersOptions.KnownIPNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+app.UseForwardedHeaders(forwardedHeadersOptions);
 app.UseHttpsRedirection();
 app.UseHttpMetrics(); // prometheus-net: per-request duration/count, scraped at /metrics below
 app.UseCors(ClientOrigins);

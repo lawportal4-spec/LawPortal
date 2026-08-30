@@ -5,10 +5,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace LawPortal.Infrastructure.Storage;
 
-/// <summary>S3-compatible storage — talks to MinIO locally, swaps to real AWS S3 in production
-/// by changing configuration only (ServiceURL + ForcePathStyle are the only MinIO-specific
-/// bits). Never serves attachments directly: every read is a short-lived signed URL minted
-/// after the caller's own authorization check.</summary>
+/// <summary>S3-compatible storage — talks to MinIO locally, swaps to real AWS S3 (or any other
+/// S3-compatible provider) in production by changing configuration only (ServiceURL,
+/// ForcePathStyle, and Region are the only provider-specific bits). Never serves attachments
+/// directly: every read is a short-lived signed URL minted after the caller's own authorization
+/// check.</summary>
 public class S3FileStorage : IFileStorage
 {
     private readonly AmazonS3Client _client;
@@ -25,7 +26,10 @@ public class S3FileStorage : IFileStorage
         var config = new AmazonS3Config
         {
             ServiceURL = endpoint,
-            ForcePathStyle = true, // required by MinIO
+            // MinIO needs path-style (bucket-in-path); Railway's native buckets and most other
+            // providers use virtual-hosted-style (bucket-in-host) — default true to preserve the
+            // existing local/MinIO behavior, override with Storage:ForcePathStyle=false for those.
+            ForcePathStyle = section.GetValue("ForcePathStyle", true),
             AuthenticationRegion = section["Region"] ?? "us-east-1",
             UseHttp = _endpointIsHttp,
         };
