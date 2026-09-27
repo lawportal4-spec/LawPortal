@@ -15,7 +15,8 @@
     "logout": "خروج",
     "search": "ابحث عن محامٍ أو خدمة",
     "openMenu": "فتح القائمة",
-    "closeMenu": "إغلاق القائمة"
+    "closeMenu": "إغلاق القائمة",
+    "wallet": "المحفظة"
   },
   "shell": {
     "lawyer": {
@@ -50,6 +51,27 @@
     "confirm": "تأكيد",
     "needHelp": "تحتاج مساعدة؟",
     "step": "الخطوة {{current}} من {{total}}"
+  },
+  "wallet": {
+    "title": "المحفظة",
+    "balance": "الرصيد الحالي",
+    "topUp": "شحن المحفظة",
+    "topUpAmount": "المبلغ",
+    "topUpAction": "اشحن الآن",
+    "topUpHint": "ادفع بالبطاقة لشحن رصيدك، ثم استخدمه لدفع طلباتك.",
+    "amountPlaceholder": "مثال: 500",
+    "invalidAmount": "أدخل مبلغًا أكبر من صفر.",
+    "topUpFailed": "تعذّر بدء عملية الشحن.",
+    "confirming": "جارٍ تأكيد الشحن… قد يستغرق ذلك بضع ثوانٍ.",
+    "checkStatus": "تحقّق من حالة الشحن",
+    "transactions": "سجل العمليات",
+    "noTransactions": "لا توجد عمليات بعد.",
+    "loadFailed": "تعذّر تحميل المحفظة.",
+    "type": {
+      "TopUp": "شحن",
+      "Payment": "دفع",
+      "Refund": "استرجاع"
+    }
   },
   "categories": {
     "consultations": "الاستشارات القانونية",

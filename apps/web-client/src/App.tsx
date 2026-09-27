@@ -9,6 +9,7 @@ import OrderDetail from "./pages/OrderDetail";
 import NewBiddingRequest from "./pages/NewBiddingRequest";
 import NewConsultationRequest from "./pages/NewConsultationRequest";
 import Chat from "./pages/Chat";
+import Wallet from "./pages/Wallet";
 import { AuthProvider } from "./lib/authContext";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -51,6 +52,14 @@ export default function App() {
             element={
               <RequireAuth>
                 <OrderDetail />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/wallet"
+            element={
+              <RequireAuth>
+                <Wallet />
               </RequireAuth>
             }
           />
