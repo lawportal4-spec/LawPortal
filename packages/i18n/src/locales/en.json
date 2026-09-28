@@ -15,7 +15,8 @@
     "logout": "Log out",
     "search": "Search for a lawyer or service",
     "openMenu": "Open menu",
-    "closeMenu": "Close menu"
+    "closeMenu": "Close menu",
+    "wallet": "Wallet"
   },
   "shell": {
     "lawyer": {
@@ -50,6 +51,27 @@
     "confirm": "Confirm",
     "needHelp": "Need help?",
     "step": "Step {{current}} of {{total}}"
+  },
+  "wallet": {
+    "title": "Wallet",
+    "balance": "Current balance",
+    "topUp": "Top up",
+    "topUpAmount": "Amount",
+    "topUpAction": "Top up now",
+    "topUpHint": "Pay by card to load your balance, then use it to pay for your orders.",
+    "amountPlaceholder": "e.g. 500",
+    "invalidAmount": "Enter an amount greater than zero.",
+    "topUpFailed": "Could not start the top-up.",
+    "confirming": "Confirming your top-up… this can take a few seconds.",
+    "checkStatus": "Check top-up status",
+    "transactions": "Transaction history",
+    "noTransactions": "No transactions yet.",
+    "loadFailed": "Could not load your wallet.",
+    "type": {
+      "TopUp": "Top-up",
+      "Payment": "Payment",
+      "Refund": "Refund"
+    }
   },
   "categories": {
     "consultations": "Legal Consultations",

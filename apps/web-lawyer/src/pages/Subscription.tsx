@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
 import { Check, CreditCard, Megaphone, Percent, TriangleAlert } from "lucide-react";
 import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDate } from "@law-portal/i18n";
@@ -12,6 +13,10 @@ import {
   payInvoice,
   subscribeToPlan,
 } from "../lib/subscriptionApi";
+
+/** Same bound as web-client's OrderDetail: a declined payment leaves the invoice Pending, so
+ * nothing would stop the poll on its own. */
+const GATEWAY_POLL_TIMEOUT_MS = 90_000;
 
 const STATUS_LABEL: Record<string, { ar: string; en: string }> = {
   Active: { ar: "نشطة", en: "Active" },
@@ -31,11 +36,31 @@ export default function Subscription() {
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
-  const [awaitingGatewayFor, setAwaitingGatewayFor] = useState<string | null>(null);
+  const [searchParams] = useSearchParams();
+  // PaymentsReturnController sends a subscription payer back here with ?payment=returned.
+  const [awaitingGateway, setAwaitingGateway] = useState(searchParams.get("payment") === "returned");
+  const pollInterval = awaitingGateway ? 2000 : false;
 
   const plansQuery = useQuery({ queryKey: ["subscriptionPlans"], queryFn: getSubscriptionPlans });
-  const mineQuery = useQuery({ queryKey: ["mySubscription"], queryFn: getMySubscription });
-  const invoicesQuery = useQuery({ queryKey: ["mySubscriptionInvoices"], queryFn: getMySubscriptionInvoices });
+  const mineQuery = useQuery({ queryKey: ["mySubscription"], queryFn: getMySubscription, refetchInterval: pollInterval });
+  const invoicesQuery = useQuery({
+    queryKey: ["mySubscriptionInvoices"],
+    queryFn: getMySubscriptionInvoices,
+    refetchInterval: pollInterval,
+  });
+
+  // The webhook settles the invoice a beat after the gateway redirects back — once nothing is
+  // Pending any more, it has landed.
+  const hasPendingInvoice = invoicesQuery.data?.some((i) => i.status === "Pending");
+  useEffect(() => {
+    if (!awaitingGateway) return;
+    if (hasPendingInvoice === false) {
+      setAwaitingGateway(false);
+      return;
+    }
+    const timer = setTimeout(() => setAwaitingGateway(false), GATEWAY_POLL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [awaitingGateway, hasPendingInvoice]);
 
   function invalidateAll() {
     void queryClient.invalidateQueries({ queryKey: ["mySubscription"] });
@@ -59,18 +84,21 @@ export default function Subscription() {
 
   const payMutation = useMutation({
     mutationFn: (invoiceId: string) => payInvoice(invoiceId),
-    onSuccess: (result, invoiceId) => {
+    onSuccess: (result) => {
       setError(null);
       if (result.redirectUrl) {
-        window.open(result.redirectUrl, "_blank");
-        setAwaitingGatewayFor(invoiceId);
+        // Same tab, not a popup: success_url brings them straight back to this page.
+        setAwaitingGateway(true);
+        window.location.href = result.redirectUrl;
+      } else {
+        invalidateAll();
       }
     },
     onError: () => setError(isAr ? "تعذّر بدء الدفع." : "Could not start checkout."),
   });
 
   function refreshAfterGateway() {
-    setAwaitingGatewayFor(null);
+    setAwaitingGateway(false);
     invalidateAll();
   }
 
@@ -129,12 +157,12 @@ export default function Subscription() {
         </Card>
       )}
 
-      {awaitingGatewayFor && (
+      {awaitingGateway && (
         <Card className="mb-6">
           <p className="mb-3 text-sm text-ink-soft">
             {isAr
-              ? "أكمل الدفع في النافذة التي فُتحت، ثم اضغط للتحقق من الحالة."
-              : "Complete the payment in the window that opened, then check the status."}
+              ? "جارٍ تأكيد الدفع… قد يستغرق ذلك بضع ثوانٍ."
+              : "Confirming your payment… this can take a few seconds."}
           </p>
           <Button variant="secondary" onClick={refreshAfterGateway}>
             {isAr ? "تحقّق من حالة الدفع" : "Check payment status"}

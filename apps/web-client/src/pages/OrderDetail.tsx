@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { ArrowLeft, ArrowRight, CreditCard, MessageCircle, Paperclip, Wallet as WalletIcon } from "lucide-react";
 import { Button, Card, StatusPill, Ltr, type RequestStatus } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
@@ -8,6 +8,11 @@ import { AppShell } from "../components/AppShell";
 import { getRequestDetail } from "../lib/requestsApi";
 import { checkout, getInvoice } from "../lib/paymentsApi";
 import { OfferInbox } from "../components/OfferInbox";
+
+/** How long to keep polling for the webhook after the gateway hands the payer back, before
+ * falling back to the manual button. Long enough for a slow webhook, short enough that a tab left
+ * open on a failed payment stops hitting the API. */
+const GATEWAY_POLL_TIMEOUT_MS = 90_000;
 
 const STATUS_TO_PILL: Record<string, RequestStatus> = {
   Draft: "draft",
@@ -56,13 +61,20 @@ export default function OrderDetail() {
   const { i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
-  const [awaitingGateway, setAwaitingGateway] = useState(false);
+  const [searchParams] = useSearchParams();
+  // PaymentsReturnController appends ?payment=returned when the gateway hands the payer back, so a
+  // fresh mount knows to wait for the webhook instead of offering "Pay by card" all over again.
+  const [awaitingGateway, setAwaitingGateway] = useState(searchParams.get("payment") === "returned");
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
   const query = useQuery({
     queryKey: ["requestDetail", id],
     queryFn: () => getRequestDetail(id!),
     enabled: !!id,
+    // The gateway redirects the payer back the instant they're done, but the webhook that actually
+    // flips the status is a separate call landing a beat later. Poll across that gap rather than
+    // making them press a button to find out.
+    refetchInterval: (q) => (awaitingGateway && q.state.data?.status !== "Paid" ? 2000 : false),
   });
 
   const invoiceQuery = useQuery({
@@ -78,8 +90,10 @@ export default function OrderDetail() {
       if (result.paidImmediately) {
         void queryClient.invalidateQueries({ queryKey: ["requestDetail", id] });
       } else if (result.redirectUrl) {
-        window.open(result.redirectUrl, "_blank");
+        // Same tab, not a popup: success_url brings them straight back to this page, whereas a
+        // popup strands the result in a second tab and trips blockers besides.
         setAwaitingGateway(true);
+        window.location.href = result.redirectUrl;
       }
     },
     onError: () => setCheckoutError(isAr ? "تعذّر بدء عملية الدفع." : "Could not start checkout."),
@@ -89,6 +103,19 @@ export default function OrderDetail() {
     setAwaitingGateway(false);
     void queryClient.invalidateQueries({ queryKey: ["requestDetail", id] });
   }
+
+  const isPaid = query.data?.status === "Paid";
+  useEffect(() => {
+    if (!awaitingGateway) return;
+    if (isPaid) {
+      setAwaitingGateway(false);
+      return;
+    }
+    // A declined payment leaves the request Submitted, so nothing would ever stop the poll on its
+    // own — give up after the timeout and fall back to the manual check.
+    const timer = setTimeout(() => setAwaitingGateway(false), GATEWAY_POLL_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [awaitingGateway, isPaid]);
 
   return (
     <AppShell>
@@ -210,8 +237,8 @@ export default function OrderDetail() {
                 <div className="flex flex-col gap-3">
                   <p className="text-sm text-ink-soft">
                     {isAr
-                      ? "أكمل الدفع في النافذة التي فُتحت، ثم اضغط للتحقق من الحالة."
-                      : "Complete the payment in the window that opened, then check the status."}
+                      ? "جارٍ تأكيد الدفع… قد يستغرق ذلك بضع ثوانٍ."
+                      : "Confirming your payment… this can take a few seconds."}
                   </p>
                   <Button variant="secondary" onClick={refreshAfterGateway}>
                     {isAr ? "تحقّق من حالة الدفع" : "Check payment status"}

@@ -18,7 +18,12 @@ export function AppShell({ children }: { children: ReactNode }) {
     { to: "/", label: t("nav.home") },
     { to: "/services", label: t("nav.services") },
     { to: "/lawyers", label: t("nav.lawyerDirectory") },
-    ...(isAuthenticated ? [{ to: "/orders", label: t("nav.orders") }] : []),
+    ...(isAuthenticated
+      ? [
+          { to: "/orders", label: t("nav.orders") },
+          { to: "/wallet", label: t("nav.wallet") },
+        ]
+      : []),
   ];
 
   function handleAuthClick() {
