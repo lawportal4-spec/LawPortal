@@ -1,7 +1,7 @@
 # Builds two apps from this one image: LawPortal.Api (the long-running web process) and
-# LawPortal.DbMigrator (a one-shot process run as Railway's pre-deploy command, see
-# railway.json). Both publish into the same runtime image so the pre-deploy command has
-# everything it needs without a second build.
+# LawPortal.DbMigrator (a one-shot process the entrypoint runs before the API, see below).
+# Both publish into the same runtime image so the migrator has everything it needs without a
+# second build.
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
@@ -24,6 +24,13 @@ WORKDIR /app
 COPY --from=build /app/api ./api
 COPY --from=build /app/migrator ./migrator
 
+# Migrate (and seed reference data) before the API starts, rather than relying on Railway's
+# pre-deploy command: that needs the service to read api/railway.json, which the dashboard
+# setting failed to persist. Both steps are idempotent — only pending migrations apply and
+# every seeder skips data that already exists — so running on each start is safe, and a failed
+# migration stops the container instead of serving a half-migrated schema.
+# ponytail: one replica only; with several, starts would race the migration — move it back to
+# a pre-deploy step before scaling out.
 # Railway assigns a container port dynamically via $PORT — ASPNETCORE_URLS must be set at
 # container start (shell form, not a build-time ENV) so it picks up the actual runtime value.
-ENTRYPOINT ["/bin/sh", "-c", "ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} exec dotnet /app/api/LawPortal.Api.dll"]
+ENTRYPOINT ["/bin/sh", "-c", "dotnet /app/migrator/LawPortal.DbMigrator.dll --seed && ASPNETCORE_URLS=http://0.0.0.0:${PORT:-8080} exec dotnet /app/api/LawPortal.Api.dll"]
