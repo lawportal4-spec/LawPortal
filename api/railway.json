@@ -5,7 +5,6 @@
     "watchPatterns": ["/api/**"]
   },
   "deploy": {
-    "preDeployCommand": ["dotnet /app/migrator/LawPortal.DbMigrator.dll --seed"],
     "healthcheckPath": "/health/live",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
