@@ -298,7 +298,8 @@ function HijriInput({
       {...aria}
       icon={<CalendarDays className="h-4 w-4 text-ink-faint" />}
       dir="ltr"
-      className="font-mono"
+      // Digits in the mono face; the Arabic placeholder in the body face — mono spaces Arabic letters apart.
+      className="font-mono [&_input::placeholder]:font-body"
       inputMode="numeric"
       placeholder={t("lawyerAuth.register.hijriPlaceholder")}
       value={value}
@@ -325,6 +326,7 @@ function LicenseUpload({ file, onChange, error }: { file: File | null; onChange:
         <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-raised">
           <FileUp className="h-5 w-5 text-ink-soft" />
         </span>
+        <span className="text-sm font-semibold text-ink">{t("lawyerAuth.register.upload.required")}</span>
         {file ? (
           <>
             <span className="text-sm text-ink-soft">{t("lawyerAuth.register.upload.uploaded")}</span>

@@ -114,7 +114,8 @@
         "prompt": "Click here to upload files",
         "uploaded": "Uploaded files:",
         "change": "Click here to change the files",
-        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)"
+        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)",
+        "required": "Required: law practice licence"
       },
       "startDate": "Start date",
       "endDate": "End date",

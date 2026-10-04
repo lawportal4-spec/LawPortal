@@ -114,7 +114,8 @@
         "prompt": "اضغط هنا لرفع الملفات",
         "uploaded": "قمت برفع الملفات:",
         "change": "اضغط هنا لتغيير الملفات",
-        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)"
+        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)",
+        "required": "المطلوب: ترخيص المحاماة"
       },
       "startDate": "تاريخ البدء",
       "endDate": "تاريخ الانتهاء",
