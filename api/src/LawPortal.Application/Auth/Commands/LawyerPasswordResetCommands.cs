@@ -37,7 +37,30 @@ public class RequestLawyerPasswordResetHandler(ILawPortalDbContext db, OtpServic
     }
 }
 
-/// <summary>"Forgot password", step 2: the code proves the phone, then the new password replaces
+/// <summary>"Forgot password", step 2: confirm the code before asking for a new password. Doesn't
+/// use the code up — step 3 sends it again with the password, so this step can't be skipped.</summary>
+public record CheckLawyerPasswordResetCodeCommand(string PhoneE164, string Code) : IRequest<Unit>;
+
+public class CheckLawyerPasswordResetCodeValidator : AbstractValidator<CheckLawyerPasswordResetCodeCommand>
+{
+    public CheckLawyerPasswordResetCodeValidator()
+    {
+        RuleFor(x => x.PhoneE164).Matches(@"^\+9665\d{8}$");
+        RuleFor(x => x.Code).Matches(@"^\d{6}$");
+    }
+}
+
+public class CheckLawyerPasswordResetCodeHandler(OtpService otpService) : IRequestHandler<CheckLawyerPasswordResetCodeCommand, Unit>
+{
+    public async Task<Unit> Handle(CheckLawyerPasswordResetCodeCommand request, CancellationToken cancellationToken)
+    {
+        // An unknown number simply has no challenge, so it fails with the same message as a bad code.
+        await otpService.CheckAsync(request.PhoneE164, request.Code, OtpPurpose.PasswordReset, cancellationToken);
+        return Unit.Value;
+    }
+}
+
+/// <summary>"Forgot password", step 3: the code proves the phone, then the new password replaces
 /// the old one and every existing session is signed out.</summary>
 public record ResetLawyerPasswordCommand(string PhoneE164, string Code, string NewPassword) : IRequest<Unit>;
 

@@ -221,7 +221,10 @@
       "sendFailed": "Could not send the code, try again shortly.",
       "successTitle": "Your password has been changed",
       "successRedirect": "You'll be taken to sign in",
-      "backToLogin": "Back to sign in"
+      "backToLogin": "Back to sign in",
+      "verify": "Verify",
+      "verified": "Code verified. Enter your new password.",
+      "codeExpired": "The code has expired, request a new one."
     }
   }
 }

@@ -73,6 +73,13 @@ public class LawyerAuthController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("password/verify-code")]
+    public async Task<IActionResult> VerifyResetCode(PhoneCodeBody body, CancellationToken cancellationToken)
+    {
+        await sender.Send(new CheckLawyerPasswordResetCodeCommand(body.PhoneE164, body.Code), cancellationToken);
+        return NoContent();
+    }
+
     public record ResetPasswordBody(string PhoneE164, string Code, string NewPassword);
 
     [HttpPost("password/reset")]
