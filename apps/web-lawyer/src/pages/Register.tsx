@@ -226,7 +226,7 @@ export default function Register() {
               <HijriDateInput value={startDate} onChange={setStartDate} />
             </Field>
             <Field label={t("lawyerAuth.register.endDate")} required error={err(step3Errors.endDate)}>
-              <HijriDateInput value={endDate} onChange={setEndDate} />
+              <HijriDateInput value={endDate} onChange={setEndDate} align="end" />
             </Field>
           </div>
           <Field label={t("lawyerAuth.register.licenseType")} required>

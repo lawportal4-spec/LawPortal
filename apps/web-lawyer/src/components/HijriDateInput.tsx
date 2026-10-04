@@ -12,7 +12,9 @@ const pad = (n: number) => String(n).padStart(2, "0");
 
 function parse(value: string) {
   const m = /^\s*(\d{1,2})\/(\d{1,2})\/(\d{4})\s*$/.exec(value);
-  return m ? { day: Number(m[1]), month: Number(m[2]), year: Number(m[3]) } : null;
+  return m
+    ? { day: Number(m[1]), month: Number(m[2]), year: Number(m[3]) }
+    : null;
 }
 
 /**
@@ -22,10 +24,14 @@ function parse(value: string) {
 export function HijriDateInput({
   value,
   onChange,
+  align = "start",
   ...aria
 }: {
   value: string;
   onChange: (value: string) => void;
+  /** Which field edge the popup hangs from — "end" for a field in the trailing column, so the
+   * popup opens back over the form instead of past its edge (off-screen on a phone). */
+  align?: "start" | "end";
   "aria-label"?: string;
   "aria-describedby"?: string;
 }) {
@@ -33,7 +39,10 @@ export function HijriDateInput({
   const [open, setOpen] = useState(false);
   const today = todayHijri();
   const selected = parse(value);
-  const [view, setView] = useState(() => ({ year: selected?.year ?? today.year, month: selected?.month ?? today.month }));
+  const [view, setView] = useState(() => ({
+    year: selected?.year ?? today.year,
+    month: selected?.month ?? today.month,
+  }));
   const wrapper = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,10 +61,14 @@ export function HijriDateInput({
     };
   }, [open]);
 
-  function toggle() {
+  function openCalendar() {
+    if (open) return;
     // Re-centre on whatever is typed (or today) each time it opens.
-    if (!open) setView({ year: selected?.year ?? today.year, month: selected?.month ?? today.month });
-    setOpen((o) => !o);
+    setView({
+      year: selected?.year ?? today.year,
+      month: selected?.month ?? today.month,
+    });
+    setOpen(true);
   }
 
   function shiftMonth(delta: number) {
@@ -66,50 +79,78 @@ export function HijriDateInput({
   }
 
   const layout = hijriMonthLayout(view.year, view.month);
-  const months = t("lawyerAuth.hijriCalendar.months", { returnObjects: true }) as string[];
-  const weekdays = t("lawyerAuth.hijriCalendar.weekdays", { returnObjects: true }) as string[];
-  const years = Array.from({ length: today.year + YEARS_AHEAD - FIRST_YEAR + 1 }, (_, i) => FIRST_YEAR + i);
+  const months = t("lawyerAuth.hijriCalendar.months", {
+    returnObjects: true,
+  }) as string[];
+  const weekdays = t("lawyerAuth.hijriCalendar.weekdays", {
+    returnObjects: true,
+  }) as string[];
+  const years = Array.from(
+    { length: today.year + YEARS_AHEAD - FIRST_YEAR + 1 },
+    (_, i) => FIRST_YEAR + i,
+  );
 
   return (
     <div ref={wrapper} className="relative">
-      <div className="flex items-center gap-2">
+      {/* Icon inside the field as in the reference design. Input renders a <label> wrapper, so a
+          click on the icon lands on the input too — one handler opens the calendar for both.
+          The wrapper is LTR so the icon sits on the left beside the date, as dates read LTR. */}
+      <div dir="ltr">
         <Input
           {...aria}
+          icon={
+            <CalendarDays
+              aria-hidden
+              className="h-4 w-4 shrink-0 text-ink-faint"
+            />
+          }
           dir="ltr"
           // Digits in the mono face; the Arabic placeholder in the body face — mono spaces Arabic letters apart.
-          className="flex-1 font-mono [&_input::placeholder]:font-body"
+          className="cursor-pointer font-mono [&_input::placeholder]:font-body"
           inputMode="numeric"
           placeholder={t("lawyerAuth.register.hijriPlaceholder")}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-        />
-        <button
-          type="button"
-          onClick={toggle}
-          aria-label={t("lawyerAuth.hijriCalendar.open")}
+          onClick={openCalendar}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowDown" || (e.key === "Enter" && !open)) {
+              e.preventDefault();
+              openCalendar();
+            }
+          }}
+          aria-haspopup="dialog"
           aria-expanded={open}
-          className="rounded-md p-2 text-ink-faint hover:bg-surface hover:text-seal"
-        >
-          <CalendarDays className="h-5 w-5" />
-        </button>
+        />
       </div>
 
       {open && layout && (
         <div
           role="dialog"
           aria-label={aria["aria-label"]}
-          className="absolute start-0 top-full z-20 mt-1 w-72 rounded-lg border border-border bg-surface-raised p-3 shadow-raised"
+          className={clsx(
+            "absolute top-full z-20 mt-1 w-72 rounded-lg border border-border bg-surface-raised p-3 shadow-raised",
+            align === "end" ? "end-0" : "start-0",
+          )}
         >
           <div className="mb-2 flex items-center justify-between gap-1">
-            <button type="button" onClick={() => shiftMonth(-1)} aria-label={t("lawyerAuth.hijriCalendar.prevMonth")} className="rounded p-1 text-ink-soft hover:bg-surface">
+            <button
+              type="button"
+              onClick={() => shiftMonth(-1)}
+              aria-label={t("lawyerAuth.hijriCalendar.prevMonth")}
+              className="rounded p-1 text-ink-soft hover:bg-surface"
+            >
               <ChevronLeft className="h-4 w-4 rtl:rotate-180" />
             </button>
             <div className="flex items-center gap-1">
-              <span className="text-sm font-semibold text-ink">{months[view.month - 1]}</span>
+              <span className="text-sm font-semibold text-ink">
+                {months[view.month - 1]}
+              </span>
               <select
                 aria-label={t("lawyerAuth.hijriCalendar.year")}
                 value={view.year}
-                onChange={(e) => setView((v) => ({ ...v, year: Number(e.target.value) }))}
+                onChange={(e) =>
+                  setView((v) => ({ ...v, year: Number(e.target.value) }))
+                }
                 className="rounded border border-border bg-surface px-1 py-0.5 font-mono text-sm text-ink"
               >
                 {years.map((y) => (
@@ -119,7 +160,12 @@ export function HijriDateInput({
                 ))}
               </select>
             </div>
-            <button type="button" onClick={() => shiftMonth(1)} aria-label={t("lawyerAuth.hijriCalendar.nextMonth")} className="rounded p-1 text-ink-soft hover:bg-surface">
+            <button
+              type="button"
+              onClick={() => shiftMonth(1)}
+              aria-label={t("lawyerAuth.hijriCalendar.nextMonth")}
+              className="rounded p-1 text-ink-soft hover:bg-surface"
+            >
               <ChevronRight className="h-4 w-4 rtl:rotate-180" />
             </button>
           </div>
@@ -135,8 +181,14 @@ export function HijriDateInput({
             ))}
             {Array.from({ length: layout.days }, (_, i) => {
               const day = i + 1;
-              const isSelected = selected?.day === day && selected.month === view.month && selected.year === view.year;
-              const isToday = today.day === day && today.month === view.month && today.year === view.year;
+              const isSelected =
+                selected?.day === day &&
+                selected.month === view.month &&
+                selected.year === view.year;
+              const isToday =
+                today.day === day &&
+                today.month === view.month &&
+                today.year === view.year;
               return (
                 <button
                   key={day}
@@ -149,7 +201,9 @@ export function HijriDateInput({
                   }}
                   className={clsx(
                     "rounded py-1.5 font-mono text-sm",
-                    isSelected ? "bg-seal text-seal-on" : "text-ink hover:bg-seal-tint",
+                    isSelected
+                      ? "bg-seal text-seal-on"
+                      : "text-ink hover:bg-seal-tint",
                     isToday && !isSelected && "ring-1 ring-seal",
                   )}
                 >
