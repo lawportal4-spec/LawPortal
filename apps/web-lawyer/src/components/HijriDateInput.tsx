@@ -35,7 +35,7 @@ export function HijriDateInput({
   "aria-label"?: string;
   "aria-describedby"?: string;
 }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   const today = todayHijri();
   const selected = parse(value);
@@ -106,7 +106,8 @@ export function HijriDateInput({
           }
           dir="ltr"
           // Digits in the mono face; the Arabic placeholder in the body face — mono spaces Arabic letters apart.
-          className="cursor-pointer font-mono [&_input::placeholder]:font-body"
+          // Empty in Arabic: the placeholder sits at the far (right) end — the field is LTR, so "end" is right.
+          className={clsx("cursor-pointer font-mono [&_input::placeholder]:font-body", !value && i18n.language === "ar" && "[&_input]:text-end")}
           inputMode="numeric"
           placeholder={t("lawyerAuth.register.hijriPlaceholder")}
           value={value}
