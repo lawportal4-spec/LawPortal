@@ -12,3 +12,10 @@ assert.equal(hijriToIsoDate("31/1/1445"), null);
 assert.equal(hijriToIsoDate("2022-05-23"), null);
 assert.equal(hijriToIsoDate(""), null);
 console.log("hijri ok");
+
+import { hijriMonthLayout } from "../src/hijri.ts";
+// Shawwal 1443 began on Monday 2 May 2022 and had 29 days; Dhu al-Hijjah 1445 had 30.
+assert.deepEqual(hijriMonthLayout(1443, 10), { days: 29, firstWeekday: 1 });
+assert.equal(hijriMonthLayout(1445, 12)?.days, 30);
+assert.equal(hijriMonthLayout(1200, 1), null);
+console.log("hijri calendar ok");

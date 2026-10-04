@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { CalendarDays, CircleCheck, FileUp } from "lucide-react";
+import { CircleCheck, FileUp } from "lucide-react";
 import { Button, Card, Input, Ltr, StepProgress } from "@law-portal/ui";
 import { hijriToIsoDate, useTranslation } from "@law-portal/i18n";
 import { AuthLayout, Field, PasswordInput, SaudiPhoneInput, Select } from "../components/AuthForm";
+import { HijriDateInput } from "../components/HijriDateInput";
 import {
   getRegions,
   registerLawyer,
@@ -222,10 +223,10 @@ export default function Register() {
           <LicenseUpload file={file} onChange={setFile} error={err(step3Errors.file)} />
           <div className="grid grid-cols-2 gap-3">
             <Field label={t("lawyerAuth.register.startDate")} required error={err(step3Errors.startDate)}>
-              <HijriInput value={startDate} onChange={setStartDate} />
+              <HijriDateInput value={startDate} onChange={setStartDate} />
             </Field>
             <Field label={t("lawyerAuth.register.endDate")} required error={err(step3Errors.endDate)}>
-              <HijriInput value={endDate} onChange={setEndDate} />
+              <HijriDateInput value={endDate} onChange={setEndDate} />
             </Field>
           </div>
           <Field label={t("lawyerAuth.register.licenseType")} required>
@@ -279,32 +280,6 @@ export default function Register() {
 
       {registered && <SuccessDialog onDone={() => navigate("/login", { replace: true })} />}
     </AuthLayout>
-  );
-}
-
-function HijriInput({
-  value,
-  onChange,
-  ...aria
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  "aria-label"?: string;
-  "aria-describedby"?: string;
-}) {
-  const { t } = useTranslation();
-  return (
-    <Input
-      {...aria}
-      icon={<CalendarDays className="h-4 w-4 text-ink-faint" />}
-      dir="ltr"
-      // Digits in the mono face; the Arabic placeholder in the body face — mono spaces Arabic letters apart.
-      className="font-mono [&_input::placeholder]:font-body"
-      inputMode="numeric"
-      placeholder={t("lawyerAuth.register.hijriPlaceholder")}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-    />
   );
 }
 

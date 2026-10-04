@@ -52,3 +52,21 @@ export function hijriToIsoDate(input: string): string | null {
   }
   return null;
 }
+
+/** Today's Umm al-Qura date. */
+export function todayHijri(): HijriParts {
+  const now = new Date();
+  return toHijri(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+}
+
+/** The days of one Hijri month for a calendar grid: how many there are (29 or 30) and which
+ * weekday the 1st falls on (0 = Sunday, the first day of the Saudi week). Null outside the
+ * range `hijriToIsoDate` supports. */
+export function hijriMonthLayout(year: number, month: number): { days: number; firstWeekday: number } | null {
+  const first = hijriToIsoDate(`1/${month}/${year}`);
+  if (!first) return null;
+  const days = hijriToIsoDate(`30/${month}/${year}`) ? 30 : 29;
+  return { days, firstWeekday: new Date(`${first}T00:00:00Z`).getUTCDay() };
+}
+
+export type { HijriParts };

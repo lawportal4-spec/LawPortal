@@ -177,6 +177,36 @@
     },
     "admin": {
       "viewLicense": "View licence"
+    },
+    "hijriCalendar": {
+      "months": [
+        "Muharram",
+        "Safar",
+        "Rabi al-Awwal",
+        "Rabi al-Thani",
+        "Jumada al-Ula",
+        "Jumada al-Akhirah",
+        "Rajab",
+        "Shaban",
+        "Ramadan",
+        "Shawwal",
+        "Dhu al-Qadah",
+        "Dhu al-Hijjah"
+      ],
+      "weekdays": [
+        "Sun",
+        "Mon",
+        "Tue",
+        "Wed",
+        "Thu",
+        "Fri",
+        "Sat"
+      ],
+      "open": "Open Hijri calendar",
+      "prevMonth": "Previous month",
+      "nextMonth": "Next month",
+      "year": "Year",
+      "today": "Today"
     }
   }
 }
