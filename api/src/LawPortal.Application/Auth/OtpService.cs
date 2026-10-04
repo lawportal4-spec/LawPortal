@@ -55,6 +55,18 @@ public class OtpService(ILawPortalDbContext db, IOtpSender otpSender, IHostEnvir
     /// the caller saves together with whatever the verification unlocks.</summary>
     public async Task VerifyAsync(string phoneE164, string code, OtpPurpose purpose, CancellationToken cancellationToken)
     {
+        var challenge = await MatchAsync(phoneE164, code, purpose, cancellationToken);
+        challenge.ConsumedAtUtc = DateTime.UtcNow;
+    }
+
+    /// <summary>Checks a code without using it up — for flows that confirm the code on one screen
+    /// and act on it on the next (password reset). Wrong guesses still count towards the lock,
+    /// and the final step must still call <see cref="VerifyAsync"/>.</summary>
+    public async Task CheckAsync(string phoneE164, string code, OtpPurpose purpose, CancellationToken cancellationToken) =>
+        await MatchAsync(phoneE164, code, purpose, cancellationToken);
+
+    private async Task<OtpChallenge> MatchAsync(string phoneE164, string code, OtpPurpose purpose, CancellationToken cancellationToken)
+    {
         var challenge = await db.OtpChallenges
             .Where(o => o.PhoneE164 == phoneE164 && o.Purpose == purpose && o.ConsumedAtUtc == null)
             .OrderByDescending(o => o.CreatedAtUtc)
@@ -74,7 +86,7 @@ public class OtpService(ILawPortalDbContext db, IOtpSender otpSender, IHostEnvir
             throw new InvalidOperationException("Incorrect code.");
         }
 
-        challenge.ConsumedAtUtc = DateTime.UtcNow;
+        return challenge;
     }
 
     private static string HashCode(string phone, string code) =>

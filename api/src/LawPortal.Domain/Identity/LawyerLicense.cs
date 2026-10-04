@@ -17,6 +17,13 @@ public class LawyerLicense : Entity<Guid>
     public DateTime? VerifiedAtUtc { get; set; }
     public string? RejectionReason { get; set; }
 
+    /// <summary>Set while <see cref="LicenseVerificationStatus.ChangesRequested"/>: what the admin
+    /// asked the lawyer to fix. Kept after resubmission so the next reviewer sees what changed.</summary>
+    public LicenseCorrectionIssue CorrectionIssues { get; set; }
+    public string? CorrectionNote { get; set; }
+    public DateTime? CorrectionRequestedAtUtc { get; set; }
+    public DateTime? ResubmittedAtUtc { get; set; }
+
     /// <summary>The licence scan uploaded at registration — null for lawyers registered before
     /// the upload existed. Served to admins only, via a short-lived signed URL.</summary>
     public string? DocumentStorageKey { get; set; }

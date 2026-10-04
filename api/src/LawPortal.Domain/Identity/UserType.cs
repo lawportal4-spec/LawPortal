@@ -28,6 +28,22 @@ public enum LicenseVerificationStatus
     Approved = 2,
     Rejected = 3,
     Expired = 4,
+    /// <summary>Returned to the lawyer with a checklist of what to fix; resubmitting puts it back
+    /// to <see cref="PendingReview"/>.</summary>
+    ChangesRequested = 5,
+}
+
+/// <summary>What an admin can tick when returning a registration for correction.</summary>
+[Flags]
+public enum LicenseCorrectionIssue
+{
+    None = 0,
+    FileUnreadable = 1,
+    WrongFile = 2,
+    LicenseNumberMismatch = 4,
+    DatesMismatch = 8,
+    // 16 unused: a name mismatch can't be fixed from the licence step the lawyer edits — reject or note it instead.
+    LicenseTypeMismatch = 32,
 }
 
 public enum OtpPurpose
@@ -35,6 +51,8 @@ public enum OtpPurpose
     Login = 1,
     /// <summary>Proves a lawyer owns the phone they registered with, before the account can sign in.</summary>
     LawyerRegistration = 2,
+    /// <summary>Proves a lawyer owns their phone before they can set a new password.</summary>
+    PasswordReset = 3,
 }
 
 public enum LawyerLicenseType

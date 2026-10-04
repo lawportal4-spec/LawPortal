@@ -1,11 +1,15 @@
-import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
-import { CircleCheck, FileUp } from "lucide-react";
+import { CircleCheck } from "lucide-react";
 import { Button, Card, Input, Ltr, StepProgress } from "@law-portal/ui";
 import { hijriToIsoDate, useTranslation } from "@law-portal/i18n";
 import { AuthLayout, Field, PasswordInput, SaudiPhoneInput, Select } from "../components/AuthForm";
 import { HijriDateInput } from "../components/HijriDateInput";
+import { LicenseUpload } from "../components/LicenseUpload";
+import { OtpCodeInput, ResendTimer } from "../components/OtpCodeInput";
+import { ACCEPTED_TYPES, MAX_FILE_BYTES } from "../lib/licenseFile";
+import { useCountdown } from "../lib/useCountdown";
 import {
   getRegions,
   registerLawyer,
@@ -15,8 +19,6 @@ import {
   type LicenseType,
 } from "../lib/authApi";
 
-const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/jpg", "image/webp", "application/pdf"];
-const MAX_FILE_BYTES = 3 * 1024 * 1024;
 const RESEND_SECONDS = 60;
 const CODE_LENGTH = 6;
 const MARKETING_URL = import.meta.env.VITE_MARKETING_URL ?? "http://localhost:5176";
@@ -283,52 +285,6 @@ export default function Register() {
   );
 }
 
-function LicenseUpload({ file, onChange, error }: { file: File | null; onChange: (file: File | null) => void; error: string | null }) {
-  const { t } = useTranslation();
-  const inputRef = useRef<HTMLInputElement>(null);
-  return (
-    <div className="flex flex-col gap-1.5">
-      <button
-        type="button"
-        onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          onChange(e.dataTransfer.files[0] ?? null);
-        }}
-        className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-surface px-4 py-6 text-center hover:border-seal"
-      >
-        <span className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-raised">
-          <FileUp className="h-5 w-5 text-ink-soft" />
-        </span>
-        <span className="text-sm font-semibold text-ink">{t("lawyerAuth.register.upload.required")}</span>
-        {file ? (
-          <>
-            <span className="text-sm text-ink-soft">{t("lawyerAuth.register.upload.uploaded")}</span>
-            {/* Two flex items, so the number sits at the start of the line in either direction. */}
-            <span className="flex items-center gap-1.5 text-sm text-ink">
-              <Ltr className="font-mono">1-</Ltr>
-              <bdi>{file.name}</bdi>
-            </span>
-            <span className="text-sm font-semibold text-ink underline">{t("lawyerAuth.register.upload.change")}</span>
-          </>
-        ) : (
-          <span className="text-sm font-semibold text-ink underline">{t("lawyerAuth.register.upload.prompt")}</span>
-        )}
-        <Ltr className="font-mono text-xs text-ink-faint">{t("lawyerAuth.register.upload.formats")}</Ltr>
-      </button>
-      <input
-        ref={inputRef}
-        type="file"
-        accept={ACCEPTED_TYPES.join(",")}
-        className="hidden"
-        onChange={(e) => onChange(e.target.files?.[0] ?? null)}
-      />
-      {error && <p className="text-xs text-rubric">{error}</p>}
-    </div>
-  );
-}
-
 function ActivationStep({
   phoneE164,
   localPhone,
@@ -342,34 +298,9 @@ function ActivationStep({
 }) {
   const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(() => Array(CODE_LENGTH).fill(""));
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [secondsLeft, restartCountdown] = useCountdown(RESEND_SECONDS);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const boxes = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    if (secondsLeft <= 0) return;
-    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [secondsLeft]);
-
-  function setDigit(index: number, value: string) {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    setDigits((prev) => prev.map((d, i) => (i === index ? digit : d)));
-    if (digit && index < CODE_LENGTH - 1) boxes.current[index + 1]?.focus();
-  }
-
-  function onKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !digits[index] && index > 0) boxes.current[index - 1]?.focus();
-  }
-
-  function onPaste(e: ClipboardEvent<HTMLInputElement>) {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH);
-    if (!pasted) return;
-    e.preventDefault();
-    setDigits(Array.from({ length: CODE_LENGTH }, (_, i) => pasted[i] ?? ""));
-    boxes.current[Math.min(pasted.length, CODE_LENGTH - 1)]?.focus();
-  }
 
   async function activate(e: FormEvent) {
     e.preventDefault();
@@ -390,49 +321,18 @@ function ActivationStep({
     try {
       await resendLawyerRegistrationCode(phoneE164);
       setDigits(Array(CODE_LENGTH).fill(""));
-      setSecondsLeft(RESEND_SECONDS);
+      restartCountdown();
     } catch {
       setError(t("lawyerAuth.otp.resendFailed"));
     }
   }
 
-  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const ss = String(secondsLeft % 60).padStart(2, "0");
-
   return (
     <form className="flex flex-col items-center gap-4" onSubmit={activate}>
       <p className="text-sm text-ink-soft">{t("lawyerAuth.otp.sentTo")}</p>
       <Ltr className="font-mono text-base font-semibold text-ink">{localPhone}</Ltr>
-      <div dir="ltr" className="flex gap-2">
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => {
-              boxes.current[i] = el;
-            }}
-            value={d}
-            onChange={(e) => setDigit(i, e.target.value)}
-            onKeyDown={(e) => onKeyDown(i, e)}
-            onPaste={onPaste}
-            inputMode="numeric"
-            autoComplete={i === 0 ? "one-time-code" : "off"}
-            maxLength={1}
-            aria-label={t("lawyerAuth.otp.digit", { n: i + 1 })}
-            className="h-12 w-11 rounded-md border border-border bg-surface-raised text-center font-mono text-lg text-ink focus:border-seal focus:outline-none focus:ring-2 focus:ring-seal/30"
-          />
-        ))}
-      </div>
-      <Ltr className="font-mono text-sm text-ink-faint">
-        {mm}:{ss}
-      </Ltr>
-      <button
-        type="button"
-        onClick={resend}
-        disabled={secondsLeft > 0}
-        className="text-sm text-ink-soft underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-      >
-        {t("lawyerAuth.otp.resend")}
-      </button>
+      <OtpCodeInput digits={digits} onChange={setDigits} />
+      <ResendTimer secondsLeft={secondsLeft} onResend={resend} />
       {error && <p className="text-sm text-rubric">{error}</p>}
       <Button type="submit" className="w-full max-w-xs justify-center" disabled={busy || digits.some((d) => !d)}>
         {t("lawyerAuth.otp.activate")}

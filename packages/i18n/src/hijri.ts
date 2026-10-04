@@ -70,3 +70,10 @@ export function hijriMonthLayout(year: number, month: number): { days: number; f
 }
 
 export type { HijriParts };
+
+/** "2022-05-23" → "22/10/1443" — the Umm al-Qura date a licence shows, for reviewers comparing
+ * the entered dates against the uploaded document. */
+export function isoToHijriDate(iso: string): string {
+  const { day, month, year } = toHijri(Date.parse(`${iso.slice(0, 10)}T12:00:00Z`));
+  return `${String(day).padStart(2, "0")}/${String(month).padStart(2, "0")}/${year}`;
+}

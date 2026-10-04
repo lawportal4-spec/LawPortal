@@ -1,4 +1,6 @@
+using LawPortal.Application.Auth.Commands;
 using LawPortal.Application.Lawyers.Commands;
+using LawPortal.Domain.Identity;
 using LawPortal.Application.Lawyers.Dtos;
 using LawPortal.Application.Lawyers.Queries;
 using MediatR;
@@ -15,6 +17,23 @@ public class LawyerProfileController(ISender sender) : ControllerBase
     public record PricingBody(decimal WrittenPrice, decimal Price15, decimal Price30, decimal Price45);
     public record ProfileBody(string? BioAr, string? BioEn, bool AcceptingNewRequests, IReadOnlyList<int> SpecialtyIds, IReadOnlyList<int> LanguageIds);
     public record RenewLicenseBody(string LicenseNumber, DateOnly IssueDate, DateOnly ExpiryDate);
+
+    /// <summary>multipart/form-data — answers "returned for correction"; the document is optional
+    /// unless the admin flagged the file.</summary>
+    public record ResubmitLicenseForm(LawyerLicenseType LicenseType, string LicenseNumber, DateOnly IssueDate, DateOnly ExpiryDate, IFormFile? LicenseDocument);
+
+    [HttpPost("license/resubmit")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(4 * 1024 * 1024)]
+    public async Task<IActionResult> ResubmitLicense([FromForm] ResubmitLicenseForm form, CancellationToken cancellationToken)
+    {
+        await using var content = form.LicenseDocument?.OpenReadStream();
+        var document = form.LicenseDocument is { } file
+            ? new LicenseDocumentUpload(content!, file.FileName, file.ContentType, file.Length)
+            : null;
+        await sender.Send(new ResubmitLicenseCommand(form.LicenseType, form.LicenseNumber, form.IssueDate, form.ExpiryDate, document), cancellationToken);
+        return NoContent();
+    }
 
     [HttpGet("me")]
     [ProducesResponseType<LawyerMeDto>(StatusCodes.Status200OK)]

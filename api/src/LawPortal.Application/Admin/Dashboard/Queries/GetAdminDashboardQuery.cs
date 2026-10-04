@@ -37,7 +37,9 @@ public class GetAdminDashboardHandler(ILawPortalDbContext db) : IRequestHandler<
         var totalClients = await db.Users.CountAsync(u => u.UserType == UserType.Client, cancellationToken);
         var totalVerifiedLawyers = await db.LawyerProfiles.CountAsync(l => l.IsVerified, cancellationToken);
         var pendingVerifications = await db.LawyerProfiles
-            .CountAsync(l => l.License!.VerificationStatus == LicenseVerificationStatus.PendingReview, cancellationToken);
+            // Unactivated sign-ups aren't applicants yet — same rule as the registrations list.
+            .CountAsync(l => l.License!.VerificationStatus == LicenseVerificationStatus.PendingReview
+                && (l.User!.PhoneE164 == null || l.User.IsPhoneVerified), cancellationToken);
         var totalAdmins = await db.Users.CountAsync(u => u.UserType == UserType.Admin, cancellationToken);
 
         var requestsByStatus = await db.ServiceRequests

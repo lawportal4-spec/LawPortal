@@ -73,6 +73,7 @@ public class LawyerLicenseConfiguration : IEntityTypeConfiguration<LawyerLicense
         builder.Property(l => l.DocumentStorageKey).HasMaxLength(500);
         builder.Property(l => l.DocumentFileName).HasMaxLength(255);
         builder.Property(l => l.DocumentContentType).HasMaxLength(100);
+        builder.Property(l => l.CorrectionNote).HasMaxLength(1000);
         builder.HasIndex(l => l.LicenseNumber).IsUnique();
     }
 }

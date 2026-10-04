@@ -1,4 +1,4 @@
-import { api } from "./api";
+import { api, type PagedResult } from "./api";
 
 export interface RequestStatusCountDto {
   status: string;
@@ -27,24 +27,74 @@ export async function getDashboard(): Promise<AdminDashboardDto> {
   return data;
 }
 
-export interface PendingLawyerDto {
+export type LicenseReviewStatus = "PendingReview" | "ChangesRequested" | "Approved" | "Rejected" | "Expired";
+export type LicenseCorrectionIssue = "FileUnreadable" | "WrongFile" | "LicenseNumberMismatch" | "DatesMismatch" | "LicenseTypeMismatch";
+export const CORRECTION_ISSUES: LicenseCorrectionIssue[] = [
+  "FileUnreadable",
+  "WrongFile",
+  "LicenseNumberMismatch",
+  "DatesMismatch",
+  "LicenseTypeMismatch",
+];
+
+export interface LawyerRegistrationSummaryDto {
   lawyerProfileId: string;
-  userId: string;
   fullName: string;
-  email: string;
   phoneE164: string | null;
+  email: string;
   licenseNumber: string;
-  licenseType: "Licensed" | "Trainee";
-  issueDate: string;
-  expiryDate: string;
-  verificationStatus: string;
-  /** Short-lived signed URL; null for lawyers who registered before the upload existed. */
-  licenseDocumentUrl: string | null;
+  status: LicenseReviewStatus;
+  submittedAtUtc: string;
+  resubmittedAtUtc: string | null;
 }
 
-export async function getPendingLawyers(): Promise<PendingLawyerDto[]> {
-  const { data } = await api.get<PendingLawyerDto[]>("/api/v1/admin/lawyers/pending");
+export interface LawyerRegistrationDetailDto {
+  lawyerProfileId: string;
+  fullName: string;
+  phoneE164: string | null;
+  isPhoneVerified: boolean;
+  email: string;
+  regionNameAr: string | null;
+  regionNameEn: string | null;
+  cityNameAr: string | null;
+  cityNameEn: string | null;
+  countryCode: string;
+  termsAcceptedAtUtc: string | null;
+  submittedAtUtc: string;
+  licenseType: "Licensed" | "Trainee";
+  licenseNumber: string;
+  issueDate: string;
+  expiryDate: string;
+  status: LicenseReviewStatus;
+  /** Short-lived signed URL. */
+  documentUrl: string | null;
+  documentFileName: string | null;
+  documentContentType: string | null;
+  rejectionReason: string | null;
+  correctionIssues: LicenseCorrectionIssue[];
+  correctionNote: string | null;
+  correctionRequestedAtUtc: string | null;
+  resubmittedAtUtc: string | null;
+  decidedAtUtc: string | null;
+}
+
+export async function getLawyerRegistrations(params: {
+  status?: LicenseReviewStatus;
+  search?: string;
+  page: number;
+  pageSize: number;
+}): Promise<PagedResult<LawyerRegistrationSummaryDto>> {
+  const { data } = await api.get<PagedResult<LawyerRegistrationSummaryDto>>("/api/v1/admin/lawyers", { params });
   return data;
+}
+
+export async function getLawyerRegistration(lawyerProfileId: string): Promise<LawyerRegistrationDetailDto> {
+  const { data } = await api.get<LawyerRegistrationDetailDto>(`/api/v1/admin/lawyers/${lawyerProfileId}`);
+  return data;
+}
+
+export async function requestLawyerChanges(lawyerProfileId: string, issues: LicenseCorrectionIssue[], note: string): Promise<void> {
+  await api.post(`/api/v1/admin/lawyers/${lawyerProfileId}/request-changes`, { issues, note });
 }
 
 export async function verifyLawyer(lawyerProfileId: string): Promise<void> {

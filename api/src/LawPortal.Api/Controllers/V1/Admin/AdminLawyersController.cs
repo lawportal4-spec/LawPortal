@@ -1,4 +1,6 @@
 using LawPortal.Application.Admin.Lawyers;
+using LawPortal.Application.Lawyers.Dtos;
+using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +13,25 @@ namespace LawPortal.Api.Controllers.V1.Admin;
 public class AdminLawyersController(ISender sender) : ControllerBase
 {
     public record RejectBody(string Reason);
+    public record RequestChangesBody(IReadOnlyList<LicenseCorrectionIssue> Issues, string? Note);
 
-    [HttpGet("pending")]
-    [ProducesResponseType<IReadOnlyList<PendingLawyerDto>>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IReadOnlyList<PendingLawyerDto>>> ListPending(CancellationToken cancellationToken)
+    [HttpGet]
+    [ProducesResponseType<PagedResult<LawyerRegistrationSummaryDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResult<LawyerRegistrationSummaryDto>>> List(
+        [FromQuery] LicenseVerificationStatus? status, [FromQuery] string? search,
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+        => Ok(await sender.Send(new ListLawyerRegistrationsQuery(status, search, page, pageSize), cancellationToken));
+
+    [HttpGet("{lawyerProfileId:guid}")]
+    [ProducesResponseType<LawyerRegistrationDetailDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<LawyerRegistrationDetailDto>> Get(Guid lawyerProfileId, CancellationToken cancellationToken)
+        => Ok(await sender.Send(new GetLawyerRegistrationQuery(lawyerProfileId), cancellationToken));
+
+    [HttpPost("{lawyerProfileId:guid}/request-changes")]
+    public async Task<IActionResult> RequestChanges(Guid lawyerProfileId, RequestChangesBody body, CancellationToken cancellationToken)
     {
-        var result = await sender.Send(new ListPendingLawyersQuery(), cancellationToken);
-        return Ok(result);
+        await sender.Send(new RequestLawyerChangesCommand(lawyerProfileId, body.Issues, body.Note), cancellationToken);
+        return NoContent();
     }
 
     [HttpPost("{lawyerProfileId:guid}/verify")]
