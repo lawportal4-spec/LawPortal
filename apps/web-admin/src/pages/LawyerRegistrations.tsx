@@ -7,7 +7,7 @@ import { useTranslation, formatDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getLawyerRegistrations, type LicenseReviewStatus } from "../lib/adminApi";
 
-const STATUS_TABS: (LicenseReviewStatus | "")[] = ["PendingReview", "ChangesRequested", "Approved", "Rejected", ""];
+const STATUS_TABS: (LicenseReviewStatus | "")[] = ["", "PendingReview", "ChangesRequested", "Approved", "Rejected"];
 const PAGE_SIZE = 20;
 
 /** Every lawyer registration, filterable by review status — opens into the review screen. */
