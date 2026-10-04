@@ -20,7 +20,9 @@ public class GetRegionsHandler(ILawPortalDbContext db) : IRequestHandler<GetRegi
     {
         var regions = await db.Regions
             .Where(r => r.IsActive)
-            .Include(r => r.Cities.Where(c => c.IsActive))
+            .Include(r => r.Cities.Where(c => c.IsActive).OrderBy(c => c.Id))
+            // Seed order: the five original regions first, and each region's main city first.
+            .OrderBy(r => r.Id)
             .ToListAsync(cancellationToken);
 
         return regions.Select(r => new RegionDto(r.Id, r.NameAr, r.NameEn, r.Cities.Select(c => new CityDto(c.Id, c.NameAr, c.NameEn)).ToList())).ToList();
