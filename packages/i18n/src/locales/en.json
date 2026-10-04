@@ -206,6 +206,22 @@
       "nextMonth": "Next month",
       "year": "Year",
       "today": "Today"
+    },
+    "forgot": {
+      "link": "Forgot password?",
+      "title": "Reset your password",
+      "intro": "Enter your registered mobile number and we'll send you a verification code.",
+      "sendCode": "Send code",
+      "codeSent": "If this number is registered, we've sent a verification code to",
+      "newPassword": "New password",
+      "confirmPassword": "Confirm new password",
+      "submit": "Change password",
+      "changeNumber": "Change number",
+      "failed": "Invalid or expired code.",
+      "sendFailed": "Could not send the code, try again shortly.",
+      "successTitle": "Your password has been changed",
+      "successRedirect": "You'll be taken to sign in",
+      "backToLogin": "Back to sign in"
     }
   }
 }

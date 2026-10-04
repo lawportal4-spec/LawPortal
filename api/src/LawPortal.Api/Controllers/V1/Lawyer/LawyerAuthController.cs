@@ -66,6 +66,22 @@ public class LawyerAuthController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    [HttpPost("password/forgot")]
+    public async Task<IActionResult> ForgotPassword(PhoneBody body, CancellationToken cancellationToken)
+    {
+        await sender.Send(new RequestLawyerPasswordResetCommand(body.PhoneE164), cancellationToken);
+        return NoContent();
+    }
+
+    public record ResetPasswordBody(string PhoneE164, string Code, string NewPassword);
+
+    [HttpPost("password/reset")]
+    public async Task<IActionResult> ResetPassword(ResetPasswordBody body, CancellationToken cancellationToken)
+    {
+        await sender.Send(new ResetLawyerPasswordCommand(body.PhoneE164, body.Code, body.NewPassword), cancellationToken);
+        return NoContent();
+    }
+
     [HttpPost("login")]
     [ProducesResponseType<AuthResultDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<AuthResultDto>> Login(LawyerLoginCommand command, CancellationToken cancellationToken)

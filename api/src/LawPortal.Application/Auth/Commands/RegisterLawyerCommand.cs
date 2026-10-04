@@ -46,9 +46,7 @@ public class RegisterLawyerValidator : AbstractValidator<RegisterLawyerCommand>
         RuleFor(x => x.PhoneE164).Matches(@"^\+9665\d{8}$")
             .WithMessage("Phone must be a Saudi mobile number in E.164 format, e.g. +966501234567.");
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
-        RuleFor(x => x.Password).MinimumLength(8)
-            .Matches(@"[A-Z]").WithMessage("Password must contain an uppercase letter.")
-            .Matches(@"[0-9]").WithMessage("Password must contain a digit.");
+        RuleFor(x => x.Password).LawyerPassword();
         RuleFor(x => x.RegionId).GreaterThan(0);
         RuleFor(x => x.CityId).GreaterThan(0);
         RuleFor(x => x.LicenseType).IsInEnum();
@@ -65,6 +63,15 @@ public class RegisterLawyerValidator : AbstractValidator<RegisterLawyerCommand>
             .When(x => x.LicenseDocument is not null);
         RuleFor(x => x.RecaptchaToken).NotEmpty();
     }
+}
+
+public static class LawyerPasswordRule
+{
+    /// <summary>Same rule at registration and password reset.</summary>
+    public static IRuleBuilderOptions<T, string> LawyerPassword<T>(this IRuleBuilder<T, string> rule) =>
+        rule.MinimumLength(8)
+            .Matches(@"[A-Z]").WithMessage("Password must contain an uppercase letter.")
+            .Matches(@"[0-9]").WithMessage("Password must contain a digit.");
 }
 
 public class RegisterLawyerHandler(
