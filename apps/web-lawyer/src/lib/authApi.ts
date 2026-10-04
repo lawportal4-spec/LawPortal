@@ -54,6 +54,20 @@ export async function resendLawyerRegistrationCode(phoneE164: string): Promise<v
   await api.post("/api/v1/auth/lawyer/register/resend", { phoneE164 });
 }
 
+/** Always succeeds — whether the number is registered is deliberately not revealed. */
+export async function requestPasswordReset(phoneE164: string): Promise<void> {
+  await api.post("/api/v1/auth/lawyer/password/forgot", { phoneE164 });
+}
+
+/** Confirms the code before the new-password step; the reset call sends it again. */
+export async function verifyResetCode(phoneE164: string, code: string): Promise<void> {
+  await api.post("/api/v1/auth/lawyer/password/verify-code", { phoneE164, code });
+}
+
+export async function resetPassword(phoneE164: string, code: string, newPassword: string): Promise<void> {
+  await api.post("/api/v1/auth/lawyer/password/reset", { phoneE164, code, newPassword });
+}
+
 export interface LawyerMeDto {
   fullName: string;
   isApproved: boolean;
