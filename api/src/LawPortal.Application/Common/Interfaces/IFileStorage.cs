@@ -11,6 +11,10 @@ public interface IFileStorage
     /// <summary>A short-lived GET URL, minted only after the caller's authorization check.</summary>
     string CreateDownloadUrl(string storageKey, TimeSpan ttl);
 
+    /// <summary>Server-side upload, for flows with no signed-in user to hand a PUT URL to
+    /// (lawyer registration). Returns the new storage key.</summary>
+    Task<string> UploadAsync(string fileName, string contentType, Stream content, CancellationToken cancellationToken = default);
+
     Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken = default);
     Task<long> GetSizeAsync(string storageKey, CancellationToken cancellationToken = default);
 }

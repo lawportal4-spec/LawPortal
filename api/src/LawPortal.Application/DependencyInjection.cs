@@ -20,6 +20,7 @@ public static class DependencyInjection
         });
         services.AddValidatorsFromAssembly(assembly);
         services.AddScoped<TokenIssuer>();
+        services.AddScoped<Auth.OtpService>();
 
         return services;
     }

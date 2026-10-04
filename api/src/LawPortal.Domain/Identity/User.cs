@@ -39,12 +39,14 @@ public class User : AggregateRoot<Guid>
         };
     }
 
-    public static User CreateLawyer(string email, string passwordHash)
+    public static User CreateLawyer(string email, string phoneE164, string passwordHash)
     {
         return new User
         {
             Id = Guid.NewGuid(),
             Email = email,
+            // Unverified until the registration OTP is confirmed; sign-in is refused until then.
+            PhoneE164 = phoneE164,
             PasswordHash = passwordHash,
             UserType = UserType.Lawyer,
             // Stays PendingVerification until the licence is approved (see LicenseVerificationStatus).

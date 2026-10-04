@@ -4,6 +4,7 @@ import ar from "./locales/ar.json";
 import en from "./locales/en.json";
 
 export * from "./format";
+export * from "./hijri";
 
 // Re-exported so app code never takes a direct dependency on react-i18next/i18next —
 // one workspace package owns the i18n vendor choice.

@@ -28,6 +28,10 @@ public class LawyerProfile : AggregateRoot<Guid>
     public int? ExperienceRangeId { get; set; }
     public ExperienceRange? ExperienceRange { get; set; }
 
+    /// <summary>ISO 3166-1 alpha-2. Registration only offers Saudi Arabia today.</summary>
+    public string CountryCode { get; set; } = "SA";
+    public DateTime? TermsAcceptedAtUtc { get; set; }
+
     public bool IsVerified { get; set; }
     public bool IsVatRegistered { get; set; }
     public string? VatNumber { get; set; }

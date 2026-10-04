@@ -16,6 +16,11 @@ public class LawyerProfileController(ISender sender) : ControllerBase
     public record ProfileBody(string? BioAr, string? BioEn, bool AcceptingNewRequests, IReadOnlyList<int> SpecialtyIds, IReadOnlyList<int> LanguageIds);
     public record RenewLicenseBody(string LicenseNumber, DateOnly IssueDate, DateOnly ExpiryDate);
 
+    [HttpGet("me")]
+    [ProducesResponseType<LawyerMeDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<LawyerMeDto>> Me(CancellationToken cancellationToken)
+        => Ok(await sender.Send(new GetLawyerMeQuery(), cancellationToken));
+
     [HttpGet("dashboard")]
     [ProducesResponseType<LawyerDashboardDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<LawyerDashboardDto>> Dashboard(CancellationToken cancellationToken)

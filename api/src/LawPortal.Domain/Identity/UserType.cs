@@ -33,4 +33,12 @@ public enum LicenseVerificationStatus
 public enum OtpPurpose
 {
     Login = 1,
+    /// <summary>Proves a lawyer owns the phone they registered with, before the account can sign in.</summary>
+    LawyerRegistration = 2,
+}
+
+public enum LawyerLicenseType
+{
+    Licensed = 1,
+    Trainee = 2,
 }
