@@ -47,6 +47,9 @@ export default function Login() {
         <Field label={t("lawyerAuth.register.password")} required>
           <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
         </Field>
+        <Link to="/forgot-password" className="-mt-2 self-start text-sm text-ink-soft hover:text-seal">
+          {t("lawyerAuth.forgot.link")}
+        </Link>
         {error && <p className="text-sm text-rubric">{error}</p>}
         <Button type="submit" className="mt-2 w-full justify-center" disabled={busy || !phone || !password}>
           {t("lawyerAuth.login.submit")}

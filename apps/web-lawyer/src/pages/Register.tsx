@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ClipboardEvent, type FormEvent, type KeyboardEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { CircleCheck } from "lucide-react";
@@ -7,7 +7,9 @@ import { hijriToIsoDate, useTranslation } from "@law-portal/i18n";
 import { AuthLayout, Field, PasswordInput, SaudiPhoneInput, Select } from "../components/AuthForm";
 import { HijriDateInput } from "../components/HijriDateInput";
 import { LicenseUpload } from "../components/LicenseUpload";
+import { OtpCodeInput, ResendTimer } from "../components/OtpCodeInput";
 import { ACCEPTED_TYPES, MAX_FILE_BYTES } from "../lib/licenseFile";
+import { useCountdown } from "../lib/useCountdown";
 import {
   getRegions,
   registerLawyer,
@@ -296,34 +298,9 @@ function ActivationStep({
 }) {
   const { t } = useTranslation();
   const [digits, setDigits] = useState<string[]>(() => Array(CODE_LENGTH).fill(""));
-  const [secondsLeft, setSecondsLeft] = useState(RESEND_SECONDS);
+  const [secondsLeft, restartCountdown] = useCountdown(RESEND_SECONDS);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const boxes = useRef<(HTMLInputElement | null)[]>([]);
-
-  useEffect(() => {
-    if (secondsLeft <= 0) return;
-    const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [secondsLeft]);
-
-  function setDigit(index: number, value: string) {
-    const digit = value.replace(/\D/g, "").slice(-1);
-    setDigits((prev) => prev.map((d, i) => (i === index ? digit : d)));
-    if (digit && index < CODE_LENGTH - 1) boxes.current[index + 1]?.focus();
-  }
-
-  function onKeyDown(index: number, e: KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Backspace" && !digits[index] && index > 0) boxes.current[index - 1]?.focus();
-  }
-
-  function onPaste(e: ClipboardEvent<HTMLInputElement>) {
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, CODE_LENGTH);
-    if (!pasted) return;
-    e.preventDefault();
-    setDigits(Array.from({ length: CODE_LENGTH }, (_, i) => pasted[i] ?? ""));
-    boxes.current[Math.min(pasted.length, CODE_LENGTH - 1)]?.focus();
-  }
 
   async function activate(e: FormEvent) {
     e.preventDefault();
@@ -344,49 +321,18 @@ function ActivationStep({
     try {
       await resendLawyerRegistrationCode(phoneE164);
       setDigits(Array(CODE_LENGTH).fill(""));
-      setSecondsLeft(RESEND_SECONDS);
+      restartCountdown();
     } catch {
       setError(t("lawyerAuth.otp.resendFailed"));
     }
   }
 
-  const mm = String(Math.floor(secondsLeft / 60)).padStart(2, "0");
-  const ss = String(secondsLeft % 60).padStart(2, "0");
-
   return (
     <form className="flex flex-col items-center gap-4" onSubmit={activate}>
       <p className="text-sm text-ink-soft">{t("lawyerAuth.otp.sentTo")}</p>
       <Ltr className="font-mono text-base font-semibold text-ink">{localPhone}</Ltr>
-      <div dir="ltr" className="flex gap-2">
-        {digits.map((d, i) => (
-          <input
-            key={i}
-            ref={(el) => {
-              boxes.current[i] = el;
-            }}
-            value={d}
-            onChange={(e) => setDigit(i, e.target.value)}
-            onKeyDown={(e) => onKeyDown(i, e)}
-            onPaste={onPaste}
-            inputMode="numeric"
-            autoComplete={i === 0 ? "one-time-code" : "off"}
-            maxLength={1}
-            aria-label={t("lawyerAuth.otp.digit", { n: i + 1 })}
-            className="h-12 w-11 rounded-md border border-border bg-surface-raised text-center font-mono text-lg text-ink focus:border-seal focus:outline-none focus:ring-2 focus:ring-seal/30"
-          />
-        ))}
-      </div>
-      <Ltr className="font-mono text-sm text-ink-faint">
-        {mm}:{ss}
-      </Ltr>
-      <button
-        type="button"
-        onClick={resend}
-        disabled={secondsLeft > 0}
-        className="text-sm text-ink-soft underline disabled:cursor-not-allowed disabled:no-underline disabled:opacity-50"
-      >
-        {t("lawyerAuth.otp.resend")}
-      </button>
+      <OtpCodeInput digits={digits} onChange={setDigits} />
+      <ResendTimer secondsLeft={secondsLeft} onResend={resend} />
       {error && <p className="text-sm text-rubric">{error}</p>}
       <Button type="submit" className="w-full max-w-xs justify-center" disabled={busy || digits.some((d) => !d)}>
         {t("lawyerAuth.otp.activate")}
