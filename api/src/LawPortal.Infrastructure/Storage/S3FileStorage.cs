@@ -76,6 +76,19 @@ public class S3FileStorage : IFileStorage
         return url;
     }
 
+    public async Task<string> UploadAsync(string fileName, string contentType, Stream content, CancellationToken cancellationToken = default)
+    {
+        var storageKey = $"{DateTime.UtcNow:yyyy/MM/dd}/{Guid.NewGuid():N}/{fileName}";
+        await _client.PutObjectAsync(new PutObjectRequest
+        {
+            BucketName = _bucket,
+            Key = storageKey,
+            InputStream = content,
+            ContentType = contentType,
+        }, cancellationToken);
+        return storageKey;
+    }
+
     public async Task<Stream> OpenReadAsync(string storageKey, CancellationToken cancellationToken = default)
     {
         var response = await _client.GetObjectAsync(_bucket, storageKey, cancellationToken);

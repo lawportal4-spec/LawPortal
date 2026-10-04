@@ -5,7 +5,8 @@ import { useTranslation } from "@law-portal/i18n";
 import { useLocale } from "../lib/useLocale";
 import { useAuth } from "../lib/authContext";
 
-export function AppShell({ children }: { children: ReactNode }) {
+/** `hideNav`: the portal sections are useless (and all gated) while a registration awaits review. */
+export function AppShell({ children, hideNav = false }: { children: ReactNode; hideNav?: boolean }) {
   const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
   const isAr = locale === "ar";
@@ -14,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { isAuthenticated, logout } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  const navItems = isAuthenticated
+  const navItems = isAuthenticated && !hideNav
     ? [
         { to: "/", label: t("shell.lawyer.nav.dashboard") },
         { to: "/requests", label: t("shell.lawyer.nav.incomingRequests") },

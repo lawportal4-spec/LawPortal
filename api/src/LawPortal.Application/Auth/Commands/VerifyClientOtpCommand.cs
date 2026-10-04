@@ -5,7 +5,6 @@ using LawPortal.Domain.FreeMinutes;
 using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Hosting;
 
 namespace LawPortal.Application.Auth.Commands;
 
@@ -20,44 +19,19 @@ public class VerifyClientOtpValidator : AbstractValidator<VerifyClientOtpCommand
     }
 }
 
-public class VerifyClientOtpHandler(ILawPortalDbContext db, TokenIssuer tokenIssuer, IAuditLogger auditLogger, IHostEnvironment environment)
+public class VerifyClientOtpHandler(ILawPortalDbContext db, OtpService otpService, TokenIssuer tokenIssuer, IAuditLogger auditLogger)
     : IRequestHandler<VerifyClientOtpCommand, AuthResultDto>
 {
-    /// <summary>Dev-only universal code so QA/local testing doesn't need access to the server's
-    /// OTP log. Still requires a real, unexpired challenge (i.e. "Send code" was actually
-    /// clicked) — only the code-matching step is skipped. Never honoured outside Development;
-    /// remove before any non-local deployment.</summary>
-    public const string DevBypassCode = "000000";
-
     public async Task<AuthResultDto> Handle(VerifyClientOtpCommand request, CancellationToken cancellationToken)
     {
-        var challenge = await db.OtpChallenges
-            .Where(o => o.PhoneE164 == request.PhoneE164 && o.ConsumedAtUtc == null)
-            .OrderByDescending(o => o.CreatedAtUtc)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (challenge is null || challenge.IsExpired)
-            throw new InvalidOperationException("No active code for this number. Request a new one.");
-
-        if (challenge.IsLocked)
-            throw new InvalidOperationException("Too many incorrect attempts. Request a new code.");
-
-        var isDevBypass = environment.IsDevelopment() && request.Code == DevBypassCode;
-        if (!isDevBypass)
-        {
-            var expectedHash = RequestClientOtpHandler.HashCode(request.PhoneE164, request.Code);
-            if (challenge.CodeHash != expectedHash)
-            {
-                challenge.Attempts++;
-                await db.SaveChangesAsync(cancellationToken);
-                throw new InvalidOperationException("Incorrect code.");
-            }
-        }
-
-        challenge.ConsumedAtUtc = DateTime.UtcNow;
+        await otpService.VerifyAsync(request.PhoneE164, request.Code, OtpPurpose.Login, cancellationToken);
 
         var user = await db.Users
             .FirstOrDefaultAsync(u => u.PhoneE164 == request.PhoneE164, cancellationToken);
+
+        // Lawyers register with a phone too; client OTP must never open a lawyer's account.
+        if (user is not null && user.UserType != UserType.Client)
+            throw new InvalidOperationException("This number belongs to a lawyer account. Sign in through the lawyer portal.");
 
         var isNewUser = user is null;
         if (user is null)

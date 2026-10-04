@@ -7,7 +7,7 @@ import { AppShell } from "../components/AppShell";
 import { getPendingLawyers, rejectLawyer, verifyLawyer } from "../lib/adminApi";
 
 export default function LawyerVerification() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
   const [rejectingId, setRejectingId] = useState<string | null>(null);
@@ -47,6 +47,22 @@ export default function LawyerVerification() {
                 <p className="font-medium text-ink">{lawyer.fullName}</p>
                 <p className="text-xs text-ink-faint">
                   <Ltr className="font-mono">{lawyer.email}</Ltr>
+                </p>
+                {lawyer.phoneE164 && (
+                  <p className="text-xs text-ink-faint">
+                    <Ltr className="font-mono">{lawyer.phoneE164}</Ltr>
+                  </p>
+                )}
+                <p className="mt-1 text-xs text-ink-soft">
+                  {t(`lawyerAuth.register.licenseTypes.${lawyer.licenseType}`)}
+                  {lawyer.licenseDocumentUrl && (
+                    <>
+                      {" · "}
+                      <a href={lawyer.licenseDocumentUrl} target="_blank" rel="noreferrer" className="font-medium text-seal hover:underline">
+                        {t("lawyerAuth.admin.viewLicense")}
+                      </a>
+                    </>
+                  )}
                 </p>
               </div>
               <StatusTag status={lawyer.verificationStatus} />

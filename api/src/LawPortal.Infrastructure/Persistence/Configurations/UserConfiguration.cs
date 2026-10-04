@@ -49,6 +49,7 @@ public class LawyerProfileConfiguration : IEntityTypeConfiguration<LawyerProfile
         builder.Property(l => l.Slug).HasMaxLength(220).IsRequired();
         builder.HasIndex(l => l.Slug).IsUnique();
         builder.Property(l => l.VatNumber).HasMaxLength(50);
+        builder.Property(l => l.CountryCode).HasMaxLength(2).HasDefaultValue("SA").IsRequired();
         builder.Property(l => l.AvgRating).HasColumnType("decimal(3,2)");
         builder.Property(l => l.AcceptingNewRequests).HasDefaultValue(true);
 
@@ -68,6 +69,10 @@ public class LawyerLicenseConfiguration : IEntityTypeConfiguration<LawyerLicense
         builder.ToTable("lawyer_licenses");
         builder.HasKey(l => l.Id);
         builder.Property(l => l.LicenseNumber).HasMaxLength(50).IsRequired();
+        builder.Property(l => l.LicenseType).HasDefaultValue(LawyerLicenseType.Licensed);
+        builder.Property(l => l.DocumentStorageKey).HasMaxLength(500);
+        builder.Property(l => l.DocumentFileName).HasMaxLength(255);
+        builder.Property(l => l.DocumentContentType).HasMaxLength(100);
         builder.HasIndex(l => l.LicenseNumber).IsUnique();
     }
 }

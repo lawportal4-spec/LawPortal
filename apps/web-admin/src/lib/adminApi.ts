@@ -32,10 +32,14 @@ export interface PendingLawyerDto {
   userId: string;
   fullName: string;
   email: string;
+  phoneE164: string | null;
   licenseNumber: string;
+  licenseType: "Licensed" | "Trainee";
   issueDate: string;
   expiryDate: string;
   verificationStatus: string;
+  /** Short-lived signed URL; null for lawyers who registered before the upload existed. */
+  licenseDocumentUrl: string | null;
 }
 
 export async function getPendingLawyers(): Promise<PendingLawyerDto[]> {
