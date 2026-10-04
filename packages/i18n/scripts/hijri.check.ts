@@ -19,3 +19,8 @@ assert.deepEqual(hijriMonthLayout(1443, 10), { days: 29, firstWeekday: 1 });
 assert.equal(hijriMonthLayout(1445, 12)?.days, 30);
 assert.equal(hijriMonthLayout(1200, 1), null);
 console.log("hijri calendar ok");
+
+import { isoToHijriDate } from "../src/hijri.ts";
+assert.equal(isoToHijriDate("2022-05-23"), "22/10/1443");
+assert.equal(hijriToIsoDate(isoToHijriDate("2027-03-30")), "2027-03-30"); // round-trips
+console.log("hijri format ok");

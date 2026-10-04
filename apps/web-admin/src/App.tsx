@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import LawyerVerification from "./pages/LawyerVerification";
+import LawyerRegistrations from "./pages/LawyerRegistrations";
+import LawyerRegistrationDetail from "./pages/LawyerRegistrationDetail";
 import Payments from "./pages/Payments";
 import PaymentDetail from "./pages/PaymentDetail";
 import Ledger from "./pages/Ledger";
@@ -19,7 +20,8 @@ export default function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<RequireAuth><Dashboard /></RequireAuth>} />
-          <Route path="/lawyers" element={<RequireAuth><LawyerVerification /></RequireAuth>} />
+          <Route path="/lawyers" element={<RequireAuth><LawyerRegistrations /></RequireAuth>} />
+          <Route path="/lawyers/:id" element={<RequireAuth><LawyerRegistrationDetail /></RequireAuth>} />
           <Route path="/payments" element={<RequireAuth><Payments /></RequireAuth>} />
           <Route path="/payments/:id" element={<RequireAuth><PaymentDetail /></RequireAuth>} />
           <Route path="/ledger" element={<RequireAuth><Ledger /></RequireAuth>} />

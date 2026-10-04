@@ -4,7 +4,7 @@ type Tone = "positive" | "negative" | "warning" | "neutral";
 
 const POSITIVE = new Set(["Paid", "Verified", "Approved", "Completed", "Active", "Accepted"]);
 const NEGATIVE = new Set(["Failed", "Rejected", "Refunded", "Disputed", "Cancelled", "Canceled", "Withdrawn", "Expired"]);
-const WARNING = new Set(["Initiated", "Pending", "PartiallyRefunded", "Draft"]);
+const WARNING = new Set(["Initiated", "Pending", "PendingReview", "ChangesRequested", "PartiallyRefunded", "Draft"]);
 
 function toneFor(status: string): Tone {
   if (POSITIVE.has(status)) return "positive";

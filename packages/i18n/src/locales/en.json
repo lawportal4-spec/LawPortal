@@ -207,5 +207,101 @@
       "year": "Year",
       "today": "Today"
     }
+  },
+  "lawyerReview": {
+    "statuses": {
+      "all": "All",
+      "PendingReview": "Pending review",
+      "ChangesRequested": "Returned for changes",
+      "Approved": "Approved",
+      "Rejected": "Rejected",
+      "Expired": "Expired"
+    },
+    "issues": {
+      "FileUnreadable": "The licence file can't be opened or isn't legible",
+      "WrongFile": "The uploaded file isn't the law practice licence",
+      "LicenseNumberMismatch": "The licence number doesn't match the file",
+      "DatesMismatch": "The start or end date doesn't match the file",
+      "LicenseTypeMismatch": "The licence type is wrong"
+    },
+    "admin": {
+      "title": "Lawyer registrations",
+      "subtitle": "Review registrations and decide: approve, return for changes, or reject.",
+      "search": "Search by name, mobile, email or licence number",
+      "columns": {
+        "name": "Name",
+        "phone": "Mobile",
+        "licenseNumber": "Licence number",
+        "status": "Status",
+        "submitted": "Submitted"
+      },
+      "resubmitted": "Resubmitted",
+      "empty": "No registrations.",
+      "loadFailed": "Could not load registrations.",
+      "previous": "Previous",
+      "next": "Next",
+      "back": "Back to the list",
+      "sections": {
+        "personal": "Personal data",
+        "location": "Region and city",
+        "license": "Licence",
+        "document": "Licence file",
+        "history": "Review history",
+        "decision": "Decision"
+      },
+      "fields": {
+        "fullName": "Full name",
+        "phone": "Mobile number",
+        "phoneVerified": "Mobile verified",
+        "email": "Email",
+        "region": "Region",
+        "city": "City",
+        "country": "Country",
+        "terms": "Accepted the terms",
+        "submitted": "Submitted",
+        "licenseType": "Licence type",
+        "licenseNumber": "Licence number",
+        "issueDate": "Start date",
+        "expiryDate": "End date"
+      },
+      "openDocument": "Open the file in a new tab",
+      "noDocument": "No licence file was uploaded.",
+      "history": {
+        "correctionRequested": "Returned for changes on",
+        "resubmitted": "Lawyer resubmitted on",
+        "decided": "Decided on",
+        "note": "Reviewer's note",
+        "rejectionReason": "Rejection reason",
+        "requested": "Items to fix"
+      },
+      "decision": {
+        "approve": "Approve",
+        "requestChanges": "Return to lawyer for changes",
+        "reject": "Reject",
+        "issuesTitle": "What needs to change?",
+        "note": "Note to the lawyer (optional)",
+        "sendBack": "Send change request",
+        "rejectReason": "Rejection reason (shown to the lawyer)",
+        "confirmReject": "Confirm rejection",
+        "cancel": "Cancel",
+        "needIssue": "Tick at least one item or write a note.",
+        "needReason": "Write the rejection reason.",
+        "failed": "Could not apply the decision.",
+        "closed": "No decision needed — status: {{status}}"
+      },
+      "hijriSuffix": "AH"
+    },
+    "lawyer": {
+      "changesTitle": "Your registration needs changes",
+      "changesIntro": "Our team reviewed your registration and needs you to fix the following:",
+      "adminNote": "Reviewer's note",
+      "fixTitle": "Update your licence details",
+      "currentFile": "Current file: {{name}} — upload a new one to replace it",
+      "newFileRequired": "Please upload a new licence file.",
+      "resubmit": "Resubmit registration",
+      "resubmitFailed": "Could not resubmit — check your details, or the licence number may already be registered.",
+      "rejectedTitle": "Your registration was rejected",
+      "rejectedReason": "Reason:"
+    }
   }
 }

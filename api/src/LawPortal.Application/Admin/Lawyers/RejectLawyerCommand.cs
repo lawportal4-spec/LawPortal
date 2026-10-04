@@ -24,6 +24,8 @@ public class RejectLawyerHandler(ILawPortalDbContext db, ICurrentUser currentUse
             ?? throw new KeyNotFoundException("Lawyer profile not found.");
 
         if (profile.License is null) throw new InvalidOperationException("No licence submitted for this lawyer.");
+        if (profile.License.VerificationStatus == LicenseVerificationStatus.Approved)
+            throw new InvalidOperationException("This licence is already approved.");
 
         profile.License.VerificationStatus = LicenseVerificationStatus.Rejected;
         profile.License.RejectionReason = request.Reason;

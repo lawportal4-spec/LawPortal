@@ -207,5 +207,101 @@
       "year": "السنة",
       "today": "اليوم"
     }
+  },
+  "lawyerReview": {
+    "statuses": {
+      "all": "الكل",
+      "PendingReview": "بانتظار المراجعة",
+      "ChangesRequested": "أُعيد للتعديل",
+      "Approved": "مقبول",
+      "Rejected": "مرفوض",
+      "Expired": "منتهي"
+    },
+    "issues": {
+      "FileUnreadable": "ملف الرخصة لا يفتح أو غير واضح",
+      "WrongFile": "الملف المرفوع ليس رخصة المحاماة",
+      "LicenseNumberMismatch": "رقم الرخصة لا يطابق الملف",
+      "DatesMismatch": "تاريخ البدء أو الانتهاء لا يطابق الملف",
+      "LicenseTypeMismatch": "نوع الرخصة غير صحيح"
+    },
+    "admin": {
+      "title": "تسجيلات المحامين",
+      "subtitle": "راجع طلبات التسجيل واتخذ القرار: قبول أو إعادة للتعديل أو رفض.",
+      "search": "ابحث بالاسم أو الجوال أو البريد أو رقم الرخصة",
+      "columns": {
+        "name": "الاسم",
+        "phone": "الجوال",
+        "licenseNumber": "رقم الرخصة",
+        "status": "الحالة",
+        "submitted": "تاريخ التقديم"
+      },
+      "resubmitted": "أُعيد التقديم",
+      "empty": "لا توجد تسجيلات.",
+      "loadFailed": "تعذّر تحميل التسجيلات.",
+      "previous": "السابق",
+      "next": "التالي",
+      "back": "العودة إلى القائمة",
+      "sections": {
+        "personal": "البيانات الشخصية",
+        "location": "المنطقة والمدينة",
+        "license": "الرخصة",
+        "document": "ملف الرخصة",
+        "history": "سجل المراجعة",
+        "decision": "القرار"
+      },
+      "fields": {
+        "fullName": "الاسم بالكامل",
+        "phone": "رقم الجوال",
+        "phoneVerified": "تم تفعيل الجوال",
+        "email": "البريد الإلكتروني",
+        "region": "المنطقة",
+        "city": "المدينة",
+        "country": "الدولة",
+        "terms": "الموافقة على الشروط",
+        "submitted": "تاريخ التقديم",
+        "licenseType": "نوع الرخصة",
+        "licenseNumber": "رقم الرخصة",
+        "issueDate": "تاريخ البدء",
+        "expiryDate": "تاريخ الانتهاء"
+      },
+      "openDocument": "فتح الملف في نافذة جديدة",
+      "noDocument": "لم يُرفع ملف رخصة.",
+      "history": {
+        "correctionRequested": "أُعيد للتعديل في",
+        "resubmitted": "أعاد المحامي التقديم في",
+        "decided": "تاريخ القرار",
+        "note": "ملاحظة المراجع",
+        "rejectionReason": "سبب الرفض",
+        "requested": "البنود المطلوب تعديلها"
+      },
+      "decision": {
+        "approve": "قبول",
+        "requestChanges": "إعادة للمحامي للتعديل",
+        "reject": "رفض",
+        "issuesTitle": "ما الذي يحتاج إلى تعديل؟",
+        "note": "ملاحظة للمحامي (اختياري)",
+        "sendBack": "إرسال طلب التعديل",
+        "rejectReason": "سبب الرفض (يظهر للمحامي)",
+        "confirmReject": "تأكيد الرفض",
+        "cancel": "إلغاء",
+        "needIssue": "اختر بندًا واحدًا على الأقل أو اكتب ملاحظة.",
+        "needReason": "اكتب سبب الرفض.",
+        "failed": "تعذّر تنفيذ القرار.",
+        "closed": "لا يوجد قرار مطلوب — حالة الطلب: {{status}}"
+      },
+      "hijriSuffix": "هـ"
+    },
+    "lawyer": {
+      "changesTitle": "طلبك يحتاج إلى تعديل",
+      "changesIntro": "راجع فريقنا طلب تسجيلك، ونحتاج منك تعديل ما يلي:",
+      "adminNote": "ملاحظة المراجع",
+      "fixTitle": "عدّل بيانات الرخصة",
+      "currentFile": "الملف الحالي: {{name}} — ارفع ملفًا جديدًا لاستبداله",
+      "newFileRequired": "يجب رفع ملف رخصة جديد.",
+      "resubmit": "إعادة إرسال الطلب",
+      "resubmitFailed": "تعذّر إرسال الطلب — تأكد من البيانات أو أن رقم الرخصة غير مسجّل من قبل.",
+      "rejectedTitle": "تم رفض طلب التسجيل",
+      "rejectedReason": "السبب:"
+    }
   }
 }
