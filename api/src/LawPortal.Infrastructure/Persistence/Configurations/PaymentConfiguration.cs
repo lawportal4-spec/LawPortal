@@ -13,6 +13,8 @@ public class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.Property(p => p.Number).HasMaxLength(30).IsRequired();
         builder.HasIndex(p => p.Number).IsUnique();
 
+        builder.Property(p => p.GrossAmount).HasColumnType("decimal(10,2)");
+        builder.Property(p => p.DiscountAmount).HasColumnType("decimal(10,2)");
         builder.Property(p => p.Total).HasColumnType("decimal(10,2)");
         builder.Property(p => p.VatAmount).HasColumnType("decimal(10,2)");
         builder.Property(p => p.CommissionAmount).HasColumnType("decimal(10,2)");

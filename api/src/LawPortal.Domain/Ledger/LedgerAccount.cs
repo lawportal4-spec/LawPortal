@@ -24,4 +24,8 @@ public enum LedgerAccount
     /// <summary>Revenue — lawyer subscription fees, the platform's own VAT-applicable supply
     /// (not a marketplace commission cut, so it never touches <see cref="EscrowPayable"/>).</summary>
     SubscriptionRevenue = 6,
+
+    /// <summary>Expense — discount codes the platform funds on marketplace payments: the lawyer
+    /// is paid on the full price, the client paid less, and this account absorbs the gap.</summary>
+    DiscountExpense = 7,
 }

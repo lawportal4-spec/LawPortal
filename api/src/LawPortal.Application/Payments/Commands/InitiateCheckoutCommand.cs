@@ -13,7 +13,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace LawPortal.Application.Payments.Commands;
 
-public record InitiateCheckoutCommand(Guid RequestId, string PaymentMethod) : IRequest<CheckoutResultDto>;
+public record InitiateCheckoutCommand(Guid RequestId, string PaymentMethod, string? DiscountCode = null) : IRequest<CheckoutResultDto>;
 
 public class InitiateCheckoutValidator : AbstractValidator<InitiateCheckoutCommand>
 {
@@ -46,40 +46,35 @@ public class InitiateCheckoutHandler(
         if (serviceRequest.Subtotal is not { } amount)
             throw new InvalidOperationException("This request does not have a price yet and cannot be checked out.");
 
-        Guid? lawyerProfileId = null;
-        bool isVatApplicable = false;
-        string? vatNumber = null;
-
-        Guid? assignedLawyerId = serviceRequest switch
-        {
-            ConsultationRequest consultation => consultation.LawyerProfileId,
-            BiddingRequest bidding => bidding.AwardedLawyerProfileId,
-            _ => null,
-        };
-        if (assignedLawyerId is { } knownLawyerId)
-        {
-            var lawyer = await db.LawyerProfiles.FirstOrDefaultAsync(l => l.Id == knownLawyerId, cancellationToken)
-                ?? throw new InvalidOperationException("The assigned lawyer no longer exists.");
-            lawyerProfileId = lawyer.Id;
-            isVatApplicable = lawyer.IsVatRegistered;
-            vatNumber = lawyer.VatNumber;
-        }
-        // CatalogRequest has no lawyer assigned at checkout time (see Payment.LawyerProfileId
-        // doc) — no known VAT registration to apply, so it checks out VAT-free for now.
+        var lawyer = await AssignedLawyerAsync(db, serviceRequest, cancellationToken);
+        Guid? lawyerProfileId = lawyer?.Id;
+        Guid? assignedLawyerId = lawyerProfileId;
+        bool isVatApplicable = lawyer?.IsVatRegistered ?? false;
+        string? vatNumber = lawyer?.VatNumber;
 
         // A category-specific CommissionPolicy override is modeled but nothing sets one yet;
         // a subscribed lawyer's own plan-level discount (P10) takes precedence when one applies.
         var commissionPercentage = await CommissionPolicyResolver.ResolvePercentageAsync(db, categorySlug: null, assignedLawyerId, cancellationToken);
-        var breakdown = PaymentBreakdownCalculator.Compute(amount, isVatApplicable, commissionPercentage);
+        var paymentId = Guid.NewGuid();
+        DiscountEvaluation? discount = null;
+        if (!string.IsNullOrWhiteSpace(request.DiscountCode))
+            discount = await DiscountService.ReserveAsync(db, request.DiscountCode, DiscountService.ScopeOf(serviceRequest),
+                currentUser.UserId!.Value, amount, paymentId, cancellationToken);
+        var discountAmount = discount?.Amount ?? 0;
+        // Platform-funded: the lawyer's share and commission stay on the full price.
+        var breakdown = PaymentBreakdownCalculator.ComputeWithPlatformDiscount(amount, discountAmount, isVatApplicable, commissionPercentage);
 
         var payment = new Domain.Payments.Payment
         {
-            Id = Guid.NewGuid(),
+            Id = paymentId,
             Number = await PaymentNumberGenerator.NextPaymentNumberAsync(db, cancellationToken),
             Purpose = PaymentPurpose.RequestCheckout,
             ServiceRequestId = serviceRequest.Id,
             ClientId = clientId,
             LawyerProfileId = lawyerProfileId,
+            GrossAmount = amount,
+            DiscountAmount = discountAmount,
+            DiscountCodeId = discount?.Code?.Id,
             Total = breakdown.Total,
             VatAmount = breakdown.VatAmount,
             CommissionAmount = breakdown.CommissionAmount,
@@ -132,6 +127,22 @@ public class InitiateCheckoutHandler(
         return new CheckoutResultDto(payment.Id, payment.Number, "Initiated", result.RedirectUrl, PaidImmediately: false);
     }
 
+    /// <summary>The lawyer who'll be paid. CatalogRequest has no lawyer assigned at checkout time
+    /// (see Payment.LawyerProfileId doc), so it has no known VAT registration and checks out VAT-free.</summary>
+    internal static async Task<Domain.Identity.LawyerProfile?> AssignedLawyerAsync(
+        ILawPortalDbContext db, ServiceRequest serviceRequest, CancellationToken cancellationToken)
+    {
+        Guid? assignedLawyerId = serviceRequest switch
+        {
+            ConsultationRequest consultation => consultation.LawyerProfileId,
+            BiddingRequest bidding => bidding.AwardedLawyerProfileId,
+            _ => null,
+        };
+        if (assignedLawyerId is not { } knownLawyerId) return null;
+        return await db.LawyerProfiles.FirstOrDefaultAsync(l => l.Id == knownLawyerId, cancellationToken)
+            ?? throw new InvalidOperationException("The assigned lawyer no longer exists.");
+    }
+
     internal static async Task FinalizeSuccessfulPaymentAsync(
         ILawPortalDbContext db, Domain.Payments.Payment payment, ServiceRequest serviceRequest, string? sellerVatNumber, CancellationToken cancellationToken)
     {
@@ -170,6 +181,7 @@ public class InitiateCheckoutHandler(
             });
         }
 
+        await DiscountService.ConfirmAsync(db, payment.Id, cancellationToken);
         await InvoiceIssuer.IssueAsync(db, payment, sellerVatNumber, cancellationToken);
     }
 }

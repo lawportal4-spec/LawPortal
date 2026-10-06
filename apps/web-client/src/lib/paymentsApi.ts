@@ -19,6 +19,17 @@ export interface InvoiceDto {
   sellerVatNumber: string | null;
   qrPayloadBase64: string;
   issuedAtUtc: string;
+  discountAmount: number;
+}
+
+export interface CheckoutPreviewDto {
+  scope: string;
+  gross: number;
+  discount: number;
+  vatAmount: number;
+  total: number;
+  /** A `discount.reasons.*` key when the code can't be used; the figures are then undiscounted. */
+  rejection: string | null;
 }
 
 export interface WalletDto {
@@ -34,8 +45,17 @@ export interface WalletTransactionDto {
   createdAtUtc: string;
 }
 
-export async function checkout(requestId: string, paymentMethod: "Card" | "Wallet"): Promise<CheckoutResultDto> {
-  const { data } = await api.post<CheckoutResultDto>("/api/v1/client/payments/checkout", { requestId, paymentMethod });
+export async function checkout(
+  requestId: string,
+  paymentMethod: "Card" | "Wallet",
+  discountCode: string | null,
+): Promise<CheckoutResultDto> {
+  const { data } = await api.post<CheckoutResultDto>("/api/v1/client/payments/checkout", { requestId, paymentMethod, discountCode });
+  return data;
+}
+
+export async function previewCheckout(referenceId: string, code: string | null): Promise<CheckoutPreviewDto> {
+  const { data } = await api.post<CheckoutPreviewDto>("/api/v1/discount-codes/preview", { referenceId, code });
   return data;
 }
 

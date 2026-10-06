@@ -66,7 +66,22 @@ export async function cancelSubscription(): Promise<void> {
   await api.post("/api/v1/lawyer/subscription/cancel");
 }
 
-export async function payInvoice(invoiceId: string): Promise<CheckoutResultDto> {
-  const { data } = await api.post<CheckoutResultDto>(`/api/v1/lawyer/subscription/invoices/${invoiceId}/pay`);
+export async function payInvoice(invoiceId: string, discountCode: string | null): Promise<CheckoutResultDto> {
+  const { data } = await api.post<CheckoutResultDto>(`/api/v1/lawyer/subscription/invoices/${invoiceId}/pay`, { discountCode });
+  return data;
+}
+
+export interface CheckoutPreviewDto {
+  scope: string;
+  gross: number;
+  discount: number;
+  vatAmount: number;
+  total: number;
+  /** A `discount.reasons.*` key when the code can't be used. */
+  rejection: string | null;
+}
+
+export async function previewCheckout(referenceId: string, code: string | null): Promise<CheckoutPreviewDto> {
+  const { data } = await api.post<CheckoutPreviewDto>("/api/v1/discount-codes/preview", { referenceId, code });
   return data;
 }

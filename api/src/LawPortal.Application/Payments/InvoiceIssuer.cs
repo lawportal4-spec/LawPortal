@@ -25,6 +25,7 @@ public static class InvoiceIssuer
                 ?? throw new InvalidOperationException("Cannot invoice a payment with no associated request."),
             Number = number,
             SubtotalExVat = payment.Total - payment.VatAmount,
+            DiscountAmount = payment.DiscountAmount,
             VatAmount = payment.VatAmount,
             Total = payment.Total,
             IsVatApplicable = payment.IsVatApplicable,

@@ -12,12 +12,12 @@ namespace LawPortal.Api.Controllers.V1.Client;
 [Route("api/v1/client/payments")]
 public class PaymentsController(ISender sender) : ControllerBase
 {
-    public record CheckoutBody(Guid RequestId, string PaymentMethod);
+    public record CheckoutBody(Guid RequestId, string PaymentMethod, string? DiscountCode);
 
     [HttpPost("checkout")]
     [ProducesResponseType<CheckoutResultDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<CheckoutResultDto>> Checkout(CheckoutBody body, CancellationToken cancellationToken)
-        => Ok(await sender.Send(new InitiateCheckoutCommand(body.RequestId, body.PaymentMethod), cancellationToken));
+        => Ok(await sender.Send(new InitiateCheckoutCommand(body.RequestId, body.PaymentMethod, body.DiscountCode), cancellationToken));
 
     [HttpGet("{id:guid}/status")]
     [ProducesResponseType<PaymentSummaryDto>(StatusCodes.Status200OK)]

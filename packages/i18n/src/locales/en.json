@@ -40,7 +40,8 @@
         "catalogAndPricing": "Catalog & Pricing",
         "subscriptionPlans": "Subscription Plans",
         "usersAndRoles": "Users & Roles",
-        "auditLog": "Audit Log"
+        "auditLog": "Audit Log",
+        "discountCodes": "Discount codes"
       }
     }
   },
@@ -321,6 +322,104 @@
       "resubmitFailed": "Could not resubmit — check your details, or the licence number may already be registered.",
       "rejectedTitle": "Your registration was rejected",
       "rejectedReason": "Reason:"
+    }
+  },
+  "checkout": {
+    "title": "Payment",
+    "method": "Payment method",
+    "card": "Bank card",
+    "cardHint": "mada · Visa · Mastercard",
+    "wallet": "Wallet",
+    "walletBalance": "Available balance",
+    "applePay": "Apple Pay",
+    "tamara": "Tamara",
+    "tamaraHint": "Split it into installments",
+    "soon": "Coming soon",
+    "priceConsultation": "Consultation fee",
+    "priceService": "Service fee",
+    "discount": "Discount",
+    "vat": "VAT",
+    "total": "Amount due",
+    "notice": "To protect your rights, pay inside the platform only and never transfer money to the lawyer outside it.",
+    "instantRedirect": "After paying you'll go straight to the chat with the lawyer.",
+    "submit": "Complete order",
+    "failed": "Could not start checkout.",
+    "insufficientWallet": "Your wallet balance is not enough.",
+    "confirming": "Confirming your payment… this can take a few seconds.",
+    "checkStatus": "Check payment status"
+  },
+  "discount": {
+    "question": "Have a discount code?",
+    "placeholder": "Enter code",
+    "apply": "Apply",
+    "remove": "Remove",
+    "applied": "Code applied",
+    "reasons": {
+      "NotFound": "This code is not valid.",
+      "Inactive": "This code is not active.",
+      "NotStarted": "This code isn't available yet.",
+      "Expired": "This code has expired.",
+      "WrongScope": "This code doesn't apply to this service.",
+      "UsageLimitReached": "This code has been used up.",
+      "PerUserLimitReached": "You've already used this code.",
+      "BelowMinimum": "The amount is below this code's minimum.",
+      "NotFirstPayment": "This code is for a first payment only."
+    },
+    "scopes": {
+      "InstantConsultation": "Instant consultation",
+      "ScheduledConsultation": "Scheduled consultation",
+      "WrittenConsultation": "Written consultation",
+      "BiddingRequest": "Request for quotes",
+      "CatalogService": "Notarization & trademark services",
+      "LawyerSubscription": "Lawyer subscription",
+      "LawyerRegistrationFee": "Lawyer registration fee"
+    },
+    "admin": {
+      "title": "Discount codes",
+      "new": "New code",
+      "edit": "Edit code",
+      "empty": "No discount codes yet.",
+      "loadFailed": "Could not load discount codes.",
+      "saveFailed": "Could not save the code.",
+      "code": "Code",
+      "codeHint": "Latin letters and digits only, e.g. WELCOME20",
+      "descriptionAr": "Description (Arabic)",
+      "descriptionEn": "Description (English)",
+      "kind": "Discount type",
+      "percentage": "Percentage",
+      "fixed": "Fixed amount",
+      "value": "Value",
+      "maxDiscount": "Maximum discount",
+      "minAmount": "Minimum amount",
+      "scopes": "Applies to",
+      "usageLimit": "Total uses",
+      "perUserLimit": "Uses per user",
+      "unlimited": "Unlimited",
+      "firstPaymentOnly": "First payment only",
+      "isActive": "Active",
+      "startsAt": "Starts",
+      "endsAt": "Ends",
+      "used": "Used",
+      "totalDiscounted": "Total discounted",
+      "dates": "Period",
+      "save": "Save",
+      "redemptions": "Recent uses",
+      "noRedemptions": "This code hasn't been used yet.",
+      "user": "User",
+      "amount": "Amount",
+      "date": "Date",
+      "status": {
+        "active": "Active",
+        "inactive": "Off",
+        "scheduled": "Scheduled",
+        "expired": "Expired",
+        "usedUp": "Used up"
+      },
+      "redemptionStatus": {
+        "Pending": "Awaiting payment",
+        "Confirmed": "Paid",
+        "Released": "Cancelled"
+      }
     }
   }
 }

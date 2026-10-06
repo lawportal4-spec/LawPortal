@@ -70,6 +70,8 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<WalletTransactionEntity> WalletTransactions => Set<WalletTransactionEntity>();
     public DbSet<CommissionPolicy> CommissionPolicies => Set<CommissionPolicy>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<DiscountCode> DiscountCodes => Set<DiscountCode>();
+    public DbSet<DiscountRedemption> DiscountRedemptions => Set<DiscountRedemption>();
 
     public DbSet<MessageThread> MessageThreads => Set<MessageThread>();
     public DbSet<Message> Messages => Set<Message>();

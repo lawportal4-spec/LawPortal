@@ -71,6 +71,8 @@ public interface ILawPortalDbContext
     DbSet<WalletTransactionEntity> WalletTransactions { get; }
     DbSet<CommissionPolicy> CommissionPolicies { get; }
     DbSet<Invoice> Invoices { get; }
+    DbSet<DiscountCode> DiscountCodes { get; }
+    DbSet<DiscountRedemption> DiscountRedemptions { get; }
 
     DbSet<MessageThread> MessageThreads { get; }
     DbSet<Message> Messages { get; }

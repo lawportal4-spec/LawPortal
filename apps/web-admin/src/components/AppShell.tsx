@@ -20,6 +20,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         { to: "/ledger", label: t("shell.admin.nav.reconciliation") },
         { to: "/catalog", label: t("shell.admin.nav.catalogAndPricing") },
         { to: "/subscriptions", label: t("shell.admin.nav.subscriptionPlans") },
+        { to: "/discount-codes", label: t("shell.admin.nav.discountCodes") },
         { to: "/users", label: t("shell.admin.nav.usersAndRoles") },
         { to: "/audit", label: t("shell.admin.nav.auditLog") },
       ]

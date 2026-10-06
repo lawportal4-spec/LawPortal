@@ -32,6 +32,7 @@ public class InitiateWalletTopUpHandler(
             Number = await PaymentNumberGenerator.NextPaymentNumberAsync(db, cancellationToken),
             Purpose = PaymentPurpose.WalletTopUp,
             ClientId = clientId,
+            GrossAmount = request.Amount,
             Total = request.Amount,
             CurrencyCode = "SAR",
             MethodDescription = "Card",

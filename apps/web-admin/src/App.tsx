@@ -10,6 +10,7 @@ import Catalog from "./pages/Catalog";
 import Subscriptions from "./pages/Subscriptions";
 import Users from "./pages/Users";
 import AuditLog from "./pages/AuditLog";
+import DiscountCodes from "./pages/DiscountCodes";
 import { AuthProvider } from "./lib/authContext";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -27,6 +28,7 @@ export default function App() {
           <Route path="/ledger" element={<RequireAuth><Ledger /></RequireAuth>} />
           <Route path="/catalog" element={<RequireAuth><Catalog /></RequireAuth>} />
           <Route path="/subscriptions" element={<RequireAuth><Subscriptions /></RequireAuth>} />
+          <Route path="/discount-codes" element={<RequireAuth><DiscountCodes /></RequireAuth>} />
           <Route path="/users" element={<RequireAuth><Users /></RequireAuth>} />
           <Route path="/audit" element={<RequireAuth><AuditLog /></RequireAuth>} />
         </Routes>

@@ -40,7 +40,8 @@
         "catalogAndPricing": "الخدمات والتسعير",
         "subscriptionPlans": "خطط الاشتراك",
         "usersAndRoles": "المستخدمون والصلاحيات",
-        "auditLog": "سجل التدقيق"
+        "auditLog": "سجل التدقيق",
+        "discountCodes": "أكواد الخصم"
       }
     }
   },
@@ -321,6 +322,104 @@
       "resubmitFailed": "تعذّر إرسال الطلب — تأكد من البيانات أو أن رقم الرخصة غير مسجّل من قبل.",
       "rejectedTitle": "تم رفض طلب التسجيل",
       "rejectedReason": "السبب:"
+    }
+  },
+  "checkout": {
+    "title": "الدفع",
+    "method": "طريقة الدفع",
+    "card": "البطاقة البنكية",
+    "cardHint": "مدى · فيزا · ماستركارد",
+    "wallet": "المحفظة",
+    "walletBalance": "الرصيد المتاح",
+    "applePay": "Apple Pay",
+    "tamara": "تمارا",
+    "tamaraHint": "قسّمها على دفعات",
+    "soon": "قريبًا",
+    "priceConsultation": "قيمة الاستشارة",
+    "priceService": "قيمة الخدمة",
+    "discount": "الخصم",
+    "vat": "قيمة الضريبة",
+    "total": "المطلوب سداده",
+    "notice": "لحماية حقوقك، أتمم الدفع داخل المنصة فقط ولا تحوّل أي مبلغ للمحامي خارجها.",
+    "instantRedirect": "بعد الدفع سيتم تحويلك مباشرة إلى المحادثة مع المحامي.",
+    "submit": "إتمام الطلب",
+    "failed": "تعذّر بدء عملية الدفع.",
+    "insufficientWallet": "رصيد المحفظة غير كافٍ.",
+    "confirming": "جارٍ تأكيد الدفع… قد يستغرق ذلك بضع ثوانٍ.",
+    "checkStatus": "تحقّق من حالة الدفع"
+  },
+  "discount": {
+    "question": "لديك كود خصم؟",
+    "placeholder": "أدخل الكود",
+    "apply": "تطبيق",
+    "remove": "إزالة",
+    "applied": "تم تطبيق الكود",
+    "reasons": {
+      "NotFound": "الكود غير صحيح.",
+      "Inactive": "هذا الكود غير مفعّل.",
+      "NotStarted": "لم يبدأ العمل بهذا الكود بعد.",
+      "Expired": "انتهت صلاحية هذا الكود.",
+      "WrongScope": "هذا الكود لا ينطبق على هذه الخدمة.",
+      "UsageLimitReached": "استُنفد عدد مرات استخدام هذا الكود.",
+      "PerUserLimitReached": "لقد استخدمت هذا الكود من قبل.",
+      "BelowMinimum": "المبلغ أقل من الحد الأدنى لاستخدام هذا الكود.",
+      "NotFirstPayment": "هذا الكود مخصص لأول عملية دفع فقط."
+    },
+    "scopes": {
+      "InstantConsultation": "استشارة فورية",
+      "ScheduledConsultation": "استشارة مجدولة",
+      "WrittenConsultation": "استشارة كتابية",
+      "BiddingRequest": "طلب عروض أسعار",
+      "CatalogService": "خدمات التوثيق والعلامات التجارية",
+      "LawyerSubscription": "اشتراك المحامي",
+      "LawyerRegistrationFee": "رسوم تسجيل المحامي"
+    },
+    "admin": {
+      "title": "أكواد الخصم",
+      "new": "كود جديد",
+      "edit": "تعديل الكود",
+      "empty": "لا توجد أكواد خصم بعد.",
+      "loadFailed": "تعذّر تحميل أكواد الخصم.",
+      "saveFailed": "تعذّر حفظ الكود.",
+      "code": "الكود",
+      "codeHint": "أحرف إنجليزية وأرقام فقط، مثال: WELCOME20",
+      "descriptionAr": "الوصف (عربي)",
+      "descriptionEn": "الوصف (إنجليزي)",
+      "kind": "نوع الخصم",
+      "percentage": "نسبة مئوية",
+      "fixed": "مبلغ ثابت",
+      "value": "قيمة الخصم",
+      "maxDiscount": "الحد الأقصى للخصم",
+      "minAmount": "الحد الأدنى للمبلغ",
+      "scopes": "ينطبق على",
+      "usageLimit": "عدد مرات الاستخدام الكلي",
+      "perUserLimit": "عدد مرات الاستخدام لكل مستخدم",
+      "unlimited": "بلا حد",
+      "firstPaymentOnly": "لأول عملية دفع فقط",
+      "isActive": "مفعّل",
+      "startsAt": "يبدأ في",
+      "endsAt": "ينتهي في",
+      "used": "الاستخدام",
+      "totalDiscounted": "إجمالي الخصومات",
+      "dates": "الفترة",
+      "save": "حفظ",
+      "redemptions": "آخر الاستخدامات",
+      "noRedemptions": "لم يُستخدم هذا الكود بعد.",
+      "user": "المستخدم",
+      "amount": "المبلغ",
+      "date": "التاريخ",
+      "status": {
+        "active": "مفعّل",
+        "inactive": "موقوف",
+        "scheduled": "مجدول",
+        "expired": "منتهي",
+        "usedUp": "مستنفد"
+      },
+      "redemptionStatus": {
+        "Pending": "بانتظار الدفع",
+        "Confirmed": "مدفوع",
+        "Released": "ملغى"
+      }
     }
   }
 }

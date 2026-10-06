@@ -97,6 +97,7 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
         {
             payment.Status = PaymentStatus.Failed;
             payment.FailureReason = "Gateway reported a failed payment (e.g. 3DS declined).";
+            await DiscountService.ReleaseAsync(db, payment.Id, cancellationToken);
             // The request deliberately stays Submitted — the client can simply retry checkout.
         }
 
@@ -126,11 +127,13 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
             subscription.ConsecutiveFailedAttempts = 0;
 
             db.LedgerEntries.AddRange(LedgerPostingService.PostSubscriptionPayment(invoice));
+            await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
         }
         else
         {
             invoice.Status = SubscriptionInvoiceStatus.Failed;
             invoice.FailureReason = "Gateway reported a failed payment (e.g. 3DS declined).";
+            await DiscountService.ReleaseAsync(db, invoice.Id, cancellationToken);
 
             subscription.ConsecutiveFailedAttempts++;
             subscription.Status = subscription.ConsecutiveFailedAttempts >= SubscriptionBillingPolicy.MaxDunningAttempts

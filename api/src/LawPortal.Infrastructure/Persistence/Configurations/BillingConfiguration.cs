@@ -27,11 +27,42 @@ public class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
         builder.HasIndex(i => i.PaymentId).IsUnique();
 
         builder.Property(i => i.SubtotalExVat).HasColumnType("decimal(10,2)");
+        builder.Property(i => i.DiscountAmount).HasColumnType("decimal(10,2)");
         builder.Property(i => i.VatAmount).HasColumnType("decimal(10,2)");
         builder.Property(i => i.Total).HasColumnType("decimal(10,2)");
         builder.Property(i => i.SellerNameAr).HasMaxLength(200);
         builder.Property(i => i.SellerNameEn).HasMaxLength(200);
         builder.Property(i => i.SellerVatNumber).HasMaxLength(30);
         builder.Property(i => i.QrPayloadBase64).HasColumnType("text");
+    }
+}
+
+public class DiscountCodeConfiguration : IEntityTypeConfiguration<DiscountCode>
+{
+    public void Configure(EntityTypeBuilder<DiscountCode> builder)
+    {
+        builder.ToTable("discount_codes");
+        builder.HasKey(d => d.Id);
+        builder.Property(d => d.Code).HasMaxLength(40).IsRequired();
+        builder.HasIndex(d => d.Code).IsUnique();
+        builder.Property(d => d.DescriptionAr).HasMaxLength(300);
+        builder.Property(d => d.DescriptionEn).HasMaxLength(300);
+        builder.Property(d => d.Value).HasColumnType("decimal(10,2)");
+        builder.Property(d => d.MaxDiscountAmount).HasColumnType("decimal(10,2)");
+        builder.Property(d => d.MinAmount).HasColumnType("decimal(10,2)");
+        builder.HasMany(d => d.Redemptions).WithOne(r => r.DiscountCode).HasForeignKey(r => r.DiscountCodeId);
+    }
+}
+
+public class DiscountRedemptionConfiguration : IEntityTypeConfiguration<DiscountRedemption>
+{
+    public void Configure(EntityTypeBuilder<DiscountRedemption> builder)
+    {
+        builder.ToTable("discount_redemptions");
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.Amount).HasColumnType("decimal(10,2)");
+        builder.HasIndex(r => new { r.DiscountCodeId, r.Status });
+        builder.HasIndex(r => new { r.DiscountCodeId, r.UserId });
+        builder.HasIndex(r => r.ReferenceId);
     }
 }
