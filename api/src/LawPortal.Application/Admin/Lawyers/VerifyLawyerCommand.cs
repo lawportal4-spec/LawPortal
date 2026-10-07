@@ -47,7 +47,15 @@ public class VerifyLawyerHandler(
             }
             else
             {
-                await LawyerOnboarding.SendVerificationEmailAsync(db, tokenService, emailSender, configuration, profile.User, profile.FullName, cancellationToken);
+                try
+                {
+                    await LawyerOnboarding.SendVerificationEmailAsync(db, tokenService, emailSender, configuration, profile.User, profile.FullName, cancellationToken);
+                }
+                catch (InvalidOperationException)
+                {
+                    // The approval stands; the sender has logged why. The lawyer's "check your email"
+                    // screen has a resend button that issues a fresh link.
+                }
             }
         }
 
