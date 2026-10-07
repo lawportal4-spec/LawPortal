@@ -32,4 +32,11 @@ public enum LedgerAccount
     /// <summary>The one-off fee a newly approved lawyer pays before the portal opens — platform
     /// income, like <see cref="SubscriptionRevenue"/>.</summary>
     RegistrationFeeRevenue = 8,
+
+    /// <summary>Asset — money lawyers owe the platform: their share of a refund given after their
+    /// payout was already released. Cleared by deducting from later payouts or a bank transfer.</summary>
+    LawyerReceivable = 9,
+
+    /// <summary>Expense — a lawyer's share of a late refund that the platform chose to absorb itself.</summary>
+    RefundLossExpense = 10,
 }

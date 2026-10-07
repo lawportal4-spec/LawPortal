@@ -5,58 +5,66 @@ import 'package:flutter/material.dart';
 
 /// Light-theme token values ("the document, made legible" — paper world).
 abstract final class LpColorsLight {
-  static const Color ink = Color(0xFF0E1F1A);
-  static const Color inkSoft = Color(0xFF4B5C55);
-  static const Color inkFaint = Color(0xFF7C8B83);
-  static const Color seal = Color(0xFF0B5C3F);
-  static const Color sealStrong = Color(0xFF084430);
-  static const Color sealTint = Color(0xFFE2EEE7);
-  static const Color sealOn = Color(0xFFF7FAF8);
-  static const Color paper = Color(0xFFECEEF0);
-  static const Color surface = Color(0xFFF7F8F5);
-  static const Color surfaceRaised = Color(0xFFFFFFFF);
-  static const Color vellum = Color(0xFFEFE7D6);
-  static const Color vellumLine = Color(0xFFC9B48C);
-  static const Color vellumInk = Color(0xFF4A3C22);
-  static const Color rubric = Color(0xFFA32E1E);
-  static const Color rubricTint = Color(0xFFF4E3E0);
-  static const Color rule = Color(0xFFD6DCD6);
-  static const Color border = Color(0xFFDCE2DB);
-  static const Color warning = Color(0xFF8A5B12);
-  static const Color warningTint = Color(0xFFF2E6CD);
-  static const Color catConsultBg = Color(0xFFE4EFE9);
-  static const Color catConsultFg = Color(0xFF0B5C3F);
-  static const Color catJudiciaryBg = Color(0xFFF3E4E1);
-  static const Color catJudiciaryFg = Color(0xFF8F2A1C);
-  static const Color catNotaryBg = Color(0xFFEFE7D6);
-  static const Color catNotaryFg = Color(0xFF4A3C22);
-  static const Color catBusinessBg = Color(0xFFE1ECEA);
-  static const Color catBusinessFg = Color(0xFF1F5C52);
-  static const Color catOtherBg = Color(0xFFE9EBE7);
-  static const Color catOtherFg = Color(0xFF4B5C55);
+  static const Color ink = Color(0xFFF2EDE3);
+  static const Color inkSoft = Color(0xFFB9BFCB);
+  static const Color inkFaint = Color(0xFF8590A3);
+  static const Color seal = Color(0xFFB8963A);
+  static const Color sealStrong = Color(0xFFE5C98A);
+  static const Color sealTint = Color(0xFF2A2618);
+  static const Color sealOn = Color(0xFF0C1321);
+  static const Color paper = Color(0xFF0C1321);
+  static const Color surface = Color(0xFF142033);
+  static const Color surfaceRaised = Color(0xFF1B2A42);
+  static const Color vellum = Color(0xFFF6F3EE);
+  static const Color vellumLine = Color(0xFFB8963A);
+  static const Color vellumInk = Color(0xFF3A2E14);
+  static const Color rubric = Color(0xFFE2776A);
+  static const Color rubricTint = Color(0xFF3A1E1E);
+  static const Color rule = Color(0xFF22324A);
+  static const Color border = Color(0xFF2A3B55);
+  static const Color warning = Color(0xFFE0B45A);
+  static const Color warningTint = Color(0xFF3A2F17);
+  static const Color success = Color(0xFF7BC79A);
+  static const Color successTint = Color(0xFF183026);
+  static const Color info = Color(0xFF8EB8E8);
+  static const Color infoTint = Color(0xFF18273D);
+  static const Color catConsultBg = Color(0xFF2A2618);
+  static const Color catConsultFg = Color(0xFFE5C98A);
+  static const Color catJudiciaryBg = Color(0xFF3A1E1E);
+  static const Color catJudiciaryFg = Color(0xFFF0A398);
+  static const Color catNotaryBg = Color(0xFF2E2A20);
+  static const Color catNotaryFg = Color(0xFFE8D9B8);
+  static const Color catBusinessBg = Color(0xFF173236);
+  static const Color catBusinessFg = Color(0xFF8ED1C6);
+  static const Color catOtherBg = Color(0xFF1F2A3B);
+  static const Color catOtherFg = Color(0xFFB9BFCB);
 }
 
 /// Dark-theme token values.
 abstract final class LpColorsDark {
-  static const Color ink = Color(0xFFE7EFE9);
-  static const Color inkSoft = Color(0xFF9FB3AA);
-  static const Color inkFaint = Color(0xFF6D8177);
-  static const Color seal = Color(0xFF33B489);
-  static const Color sealStrong = Color(0xFF58CBA3);
-  static const Color sealTint = Color(0xFF14271F);
-  static const Color sealOn = Color(0xFF06120E);
-  static const Color paper = Color(0xFF0A1512);
-  static const Color surface = Color(0xFF101E19);
-  static const Color surfaceRaised = Color(0xFF16261F);
-  static const Color vellum = Color(0xFF2B2116);
-  static const Color vellumLine = Color(0xFF6B5738);
-  static const Color vellumInk = Color(0xFFE8D9B8);
-  static const Color rubric = Color(0xFFE2665A);
-  static const Color rubricTint = Color(0xFF2A1815);
-  static const Color rule = Color(0xFF223029);
-  static const Color border = Color(0xFF24332C);
-  static const Color warning = Color(0xFFD3A341);
-  static const Color warningTint = Color(0xFF2A2213);
+  static const Color ink = Color(0xFFF2EDE3);
+  static const Color inkSoft = Color(0xFFB9BFCB);
+  static const Color inkFaint = Color(0xFF8590A3);
+  static const Color seal = Color(0xFFB8963A);
+  static const Color sealStrong = Color(0xFFE5C98A);
+  static const Color sealTint = Color(0xFF2A2618);
+  static const Color sealOn = Color(0xFF0C1321);
+  static const Color paper = Color(0xFF0C1321);
+  static const Color surface = Color(0xFF142033);
+  static const Color surfaceRaised = Color(0xFF1B2A42);
+  static const Color vellum = Color(0xFFF6F3EE);
+  static const Color vellumLine = Color(0xFFB8963A);
+  static const Color vellumInk = Color(0xFF3A2E14);
+  static const Color rubric = Color(0xFFE2776A);
+  static const Color rubricTint = Color(0xFF3A1E1E);
+  static const Color rule = Color(0xFF22324A);
+  static const Color border = Color(0xFF2A3B55);
+  static const Color warning = Color(0xFFE0B45A);
+  static const Color warningTint = Color(0xFF3A2F17);
+  static const Color success = Color(0xFF7BC79A);
+  static const Color successTint = Color(0xFF183026);
+  static const Color info = Color(0xFF8EB8E8);
+  static const Color infoTint = Color(0xFF18273D);
 }
 
 abstract final class LpRadius {
@@ -80,9 +88,9 @@ abstract final class LpSpace {
 }
 
 /// Font family names — register the matching asset fonts in pubspec.yaml
-/// under these exact family names (LP Amiri / LP Plex Arabic / LP Plex Mono).
+/// under these exact family names (LP Cairo / LP Tajawal / LP Plex Mono).
 abstract final class LpFonts {
-  static const String display = 'LP Amiri';
-  static const String body = 'LP Plex Arabic';
+  static const String display = 'LP Cairo';
+  static const String body = 'LP Tajawal';
   static const String mono = 'LP Plex Mono';
 }

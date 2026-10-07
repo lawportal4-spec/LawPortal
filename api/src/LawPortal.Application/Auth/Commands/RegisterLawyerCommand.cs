@@ -1,5 +1,6 @@
 using FluentValidation;
 using LawPortal.Application.Common.Interfaces;
+using LawPortal.Application.Lawyers;
 using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ public record RegisterLawyerCommand(
     int CityId,
     LawyerLicenseType LicenseType,
     string LicenseNumber,
+    string NationalIdNumber,
     DateOnly IssueDate,
     DateOnly ExpiryDate,
     string CountryCode,
@@ -51,6 +53,8 @@ public class RegisterLawyerValidator : AbstractValidator<RegisterLawyerCommand>
         RuleFor(x => x.CityId).GreaterThan(0);
         RuleFor(x => x.LicenseType).IsInEnum();
         RuleFor(x => x.LicenseNumber).NotEmpty().MaximumLength(50);
+        RuleFor(x => x.NationalIdNumber).Must(NationalIds.IsValid)
+            .WithMessage("Enter a valid 10-digit Saudi national ID or Iqama number.");
         RuleFor(x => x.ExpiryDate).GreaterThan(x => x.IssueDate);
         RuleFor(x => x.CountryCode).Equal("SA").WithMessage("Only Saudi Arabia is supported.");
         RuleFor(x => x.AcceptedTerms).Equal(true).WithMessage("You must accept the terms and privacy policy.");
@@ -105,9 +109,14 @@ public class RegisterLawyerHandler(
         if (await db.Users.AnyAsync(u => u.Id != pendingId && u.PhoneE164 == request.PhoneE164, cancellationToken))
             throw new InvalidOperationException("An account with this phone number already exists.");
 
+        var licenseKey = LicenseNumbers.Normalize(request.LicenseNumber);
         if (await db.LawyerLicenses.AnyAsync(
-                l => l.LicenseNumber == request.LicenseNumber && l.LawyerProfile!.UserId != pendingId, cancellationToken))
+                l => (l.LicenseNumberKey == licenseKey || l.LicenseNumber == request.LicenseNumber) && l.LawyerProfile!.UserId != pendingId, cancellationToken))
             throw new InvalidOperationException("This licence number is already registered.");
+
+        var nationalId = NationalIds.Normalize(request.NationalIdNumber);
+        if (await db.LawyerProfiles.AnyAsync(l => l.NationalIdNumber == nationalId && l.UserId != pendingId, cancellationToken))
+            throw new InvalidOperationException("An account with this national ID already exists.");
 
         var document = request.LicenseDocument!;
         var storageKey = await ScanAndStoreAsync(document, cancellationToken);
@@ -137,6 +146,10 @@ public class RegisterLawyerHandler(
         profile.CityId = request.CityId;
         profile.CountryCode = request.CountryCode;
         profile.TermsAcceptedAtUtc = DateTime.UtcNow;
+        profile.NationalIdNumber = nationalId;
+        // Same person coming back after leaving with a debt: flag it for the admin's review.
+        profile.PossibleFormerProfileId = await IdentityFingerprints.FindFormerDebtorAsync(
+            db, request.PhoneE164, request.Email, nationalId, cancellationToken);
 
         var license = profile.License;
         if (license is null)
@@ -144,7 +157,8 @@ public class RegisterLawyerHandler(
             license = new LawyerLicense { Id = Guid.NewGuid(), LawyerProfileId = profile.Id, LicenseNumber = request.LicenseNumber };
             db.LawyerLicenses.Add(license);
         }
-        license.LicenseNumber = request.LicenseNumber;
+        license.LicenseNumber = request.LicenseNumber.Trim();
+        license.LicenseNumberKey = licenseKey;
         license.LicenseType = request.LicenseType;
         license.IssueDate = request.IssueDate;
         license.ExpiryDate = request.ExpiryDate;

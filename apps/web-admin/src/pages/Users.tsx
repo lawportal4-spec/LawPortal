@@ -4,6 +4,7 @@ import { UserPlus } from "lucide-react";
 import { Button, Card, Ltr } from "@law-portal/ui";
 import { useTranslation, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/PageHeader";
 import { getAdminUsers, getRoles, inviteAdmin } from "../lib/rbacApi";
 
 export default function Users() {
@@ -34,7 +35,7 @@ export default function Users() {
 
   return (
     <AppShell>
-      <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "المستخدمون والصلاحيات" : "Users & Roles"}</h1>
+      <PageHeader page="users" />
 
       <div className="mb-8">
         <div className="mb-3 flex items-center justify-between">

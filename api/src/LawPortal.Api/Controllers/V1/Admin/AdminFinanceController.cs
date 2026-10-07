@@ -13,12 +13,17 @@ namespace LawPortal.Api.Controllers.V1.Admin;
 [Route("api/v1/admin/finance")]
 public class AdminFinanceController(ISender sender) : ControllerBase
 {
-    public record CreateCommissionPolicyBody(string? ServiceCategorySlug, decimal Percentage);
+    public record CreateCommissionPolicyBody(string? ServiceCategorySlug, decimal Percentage, DateTime? EffectiveFromUtc);
 
     [HttpGet("ledger/summary")]
     [ProducesResponseType<LedgerSummaryDto>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<LedgerSummaryDto>> LedgerSummary(CancellationToken cancellationToken)
-        => Ok(await sender.Send(new GetLedgerSummaryQuery(), cancellationToken));
+    public async Task<ActionResult<LedgerSummaryDto>> LedgerSummary([FromQuery] GetLedgerSummaryQuery query, CancellationToken cancellationToken)
+        => Ok(await sender.Send(query, cancellationToken));
+
+    [HttpGet("ledger/journal")]
+    [ProducesResponseType<PagedResult<JournalEntryDto>>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<PagedResult<JournalEntryDto>>> LedgerJournal([FromQuery] GetLedgerJournalQuery query, CancellationToken cancellationToken)
+        => Ok(await sender.Send(query, cancellationToken));
 
     [HttpGet("ledger/entries")]
     [ProducesResponseType<PagedResult<LedgerEntryDto>>(StatusCodes.Status200OK)]
@@ -33,5 +38,5 @@ public class AdminFinanceController(ISender sender) : ControllerBase
 
     [HttpPost("commission-policies")]
     public async Task<ActionResult<int>> CreateCommissionPolicy(CreateCommissionPolicyBody body, CancellationToken cancellationToken)
-        => Ok(await sender.Send(new CreateCommissionPolicyCommand(body.ServiceCategorySlug, body.Percentage), cancellationToken));
+        => Ok(await sender.Send(new CreateCommissionPolicyCommand(body.ServiceCategorySlug, body.Percentage, body.EffectiveFromUtc), cancellationToken));
 }

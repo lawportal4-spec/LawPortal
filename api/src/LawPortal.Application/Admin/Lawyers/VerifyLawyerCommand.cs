@@ -35,6 +35,24 @@ public class VerifyLawyerHandler(
         if (profile.User!.Status == UserStatus.Active)
             profile.IsVerified = true;
 
+        // The same person came back after leaving with a debt: it follows them to this account.
+        if (profile.PossibleFormerProfileId is { } formerId
+            && await Payments.LawyerDebts.BalanceAsync(db, formerId, cancellationToken) is > 0 and var carried)
+        {
+            db.LawyerDebtEntries.Add(new Domain.Payments.LawyerDebtEntry
+            {
+                Id = Guid.NewGuid(), LawyerProfileId = formerId, Kind = Domain.Payments.LawyerDebtEntryKind.TransferredOut,
+                Amount = -carried, Reference = profile.Id.ToString(), CreatedByUserId = currentUser.UserId,
+            });
+            db.LawyerDebtEntries.Add(new Domain.Payments.LawyerDebtEntry
+            {
+                Id = Guid.NewGuid(), LawyerProfileId = profile.Id, Kind = Domain.Payments.LawyerDebtEntryKind.TransferredIn,
+                Amount = carried, Reference = formerId.ToString(), CreatedByUserId = currentUser.UserId,
+            });
+            await auditLogger.LogAsync("LawyerDebtCarriedOver", nameof(LawyerProfile), profile.Id.ToString(),
+                $"{carried:0.00} SAR from {formerId}", cancellationToken);
+        }
+
         await auditLogger.LogAsync("LawyerLicenseApproved", nameof(LawyerProfile), profile.Id.ToString(), cancellationToken: cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
 

@@ -71,6 +71,7 @@ public static class DependencyInjection
         services.AddSingleton<IBidFanOutQueue, RabbitMqBidFanOutQueue>();
         services.AddHostedService<BidFanOutConsumer>();
         services.AddHostedService<SubscriptionRenewalService>();
+        services.AddHostedService<Payments.LawyerDebtReminderService>();
 
         return services;
     }

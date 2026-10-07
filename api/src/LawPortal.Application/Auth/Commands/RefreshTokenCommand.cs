@@ -25,6 +25,9 @@ public class RefreshTokenHandler(ILawPortalDbContext db, ITokenService tokenServ
 
         if (existing is null || !existing.IsActive || existing.User is null)
             throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+        // A suspended account stays signed out even if it still holds a refresh token.
+        if (existing.User.Status is Domain.Identity.UserStatus.Suspended or Domain.Identity.UserStatus.Banned or Domain.Identity.UserStatus.Deleted)
+            throw new UnauthorizedAccessException("This account is suspended.");
 
         // Rotation: revoke the presented token before issuing a new pair. If a revoked/replaced
         // token is ever presented again, that is a reuse signal a later phase should react to

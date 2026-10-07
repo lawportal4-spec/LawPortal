@@ -13,6 +13,14 @@ import AuditLog from "./pages/AuditLog";
 import DiscountCodes from "./pages/DiscountCodes";
 import DiscountCodeNew from "./pages/DiscountCodeNew";
 import DiscountCodeEdit from "./pages/DiscountCodeEdit";
+import Account from "./pages/Account";
+import LawyerDebts from "./pages/LawyerDebts";
+import LawyerDebt from "./pages/LawyerDebt";
+import Settings from "./pages/Settings";
+import Clients from "./pages/Clients";
+import Client from "./pages/Client";
+import Requests from "./pages/Requests";
+import Request from "./pages/Request";
 import { AuthProvider } from "./lib/authContext";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -34,6 +42,14 @@ export default function App() {
           <Route path="/discount-codes/new" element={<RequireAuth><DiscountCodeNew /></RequireAuth>} />
           <Route path="/discount-codes/:id" element={<RequireAuth><DiscountCodeEdit /></RequireAuth>} />
           <Route path="/users" element={<RequireAuth><Users /></RequireAuth>} />
+          <Route path="/lawyer-debts" element={<RequireAuth><LawyerDebts /></RequireAuth>} />
+          <Route path="/lawyer-debts/:id" element={<RequireAuth><LawyerDebt /></RequireAuth>} />
+          <Route path="/clients" element={<RequireAuth><Clients /></RequireAuth>} />
+          <Route path="/clients/:id" element={<RequireAuth><Client /></RequireAuth>} />
+          <Route path="/requests" element={<RequireAuth><Requests /></RequireAuth>} />
+          <Route path="/requests/:id" element={<RequireAuth><Request /></RequireAuth>} />
+          <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+          <Route path="/account" element={<RequireAuth><Account /></RequireAuth>} />
           <Route path="/audit" element={<RequireAuth><AuditLog /></RequireAuth>} />
         </Routes>
       </BrowserRouter>

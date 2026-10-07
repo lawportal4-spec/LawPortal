@@ -67,3 +67,16 @@ export function toLocalNumber(e164: string): string {
   const rest = e164.replace(/^\+966/, "");
   return /^[15]/.test(rest) ? `0${rest}` : rest;
 }
+
+export async function changeMyPassword(currentPassword: string, newPassword: string): Promise<void> {
+  await api.post("/api/v1/account/password", { currentPassword, newPassword });
+}
+
+export async function getDeletionImpact(): Promise<import("@law-portal/ui").DeletionImpact> {
+  const { data } = await api.get("/api/v1/account/deletion-impact");
+  return data;
+}
+
+export async function deleteMyAccount(): Promise<void> {
+  await api.delete("/api/v1/account");
+}

@@ -26,4 +26,9 @@ public enum PayoutStatus
 {
     Held = 0,
     Released = 10,
+    /// <summary>The client got all their money back, so nothing is owed to the lawyer; never released.</summary>
+    Cancelled = 20,
+    /// <summary>The lawyer deleted their account before the work was completed: never released
+    /// automatically; the money stays held until an admin decides.</summary>
+    Suspended = 30,
 }

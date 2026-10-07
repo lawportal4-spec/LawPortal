@@ -37,7 +37,7 @@ public class DeclineRequestHandler(ILawPortalDbContext db, ICurrentUser currentU
             .FirstOrDefaultAsync(p => p.ServiceRequestId == consultation.Id && p.Status == PaymentStatus.Paid, cancellationToken)
             ?? throw new InvalidOperationException("No paid payment found for this request.");
 
-        await sender.Send(new RefundPaymentCommand(payment.Id, payment.Total, $"Lawyer declined: {request.Reason}"), cancellationToken);
+        await sender.Send(new RefundPaymentCommand(payment.Id, payment.Total, RefundReason.LawyerDeclined, request.Reason), cancellationToken);
         return Unit.Value;
     }
 }

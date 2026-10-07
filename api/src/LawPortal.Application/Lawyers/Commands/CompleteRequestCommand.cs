@@ -43,9 +43,7 @@ public class CompleteRequestHandler(ILawPortalDbContext db, ICurrentUser current
             .FirstOrDefaultAsync(o => o.Payment!.ServiceRequestId == serviceRequest.Id && o.Status == PayoutStatus.Held, cancellationToken);
         if (payout is not null)
         {
-            payout.Status = PayoutStatus.Released;
-            payout.ReleasedAtUtc = DateTime.UtcNow;
-            db.LedgerEntries.AddRange(LedgerPostingService.PostPayout(payout));
+            await LawyerDebts.ReleasePayoutAsync(db, payout, cancellationToken);
         }
 
         var lawyer = await db.LawyerProfiles.FirstAsync(l => l.Id == lawyerProfileId, cancellationToken);

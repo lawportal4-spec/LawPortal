@@ -60,6 +60,18 @@ export interface PayoutSummaryDto {
   status: string;
   createdAtUtc: string;
   releasedAtUtc: string | null;
+  /** Deducted at release to settle a debt to the platform; paid = amount − debtOffset. */
+  debtOffset: number;
+}
+
+export interface MyDebtDto {
+  balance: number;
+  entries: { kind: string; amount: number; requestNumber: string | null; createdAtUtc: string }[];
+}
+
+export async function getMyDebt(): Promise<MyDebtDto> {
+  const { data } = await api.get<MyDebtDto>("/api/v1/lawyer/debt");
+  return data;
 }
 
 export interface LawyerReviewDto {

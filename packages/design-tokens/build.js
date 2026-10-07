@@ -15,6 +15,8 @@ const LIGHT_KEYS = [
   "rubric", "rubric-tint",
   "rule", "border",
   "warning", "warning-tint",
+  "success", "success-tint",
+  "info", "info-tint",
 ];
 
 function lightVal(key) {
@@ -80,6 +82,18 @@ ${radiusLines.join("\n")}
 ${spaceLines.join("\n")}
 ${shadowLines.join("\n")}
 }
+
+/* The palette is dark: native controls and scrollbars follow it, and browser autofill keeps the
+   navy field instead of painting it light blue. */
+:root { color-scheme: dark; }
+input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-text-fill-color: var(--color-ink);
+  caret-color: var(--color-ink);
+  box-shadow: 0 0 0 1000px var(--color-surface-raised) inset;
+  transition: background-color 99999s;
+}
 `;
 }
 
@@ -134,10 +148,10 @@ ${spaceFields.join("\n")}
 }
 
 /// Font family names — register the matching asset fonts in pubspec.yaml
-/// under these exact family names (LP Amiri / LP Plex Arabic / LP Plex Mono).
+/// under these exact family names (LP Cairo / LP Tajawal / LP Plex Mono).
 abstract final class LpFonts {
-  static const String display = 'LP Amiri';
-  static const String body = 'LP Plex Arabic';
+  static const String display = 'LP Cairo';
+  static const String body = 'LP Tajawal';
   static const String mono = 'LP Plex Mono';
 }
 `;

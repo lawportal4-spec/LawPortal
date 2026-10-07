@@ -1,10 +1,17 @@
 import { useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, FileText, RotateCcw, XCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ExternalLink, FileText, RotateCcw, TriangleAlert, XCircle } from "lucide-react";
 import { Button, Card, Ltr, SectionHeading, StatusTag } from "@law-portal/ui";
-import { useTranslation, formatDate, formatDateTime, isoToHijriDate } from "@law-portal/i18n";
+import { useTranslation, formatCurrency, formatDate, formatDateTime, isoToHijriDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { ActivityList } from "../components/directory/ActivityList";
+import { AdminNotes } from "../components/directory/AdminNotes";
+import { Tabs } from "../components/directory/bits";
+import { LawyerEarningsChart, LawyerFinanceBalance, LawyerStatement } from "../components/directory/LawyerFinancePanel";
+import { RequestsTable } from "../components/directory/RequestsTable";
+import { SuspendAccount } from "../components/directory/SuspendAccount";
+import { ACCOUNT_STATUS_PILL, getLawyerFinance, getRequests } from "../lib/directoryApi";
 import {
   CORRECTION_ISSUES,
   getLawyerRegistration,
@@ -17,6 +24,8 @@ import {
 
 type Mode = "idle" | "changes" | "reject";
 
+type LawyerTab = "finance" | "statement" | "requests" | "license" | "activity" | "notes";
+
 /** One registration in full — personal data, location, licence with the uploaded file — and the
  * three decisions: approve, return for changes (checklist + note), or reject (reason). */
 export default function LawyerRegistrationDetail() {
@@ -25,6 +34,10 @@ export default function LawyerRegistrationDetail() {
   const isAr = i18n.language === "ar";
   const query = useQuery({ queryKey: ["lawyerRegistration", id], queryFn: () => getLawyerRegistration(id!), enabled: !!id });
   const r = query.data;
+  const queryClient = useQueryClient();
+  const [tab, setTab] = useState<LawyerTab>("finance");
+  const finance = useQuery({ queryKey: ["lawyerFinance", id], queryFn: () => getLawyerFinance(id!), enabled: !!id });
+  const requests = useQuery({ queryKey: ["lawyerRequests", id], queryFn: () => getRequests({ lawyerProfileId: id!, page: 1, pageSize: 50 }), enabled: !!id && tab === "requests" });
 
   return (
     <AppShell>
@@ -39,77 +52,114 @@ export default function LawyerRegistrationDetail() {
         <>
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <SectionHeading level={2}>{r.fullName}</SectionHeading>
+            <span className={"rounded-full px-2.5 py-0.5 text-xs " + ACCOUNT_STATUS_PILL[r.accountStatus]}>{t(`directory.accountStatuses.${r.accountStatus}`)}</span>
             <StatusTag status={r.status} label={t(`lawyerReview.statuses.${r.status}`)} />
             {r.onboardingStep && <StatusTag status="Pending" label={t(`lawyerOnboarding.admin.onboarding.${r.onboardingStep}`)} />}
+            <span className="ms-auto">
+              <SuspendAccount userId={r.userId} status={r.accountStatus} onDone={() => void queryClient.invalidateQueries({ queryKey: ["lawyerRegistration", id] })} />
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-            <div className="flex flex-col gap-4 lg:col-span-2">
-              <Card>
-                <SectionHeading level={3} className="mb-3">
-                  {t("lawyerReview.admin.sections.personal")}
-                </SectionHeading>
-                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Item label={t("lawyerReview.admin.fields.fullName")}>{r.fullName}</Item>
-                  <Item label={t("lawyerReview.admin.fields.phone")}>
-                    {r.phoneE164 ? <Ltr className="font-mono">{r.phoneE164}</Ltr> : "—"}
-                    {r.isPhoneVerified && (
-                      <span className="ms-2 inline-flex items-center gap-1 text-xs text-seal">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
-                        {t("lawyerReview.admin.fields.phoneVerified")}
-                      </span>
-                    )}
-                  </Item>
-                  <Item label={t("lawyerReview.admin.fields.email")}>
-                    <Ltr className="font-mono">{r.email}</Ltr>
-                  </Item>
-                  <Item label={t("lawyerReview.admin.fields.submitted")}>
-                    <Ltr className="font-mono">{formatDateTime(r.submittedAtUtc)}</Ltr>
-                  </Item>
-                  <Item label={t("lawyerReview.admin.fields.terms")}>
-                    {r.termsAcceptedAtUtc ? <Ltr className="font-mono">{formatDateTime(r.termsAcceptedAtUtc)}</Ltr> : "—"}
-                  </Item>
-                </dl>
-              </Card>
-
-              <Card>
-                <SectionHeading level={3} className="mb-3">
-                  {t("lawyerReview.admin.sections.location")}
-                </SectionHeading>
-                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <Item label={t("lawyerReview.admin.fields.region")}>{(isAr ? r.regionNameAr : r.regionNameEn) ?? "—"}</Item>
-                  <Item label={t("lawyerReview.admin.fields.city")}>{(isAr ? r.cityNameAr : r.cityNameEn) ?? "—"}</Item>
-                  <Item label={t("lawyerReview.admin.fields.country")}>{t(`lawyerAuth.register.countries.${r.countryCode}`)}</Item>
-                </dl>
-              </Card>
-
-              <Card>
-                <SectionHeading level={3} className="mb-3">
-                  {t("lawyerReview.admin.sections.license")}
-                </SectionHeading>
-                <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  <Item label={t("lawyerReview.admin.fields.licenseType")}>{t(`lawyerAuth.register.licenseTypes.${r.licenseType}`)}</Item>
-                  <Item label={t("lawyerReview.admin.fields.licenseNumber")}>
-                    <Ltr className="font-mono">{r.licenseNumber}</Ltr>
-                  </Item>
-                  <Item label={t("lawyerReview.admin.fields.issueDate")}>
-                    <HijriAndGregorian iso={r.issueDate} />
-                  </Item>
-                  <Item label={t("lawyerReview.admin.fields.expiryDate")}>
-                    <HijriAndGregorian iso={r.expiryDate} />
-                  </Item>
-                </dl>
-              </Card>
-
-              <DocumentCard registration={r} />
+          {r.formerAccount && r.formerAccount.debtBalance > 0 && (
+            <div role="alert" className="mb-4 flex flex-wrap items-center gap-3 rounded-lg border border-rubric/50 bg-rubric-tint px-4 py-3 text-sm text-ink-soft">
+              <TriangleAlert className="h-5 w-5 shrink-0 text-rubric" />
+              <span className="min-w-0 flex-1">
+                <b className="text-ink">{t("lawyerReview.admin.formerMatchTitle", { amount: formatCurrency(r.formerAccount.debtBalance) })}</b>
+                <span className="block">{t("lawyerReview.admin.formerMatchBody", { name: r.formerAccount.fullName })}</span>
+              </span>
+              <Link to={`/lawyer-debts/${r.formerAccount.lawyerProfileId}`} className="text-seal-strong hover:underline">{t("lawyerReview.admin.formerMatchOpen")}</Link>
             </div>
+          )}
 
-            <div className="flex flex-col gap-4">
-              <DecisionCard registration={r} />
-              <ContactCard registration={r} />
-              <HistoryCard registration={r} />
+          <Tabs<LawyerTab> value={tab} onChange={setTab} tabs={[
+            { id: "finance", label: t("lawyerFinance.tabFinance") }, { id: "requests", label: t("lawyerFinance.tabRequests") },
+            { id: "license", label: t("lawyerFinance.tabLicense") }, { id: "activity", label: t("directory.tabActivity") }, { id: "notes", label: t("directory.notes") },
+          ]} />
+          {tab === "finance" && finance.data && (
+            <>
+              <LawyerFinanceBalance f={finance.data} onWhy={() => setTab("statement")} />
+              <LawyerEarningsChart f={finance.data} />
+              <LawyerStatement f={finance.data} />
+            </>
+          )}
+          {tab === "statement" && finance.data && <LawyerStatement f={finance.data} />}
+          {tab === "requests" && <Card>{requests.data && <RequestsTable rows={requests.data.page.items} hide={["lawyer"]} />}</Card>}
+          {tab === "activity" && <Card>{finance.data && <ActivityList items={finance.data.activity} />}</Card>}
+          {tab === "notes" && <AdminNotes entityType="Lawyer" entityId={r.lawyerProfileId} />}
+          {tab === "license" && (
+            <>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+              <div className="flex flex-col gap-4 lg:col-span-2">
+                <Card>
+                  <SectionHeading level={3} className="mb-3">
+                    {t("lawyerReview.admin.sections.personal")}
+                  </SectionHeading>
+                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Item label={t("lawyerReview.admin.fields.fullName")}>{r.fullName}</Item>
+                    <Item label={t("lawyerReview.admin.fields.nationalId")}>
+                      {r.nationalIdMasked ? <Ltr className="font-mono">{r.nationalIdMasked}</Ltr> : "—"}
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.phone")}>
+                      {r.phoneE164 ? <Ltr className="font-mono">{r.phoneE164}</Ltr> : "—"}
+                      {r.isPhoneVerified && (
+                        <span className="ms-2 inline-flex items-center gap-1 text-xs text-seal">
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                          {t("lawyerReview.admin.fields.phoneVerified")}
+                        </span>
+                      )}
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.email")}>
+                      <Ltr className="font-mono">{r.email}</Ltr>
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.submitted")}>
+                      <Ltr className="font-mono">{formatDateTime(r.submittedAtUtc)}</Ltr>
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.terms")}>
+                      {r.termsAcceptedAtUtc ? <Ltr className="font-mono">{formatDateTime(r.termsAcceptedAtUtc)}</Ltr> : "—"}
+                    </Item>
+                  </dl>
+                </Card>
+
+                <Card>
+                  <SectionHeading level={3} className="mb-3">
+                    {t("lawyerReview.admin.sections.location")}
+                  </SectionHeading>
+                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <Item label={t("lawyerReview.admin.fields.country")}>{t(`lawyerAuth.register.countries.${r.countryCode}`)}</Item>
+                    <Item label={t("lawyerReview.admin.fields.region")}>{(isAr ? r.regionNameAr : r.regionNameEn) ?? "—"}</Item>
+                    <Item label={t("lawyerReview.admin.fields.city")}>{(isAr ? r.cityNameAr : r.cityNameEn) ?? "—"}</Item>
+                  </dl>
+                </Card>
+
+                <Card>
+                  <SectionHeading level={3} className="mb-3">
+                    {t("lawyerReview.admin.sections.license")}
+                  </SectionHeading>
+                  <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <Item label={t("lawyerReview.admin.fields.licenseType")}>{t(`lawyerAuth.register.licenseTypes.${r.licenseType}`)}</Item>
+                    <Item label={t("lawyerReview.admin.fields.licenseNumber")}>
+                      <Ltr className="font-mono">{r.licenseNumber}</Ltr>
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.issueDate")}>
+                      <HijriAndGregorian iso={r.issueDate} />
+                    </Item>
+                    <Item label={t("lawyerReview.admin.fields.expiryDate")}>
+                      <HijriAndGregorian iso={r.expiryDate} />
+                    </Item>
+                  </dl>
+                </Card>
+
+                <DocumentCard registration={r} />
+              </div>
+
+              <div className="flex flex-col gap-4">
+                <DecisionCard registration={r} />
+                <ContactCard registration={r} />
+                <HistoryCard registration={r} />
+              </div>
             </div>
-          </div>
+            </>
+          )}
         </>
       )}
     </AppShell>

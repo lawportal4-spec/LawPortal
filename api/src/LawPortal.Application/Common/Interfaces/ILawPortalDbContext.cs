@@ -93,6 +93,10 @@ public interface ILawPortalDbContext
     DbSet<SubscriptionInvoice> SubscriptionInvoices { get; }
     DbSet<RegistrationFeeSetting> RegistrationFeeSettings { get; }
     DbSet<LawyerRegistrationFeeInvoice> RegistrationFeeInvoices { get; }
+    DbSet<LawyerDebtEntry> LawyerDebtEntries { get; }
+    DbSet<RefundPolicySetting> RefundPolicySettings { get; }
+    DbSet<DeletedAccountFingerprint> DeletedAccountFingerprints { get; }
+    DbSet<AdminNote> AdminNotes { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

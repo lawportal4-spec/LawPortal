@@ -9,13 +9,18 @@ namespace LawPortal.Application.Admin.Finance.Queries;
 /// match" check this project has run by hand via curl+SQL after every money-moving action since
 /// P4. <see cref="LedgerSummaryDto.IsBalanced"/> being false would mean the double-entry
 /// invariant has broken somewhere; every phase's own verification has confirmed it hasn't.</summary>
-public record GetLedgerSummaryQuery : IRequest<LedgerSummaryDto>;
+/// <remarks>Optional <c>From</c>/<c>To</c> limit it to the movements in that period.</remarks>
+public record GetLedgerSummaryQuery(DateTime? From = null, DateTime? To = null) : IRequest<LedgerSummaryDto>;
 
 public class GetLedgerSummaryHandler(ILawPortalDbContext db) : IRequestHandler<GetLedgerSummaryQuery, LedgerSummaryDto>
 {
     public async Task<LedgerSummaryDto> Handle(GetLedgerSummaryQuery request, CancellationToken cancellationToken)
     {
-        var grouped = await db.LedgerEntries
+        var entries = db.LedgerEntries.AsQueryable();
+        if (request.From is { } from) entries = entries.Where(e => e.CreatedAtUtc >= from);
+        if (request.To is { } to) entries = entries.Where(e => e.CreatedAtUtc <= to);
+
+        var grouped = await entries
             .GroupBy(e => e.Account)
             .Select(g => new
             {

@@ -1,6 +1,8 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json.Serialization;
+using LawPortal.Domain.Payments;
 using LawPortal.Application.Common.Interfaces;
 using Microsoft.Extensions.Configuration;
 
@@ -82,6 +84,39 @@ public class MoyasarPaymentGateway : IPaymentGateway
         return new GatewayRefundResult(body.Id, body.Status);
     }
 
+    public async Task<GatewayTransaction?> GetTransactionAsync(string gatewayPaymentId, CancellationToken cancellationToken = default)
+    {
+        string moyasarPaymentId;
+        try
+        {
+            moyasarPaymentId = await ResolveSettledPaymentIdAsync(gatewayPaymentId, cancellationToken);
+        }
+        catch (InvalidOperationException)
+        {
+            return null; // Nothing settled on this invoice yet.
+        }
+
+        var response = await _client.GetAsync($"payments/{moyasarPaymentId}", cancellationToken);
+        await EnsureSuccessAsync(response, "retrieve payment", cancellationToken);
+        var p = await response.Content.ReadFromJsonAsync<MoyasarPayment>(cancellationToken)
+            ?? throw new InvalidOperationException("Moyasar returned an empty payment response.");
+
+        return new GatewayTransaction
+        {
+            TransactionId = p.Id,
+            SourceType = p.Source?.Type,
+            CardBrand = p.Source?.Company,
+            // Moyasar already masks it (e.g. 4201-32XX-XXXX-4242); keep only that, never the holder's name.
+            CardMasked = p.Source?.Number,
+            ReferenceNumber = p.Source?.ReferenceNumber,
+            AuthorizationCode = p.Source?.AuthorizationCode,
+            ResponseCode = p.Source?.ResponseCode,
+            Message = p.Source?.Message,
+            Fee = p.Fee is { } fee ? fee / 100m : null,
+            FetchedAtUtc = DateTime.UtcNow,
+        };
+    }
+
     private async Task<string> ResolveSettledPaymentIdAsync(string invoiceId, CancellationToken cancellationToken)
     {
         var response = await _client.GetAsync($"invoices/{invoiceId}", cancellationToken);
@@ -116,4 +151,13 @@ public class MoyasarPaymentGateway : IPaymentGateway
     private record MoyasarInvoiceDetail(string Id, string Status, IReadOnlyList<MoyasarInvoicePayment>? Payments);
     private record MoyasarInvoicePayment(string Id, string Status);
     private record MoyasarRefundResponse(string Id, string Status);
+    private record MoyasarPayment(string Id, string Status, int? Fee, MoyasarSource? Source);
+    private record MoyasarSource(
+        string? Type,
+        string? Company,
+        string? Number,
+        string? Message,
+        [property: JsonPropertyName("reference_number")] string? ReferenceNumber,
+        [property: JsonPropertyName("authorization_code")] string? AuthorizationCode,
+        [property: JsonPropertyName("response_code")] string? ResponseCode);
 }

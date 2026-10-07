@@ -18,6 +18,9 @@ public class Payout : Entity<Guid>
     public LawyerProfile? LawyerProfile { get; set; }
 
     public decimal Amount { get; set; }
+    /// <summary>Taken from <see cref="Amount"/> at release to settle the lawyer's debt to the
+    /// platform; the lawyer is actually paid Amount − DebtOffset.</summary>
+    public decimal DebtOffset { get; set; }
     public PayoutStatus Status { get; set; } = PayoutStatus.Held;
 
     public DateTime CreatedAtUtc { get; set; } = DateTime.UtcNow;

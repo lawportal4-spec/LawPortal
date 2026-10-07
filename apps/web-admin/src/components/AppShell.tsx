@@ -1,88 +1,72 @@
 import type { ReactNode } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import {
+  BadgeCheck, BookOpenCheck, CreditCard, Files, HandCoins, UsersRound, LayoutDashboard, Repeat, ScrollText, Settings as SettingsIcon, Tags, TicketPercent, UserRound, Users,
+} from "lucide-react";
+import { DashboardShell, LocaleToggle, sidebarLinkClass } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { useLocale } from "../lib/useLocale";
 import { useAuth } from "../lib/authContext";
+import { GlobalSearch } from "./directory/GlobalSearch";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
   const { locale, setLocale } = useLocale();
-  const isAr = locale === "ar";
-  const location = useLocation();
   const navigate = useNavigate();
   const { isAuthenticated, logout } = useAuth();
 
-  const navItems = isAuthenticated
-    ? [
-        { to: "/", label: t("shell.admin.nav.dashboard") },
-        { to: "/lawyers", label: t("shell.admin.nav.lawyerVerification") },
-        { to: "/payments", label: t("shell.admin.nav.payments") },
-        { to: "/ledger", label: t("shell.admin.nav.reconciliation") },
-        { to: "/catalog", label: t("shell.admin.nav.catalogAndPricing") },
-        { to: "/subscriptions", label: t("shell.admin.nav.subscriptionPlans") },
-        { to: "/discount-codes", label: t("shell.admin.nav.discountCodes") },
-        { to: "/users", label: t("shell.admin.nav.usersAndRoles") },
-        { to: "/audit", label: t("shell.admin.nav.auditLog") },
-      ]
-    : [];
+  const navItems = [
+    { to: "/", label: t("shell.admin.nav.dashboard"), icon: LayoutDashboard },
+    { to: "/clients", label: t("shell.admin.nav.clients"), icon: UsersRound },
+    { to: "/requests", label: t("shell.admin.nav.requests"), icon: Files },
+    { to: "/lawyers", label: t("shell.admin.nav.lawyerVerification"), icon: BadgeCheck },
+    { to: "/payments", label: t("shell.admin.nav.payments"), icon: CreditCard },
+    { to: "/ledger", label: t("shell.admin.nav.reconciliation"), icon: BookOpenCheck },
+    { to: "/lawyer-debts", label: t("shell.admin.nav.lawyerDebts"), icon: HandCoins },
+    { to: "/catalog", label: t("shell.admin.nav.catalogAndPricing"), icon: Tags },
+    { to: "/subscriptions", label: t("shell.admin.nav.subscriptionPlans"), icon: Repeat },
+    { to: "/discount-codes", label: t("shell.admin.nav.discountCodes"), icon: TicketPercent },
+    { to: "/users", label: t("shell.admin.nav.usersAndRoles"), icon: Users },
+    { to: "/audit", label: t("shell.admin.nav.auditLog"), icon: ScrollText },
+    { to: "/settings", label: t("shell.admin.nav.settings"), icon: SettingsIcon },
+    { to: "/account", label: t("shell.admin.nav.account"), icon: UserRound },
+  ];
 
   function handleAuthClick() {
-    if (isAuthenticated) {
-      logout();
-      navigate("/login");
-    } else {
-      navigate("/login");
-    }
+    if (isAuthenticated) logout();
+    navigate("/login");
   }
 
   return (
-    <div className="min-h-screen bg-paper">
-      <header className="border-b border-border bg-surface-raised">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-baseline gap-2 font-display text-xl font-bold">
-            <span>{isAr ? "بوابة القانون" : "Law Portal"}</span>
-            <span className="text-sm font-normal text-ink-faint">{t("shell.admin.tagline")}</span>
-          </Link>
-
-          <nav className="hidden flex-wrap items-center gap-5 text-sm font-medium text-ink-soft lg:flex">
-            {navItems.map((item) => (
-              <Link key={item.to} to={item.to} className={location.pathname === item.to ? "text-seal" : "hover:text-ink"}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <div className="inline-flex items-center gap-1 rounded-full border border-border bg-surface p-1">
-              {(["ar", "en"] as const).map((code) => (
-                <button
-                  key={code}
-                  onClick={() => setLocale(code)}
-                  className={
-                    "rounded-full px-3 py-1 text-xs font-medium transition-colors " +
-                    (locale === code ? "bg-seal text-seal-on" : "text-ink-faint")
-                  }
-                >
-                  {code === "ar" ? "العربية" : "English"}
-                </button>
-              ))}
-            </div>
-            <button onClick={handleAuthClick} className="rounded-md border border-border px-3 py-2 text-sm font-medium">
-              {isAuthenticated ? t("nav.logout") : t("nav.login")}
-            </button>
-          </div>
-        </div>
-        {isAuthenticated && (
-          <nav className="flex flex-wrap gap-4 border-t border-border px-6 py-2 text-xs font-medium text-ink-soft lg:hidden">
-            {navItems.map((item) => (
-              <Link key={item.to} to={item.to} className={location.pathname === item.to ? "text-seal" : ""}>
-                {item.label}
-              </Link>
-            ))}
-          </nav>
-        )}
-      </header>
-      <main className="mx-auto max-w-7xl px-6 py-8">{children}</main>
-    </div>
+    <DashboardShell
+      menuLabel={t("nav.openMenu")}
+      brand={
+        <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold">
+          <img src="/favicon.svg" alt="" className="h-9 w-8" />
+          <span className="text-seal-strong">{locale === "ar" ? "بوابة القانون" : "Law Portal"}</span>
+          <span className="hidden text-sm font-normal text-ink-faint sm:inline">{t("shell.admin.tagline")}</span>
+        </Link>
+      }
+      nav={
+        isAuthenticated &&
+        navItems.map(({ to, label, icon: Icon }) => (
+          <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => sidebarLinkClass(isActive)}>
+            <Icon />
+            {label}
+          </NavLink>
+        ))
+      }
+      actions={
+        <>
+          {isAuthenticated && <GlobalSearch />}
+          <LocaleToggle locale={locale} onChange={setLocale} />
+          <button onClick={handleAuthClick} className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-ink-soft hover:border-seal hover:text-seal">
+            {isAuthenticated ? t("nav.logout") : t("nav.login")}
+          </button>
+        </>
+      }
+    >
+      {children}
+    </DashboardShell>
   );
 }

@@ -68,17 +68,30 @@ public static class LedgerPostingService
         return AssertBalanced(entries);
     }
 
+    /// <summary>The escrow leaves in full; part of it may settle the lawyer's debt instead of being paid out.</summary>
     public static IReadOnlyList<LedgerEntry> PostPayout(Payout payout) => AssertBalanced(
     [
         Entry(LedgerAccount.EscrowPayable, isDebit: true, payout.Amount, payout.Id, "Payout", "Escrow released to lawyer"),
-        Entry(LedgerAccount.ClearingGateway, isDebit: false, payout.Amount, payout.Id, "Payout", "Cash paid out to lawyer"),
+        Entry(LedgerAccount.ClearingGateway, isDebit: false, payout.Amount - payout.DebtOffset, payout.Id, "Payout", "Cash paid out to lawyer"),
+        Entry(LedgerAccount.LawyerReceivable, isDebit: false, payout.DebtOffset, payout.Id, "Payout", "Lawyer debt deducted from payout"),
+    ]);
+
+    /// <summary>A lawyer paid their debt back by bank transfer.</summary>
+    public static IReadOnlyList<LedgerEntry> PostDebtRepayment(LawyerDebtEntry entry) => AssertBalanced(
+    [
+        Entry(LedgerAccount.ClearingGateway, isDebit: true, -entry.Amount, entry.Id, "LawyerDebtRepayment", "Lawyer debt repaid by bank transfer"),
+        Entry(LedgerAccount.LawyerReceivable, isDebit: false, -entry.Amount, entry.Id, "LawyerDebtRepayment", "Lawyer debt settled"),
     ]);
 
     /// <summary>Reverses a proportional slice of the original checkout posting. Only valid while
     /// the associated payout (if any) is still <see cref="PayoutStatus.Held"/> — once released,
     /// the money has left escrow and a refund needs a clawback/dispute path this pass doesn't
     /// build (see <c>RefundPaymentCommand</c>'s guard).</summary>
-    public static IReadOnlyList<LedgerEntry> PostRefund(Payment payment, Refund refund, bool wasWalletFunded)
+    /// <param name="lawyerShareAccount">Where the lawyer's share is taken back from: escrow while the payout
+    /// is still held; once it was released, <see cref="LedgerAccount.LawyerReceivable"/> (the lawyer now owes it)
+    /// or <see cref="LedgerAccount.RefundLossExpense"/> (the platform absorbs it).</param>
+    public static IReadOnlyList<LedgerEntry> PostRefund(Payment payment, Refund refund, bool wasWalletFunded,
+        LedgerAccount lawyerShareAccount = LedgerAccount.EscrowPayable)
     {
         var ratio = refund.Amount / payment.Total;
         var vatPortion = Math.Round(payment.VatAmount * ratio, 2);
@@ -92,7 +105,13 @@ public static class LedgerPostingService
         var entries = new List<LedgerEntry>();
         if (vatPortion > 0)
             entries.Add(Entry(LedgerAccount.VatPayable, isDebit: true, vatPortion, refund.Id, "Refund", "VAT reversed"));
-        entries.Add(Entry(LedgerAccount.EscrowPayable, isDebit: true, netToLawyerPortion, refund.Id, "Refund", "Escrow reversed"));
+        entries.Add(Entry(lawyerShareAccount, isDebit: true, netToLawyerPortion, refund.Id, "Refund",
+            lawyerShareAccount switch
+            {
+                LedgerAccount.LawyerReceivable => "Lawyer share recovered as a debt",
+                LedgerAccount.RefundLossExpense => "Lawyer share absorbed by the platform",
+                _ => "Escrow reversed",
+            }));
         entries.Add(Entry(LedgerAccount.CommissionRevenue, isDebit: true, commissionPortion, refund.Id, "Refund", "Commission reversed"));
         if (discountPortion > 0)
             entries.Add(Entry(LedgerAccount.DiscountExpense, isDebit: false, discountPortion, refund.Id, "Refund", "Discount expense reversed"));
@@ -105,7 +124,7 @@ public static class LedgerPostingService
 
     /// <summary>Recovered from the snapshot rather than stored: a discounted payment pays the
     /// lawyer and the platform on the gross price, so its legs exceed what the client paid.</summary>
-    private static decimal DiscountExpenseOf(Payment payment) =>
+    public static decimal DiscountExpenseOf(Payment payment) =>
         payment.Purpose == PaymentPurpose.RequestCheckout
             ? Math.Max(0, payment.VatAmount + payment.NetToLawyerAmount + payment.CommissionAmount - payment.Total)
             : 0;

@@ -24,6 +24,7 @@ public class LawyerAuthController(ISender sender) : ControllerBase
         int CityId,
         LawyerLicenseType LicenseType,
         string LicenseNumber,
+        string NationalIdNumber,
         DateOnly IssueDate,
         DateOnly ExpiryDate,
         string CountryCode,
@@ -48,7 +49,7 @@ public class LawyerAuthController(ISender sender) : ControllerBase
 
         var result = await sender.Send(new RegisterLawyerCommand(
             form.FullName, form.PhoneE164, form.Email, form.Password, form.RegionId, form.CityId,
-            form.LicenseType, form.LicenseNumber, form.IssueDate, form.ExpiryDate, form.CountryCode,
+            form.LicenseType, form.LicenseNumber, form.NationalIdNumber, form.IssueDate, form.ExpiryDate, form.CountryCode,
             form.AcceptedTerms, document, form.RecaptchaToken), cancellationToken);
         return Ok(result);
     }

@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { CircleCheck, ChevronLeft, ChevronRight, Plus, Search, Share2, SlidersHorizontal } from "lucide-react";
-import { Button, Card, Chip, Input, Ltr, SectionHeading, StatusTag } from "@law-portal/ui";
+import { CircleCheck, ChevronDown, ChevronLeft, ChevronRight, Plus, Share2 } from "lucide-react";
+import { Button, Card, Input, Ltr, StatusTag } from "@law-portal/ui";
 import { formatCurrency, formatDateTime, useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/PageHeader";
+import { FilterBar, StatusTabs, filterSelectClass } from "../components/FilterBar";
+import { dayEnd, dayStart } from "../lib/api";
 import { Field } from "../components/DiscountCodeFields";
 import { CopyCodeButton } from "../components/CopyCodeButton";
+import { ScopeChips } from "../components/ScopeChips";
 import { ShareDiscountDialog } from "../components/ShareDiscountDialog";
 import {
   DISCOUNT_SCOPES,
@@ -21,9 +25,6 @@ import {
 
 const STATUS_TABS: (DiscountCodeListStatus | "")[] = ["", "Active", "Scheduled", "Expired", "UsedUp", "Inactive"];
 const PAGE_SIZE = 20;
-/** "2026-10-07" (a date input) → start / end of that local day, as ISO. */
-const dayStart = (d: string) => (d ? new Date(`${d}T00:00:00`).toISOString() : undefined);
-const dayEnd = (d: string) => (d ? new Date(`${d}T23:59:59`).toISOString() : undefined);
 
 /** The list only: search, filters and paging. Creating and editing each have their own page. */
 export default function DiscountCodes() {
@@ -31,13 +32,22 @@ export default function DiscountCodes() {
   const [status, setStatus] = useState<DiscountCodeListStatus | "">("");
   const [searchInput, setSearchInput] = useState("");
   const [search, setSearch] = useState("");
-  const [showAdvanced, setShowAdvanced] = useState(false);
   const [scope, setScope] = useState<DiscountScope | "">("");
   const [kind, setKind] = useState<DiscountKind | "">("");
   const [validFrom, setValidFrom] = useState("");
   const [validTo, setValidTo] = useState("");
   const [page, setPage] = useState(1);
   const [sharing, setSharing] = useState<AdminDiscountCodeDto | null>(null);
+  // Cards start on one line; "+N" on the scope chips opens one up.
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [overflow, setOverflow] = useState<Record<string, number>>({});
+  const reportOverflow = (id: string) => (hidden: number) =>
+    setOverflow((prev) => (prev[id] === hidden ? prev : { ...prev, [id]: hidden }));
+  const toggle = (id: string) => setExpanded((prev) => {
+    const next = new Set(prev);
+    if (!next.delete(id)) next.add(id);
+    return next;
+  });
 
   // Just created or edited (see DiscountCodeNew / DiscountCodeEdit): confirm it and offer to share it.
   const location = useLocation();
@@ -81,98 +91,52 @@ export default function DiscountCodes() {
 
   return (
     <AppShell>
-      <div className="mb-6 flex items-center justify-between gap-4">
-        <SectionHeading level={2}>{t("discount.admin.title")}</SectionHeading>
-        <Link to="/discount-codes/new">
-          <Button>
-            <Plus className="h-4 w-4" />
-            {t("discount.admin.new")}
-          </Button>
-        </Link>
-      </div>
+      <PageHeader
+        page="discountCodes"
+        actions={
+          <Link to="/discount-codes/new">
+            <Button>
+              <Plus className="h-4 w-4" />
+              {t("discount.admin.new")}
+            </Button>
+          </Link>
+        }
+      />
 
-      <div className="mb-4 flex flex-wrap gap-2" role="tablist">
-        {STATUS_TABS.map((s) => (
-          <button
-            key={s || "all"}
-            role="tab"
-            aria-selected={status === s}
-            onClick={() => {
-              setStatus(s);
-              setPage(1);
-            }}
-            className={
-              status === s
-                ? "rounded-full bg-seal px-4 py-1.5 text-sm font-medium text-seal-on"
-                : "rounded-full border border-border px-4 py-1.5 text-sm text-ink-soft hover:border-seal hover:text-seal"
-            }
+      <StatusTabs values={STATUS_TABS} value={status} onChange={(s) => { setStatus(s); setPage(1); }} label={(s) => (s ? t(`discount.admin.statusFilter.${s}`) : t("discount.admin.all"))} />
+
+      <FilterBar search={searchInput} onSearch={setSearchInput} placeholder={t("discount.admin.search")}
+        advancedActive={advancedActive} canClear={!!(advancedActive || status || search)} onClear={clearFilters}>
+        <Field label={t("discount.admin.scopes")}>
+          <select
+            value={scope}
+            onChange={(e) => { setScope(e.target.value as DiscountScope | ""); setPage(1); }}
+            className={filterSelectClass}
           >
-            {s ? t(`discount.admin.statusFilter.${s}`) : t("discount.admin.all")}
-          </button>
-        ))}
-      </div>
-
-      <div className="mb-4 flex flex-wrap items-center gap-3">
-        <Input
-          icon={<Search className="h-4 w-4 text-ink-faint" />}
-          className="w-full max-w-md"
-          placeholder={t("discount.admin.search")}
-          aria-label={t("discount.admin.search")}
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-        />
-        <button
-          type="button"
-          aria-expanded={showAdvanced}
-          onClick={() => setShowAdvanced((v) => !v)}
-          className={
-            "flex items-center gap-1.5 rounded-md border px-3 py-2 text-sm " +
-            (advancedActive ? "border-seal text-seal" : "border-border text-ink-soft hover:border-seal hover:text-seal")
-          }
-        >
-          <SlidersHorizontal className="h-4 w-4" />
-          {showAdvanced ? t("discount.admin.hideAdvanced") : t("discount.admin.advanced")}
-        </button>
-        {(advancedActive || status || search) && (
-          <button type="button" onClick={clearFilters} className="text-sm text-ink-faint hover:text-rubric">
-            {t("discount.admin.clear")}
-          </button>
-        )}
-      </div>
-
-      {showAdvanced && (
-        <Card className="mb-4 grid gap-4 sm:grid-cols-4">
-          <Field label={t("discount.admin.scopes")}>
-            <select
-              value={scope}
-              onChange={(e) => { setScope(e.target.value as DiscountScope | ""); setPage(1); }}
-              className="rounded-md border border-border bg-surface-raised px-3 py-2.5 text-sm"
-            >
-              <option value="">{t("discount.admin.anyScope")}</option>
-              {DISCOUNT_SCOPES.map((s) => (
-                <option key={s} value={s}>{t(`discount.scopes.${s}`)}</option>
-              ))}
-            </select>
-          </Field>
-          <Field label={t("discount.admin.kind")}>
-            <select
-              value={kind}
-              onChange={(e) => { setKind(e.target.value as DiscountKind | ""); setPage(1); }}
-              className="rounded-md border border-border bg-surface-raised px-3 py-2.5 text-sm"
-            >
-              <option value="">{t("discount.admin.anyKind")}</option>
-              <option value="Percentage">{t("discount.admin.percentage")}</option>
-              <option value="Fixed">{t("discount.admin.fixed")}</option>
-            </select>
-          </Field>
-          <Field label={t("discount.admin.validFrom")}>
-            <Input dir="ltr" type="date" value={validFrom} onChange={(e) => { setValidFrom(e.target.value); setPage(1); }} />
-          </Field>
-          <Field label={t("discount.admin.validTo")}>
-            <Input dir="ltr" type="date" value={validTo} onChange={(e) => { setValidTo(e.target.value); setPage(1); }} />
-          </Field>
-        </Card>
-      )}
+            <option value="">{t("discount.admin.anyScope")}</option>
+            {DISCOUNT_SCOPES.map((s) => (
+              <option key={s} value={s}>{t(`discount.scopes.${s}`)}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label={t("discount.admin.kind")}>
+          <select
+            value={kind}
+            onChange={(e) => { setKind(e.target.value as DiscountKind | ""); setPage(1); }}
+            className={filterSelectClass}
+          >
+            <option value="">{t("discount.admin.anyKind")}</option>
+            <option value="Percentage">{t("discount.admin.percentage")}</option>
+            <option value="Fixed">{t("discount.admin.fixed")}</option>
+          </select>
+        </Field>
+        <Field label={t("discount.admin.validFrom")}>
+          <Input dir="ltr" type="date" value={validFrom} onChange={(e) => { setValidFrom(e.target.value); setPage(1); }} />
+        </Field>
+        <Field label={t("discount.admin.validTo")}>
+          <Input dir="ltr" type="date" value={validTo} onChange={(e) => { setValidTo(e.target.value); setPage(1); }} />
+        </Field>
+      </FilterBar>
 
       {created.data && (
         <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-seal bg-seal-tint px-4 py-3">
@@ -205,23 +169,34 @@ export default function DiscountCodes() {
               key={c.id}
               className={
                 "relative flex flex-wrap items-center justify-between gap-4 transition-colors hover:border-seal " +
+                (expanded.has(c.id) ? "" : "sm:flex-nowrap ") +
+                (expanded.has(c.id) || (overflow[c.id] ?? 0) > 0 ? "pe-16 " : "") +
                 (c.id === createdId ? "border-seal ring-2 ring-seal/30" : "")
               }
             >
               <Link to={`/discount-codes/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={c.code} />
-                <div className="min-w-0">
+              {/* Pinned to the card's corner so it stays put when the row expands. */}
+              {(expanded.has(c.id) || (overflow[c.id] ?? 0) > 0) && (
+                <button
+                  type="button"
+                  onClick={() => toggle(c.id)}
+                  aria-expanded={expanded.has(c.id)}
+                  aria-label={expanded.has(c.id) ? t("discount.admin.collapseRow") : t("discount.admin.expandRow")}
+                  title={expanded.has(c.id) ? t("discount.admin.collapseRow") : t("discount.admin.expandRow")}
+                  className="absolute end-5 top-8 z-10 flex h-8 w-8 items-center justify-center rounded-md border border-border text-ink-soft hover:border-seal hover:text-seal"
+                >
+                  <ChevronDown className={"h-4 w-4 transition-transform " + (expanded.has(c.id) ? "rotate-180" : "")} />
+                </button>
+              )}
+                <div className={expanded.has(c.id) ? "min-w-0" : "min-w-0 flex-1"}>
                   <p className="flex items-center gap-2">
                     <Ltr className="font-mono font-semibold text-ink">{c.code}</Ltr>
                     <CopyCodeButton code={c.code} />
                     <Ltr className="font-mono text-sm text-seal">{c.kind === "Percentage" ? `${c.value}%` : formatCurrency(c.value)}</Ltr>
                   </p>
-                  <div className="mt-1 flex flex-wrap gap-1">
-                    {c.scopes.map((scopeName) => (
-                      <Chip key={scopeName}>{t(`discount.scopes.${scopeName}`)}</Chip>
-                    ))}
-                  </div>
+                  <ScopeChips labels={c.scopes.map((x) => t(`discount.scopes.${x}`))} expanded={expanded.has(c.id)} onToggle={() => toggle(c.id)} onOverflow={reportOverflow(c.id)} />
                 </div>
-                <div className="flex flex-wrap items-center gap-4 text-xs text-ink-faint">
+                <div className={"flex items-center gap-4 text-xs text-ink-faint " + (expanded.has(c.id) ? "flex-wrap" : "shrink-0 flex-wrap sm:flex-nowrap sm:whitespace-nowrap")}>
                   <span>
                     {t("discount.admin.used")}:{" "}
                     <Ltr className="font-mono text-ink">

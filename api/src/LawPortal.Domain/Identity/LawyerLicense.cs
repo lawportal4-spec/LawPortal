@@ -8,6 +8,9 @@ public class LawyerLicense : Entity<Guid>
     public LawyerProfile? LawyerProfile { get; set; }
 
     public required string LicenseNumber { get; set; }
+    /// <summary><see cref="LicenseNumber"/> normalised (Latin digits, no spaces or separators) —
+    /// what uniqueness is checked on, so "44/1029", "441029" and "٤٤-١٠٢٩" are the same licence.</summary>
+    public string? LicenseNumberKey { get; set; }
     public LawyerLicenseType LicenseType { get; set; } = LawyerLicenseType.Licensed;
     public DateOnly IssueDate { get; set; }
     public DateOnly ExpiryDate { get; set; }

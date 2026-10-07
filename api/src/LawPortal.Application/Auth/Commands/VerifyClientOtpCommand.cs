@@ -30,6 +30,9 @@ public class VerifyClientOtpHandler(ILawPortalDbContext db, OtpService otpServic
             .FirstOrDefaultAsync(u => u.PhoneE164 == request.PhoneE164, cancellationToken);
 
         // Lawyers register with a phone too; client OTP must never open a lawyer's account.
+        if (user is { Status: UserStatus.Suspended or UserStatus.Banned })
+            throw new InvalidOperationException("This account is suspended. Please contact support.");
+
         if (user is not null && user.UserType != UserType.Client)
             throw new InvalidOperationException("This number belongs to a lawyer account. Sign in through the lawyer portal.");
 

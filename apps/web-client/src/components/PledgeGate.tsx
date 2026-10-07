@@ -1,7 +1,6 @@
 import { useId, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { ShieldCheck } from "lucide-react";
 import { Button, Card } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { useAuth } from "../lib/authContext";
@@ -37,11 +36,11 @@ function PledgeDialog() {
   });
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <Card role="dialog" aria-modal="true" aria-labelledby={titleId} elevated className="max-h-[90vh] w-full max-w-lg overflow-y-auto">
         <div className="mb-4 flex flex-col items-center gap-2 text-center">
-          <ShieldCheck className="h-10 w-10 text-seal" />
-          <p className="font-display text-2xl font-bold text-ink">{i18n.language === "ar" ? t("app.nameAr") : t("app.nameEn")}</p>
+          <img src="/favicon.svg" alt="" className="h-16 w-14" />
+          <p className="font-display text-2xl font-bold text-seal-strong">{i18n.language === "ar" ? t("app.nameAr") : t("app.nameEn")}</p>
           <h2 id={titleId} className="text-base font-semibold text-ink-soft">
             {t("clientPledge.title")}
           </h2>

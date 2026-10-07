@@ -10,3 +10,6 @@ export * from "./components/VerifiedBadge";
 export * from "./components/Input";
 export * from "./components/StepProgress";
 export * from "./components/SectionHeading";
+export * from "./components/DashboardShell";
+export * from "./components/AccountCards";
+export * from "./components/DeleteAccountCard";

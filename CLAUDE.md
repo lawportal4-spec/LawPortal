@@ -4,28 +4,29 @@ Saudi legal-services marketplace. pnpm/turbo monorepo: four Vite/React+Tailwind 
 `apps/` (`web-client`, `web-lawyer`, `web-admin`) plus an Astro marketing site (`web-marketing`),
 a .NET API (`api/`), and a Flutter app (`mobile/`).
 
-## Design system — "Sealed Document"
+## Design system — "Golden Gate" (navy + gold)
 
-The visual identity is a legal-document concept, not a generic admin-panel look. Single source
+The identity comes from the client's brand board: night-navy surfaces, gold accents, and the
+logo (a pointed gate + scales of justice + a pen nib), in `apps/*/public/favicon.svg` — the shells,
+lawyer auth page and client pledge render it with `<img src="/favicon.svg">`. Single source
 of truth: `packages/design-tokens/src/tokens.json`, built by `packages/design-tokens/build.js`
 into `dist/theme.css` (consumed by every web app via `@import "@law-portal/design-tokens/theme.css"`)
 and `dist/tokens.dart` (Flutter).
 
 **Palette semantics — these are rules, not just colors:**
-- `seal` (green) is the only primary-action color. Used for buttons, active nav state, focus rings.
+- `seal` (gold `#B8963A`, with `seal-on` navy text) is the only primary-action color. Used for buttons, active nav state, focus rings.
 - `vellum` is reserved exclusively for credential artifacts — the lawyer licence facsimile
-  (`CredentialChip.tsx`'s `CredentialCard`/`CredentialChipMini`). Never use it as a generic
-  warm/cream background elsewhere; that would dilute the one place it's supposed to mean
+  (`CredentialChip.tsx`'s `CredentialCard`/`CredentialChipMini`) — the one ivory surface on the navy
+  UI. Never use it as a generic background elsewhere; that would dilute the one place it's supposed to mean
   "official document."
 - `rubric` (red) marks marginal/annotation-style labels (eyebrows, "sample data" tags) —
   **never a button fill.** Its `-tint` variant is for danger/disputed states.
-- `category.*` tokens (consult/judiciary/notary/business/other) are light-theme only — there is
-  no dark variant, which is one reason dark mode isn't supported on web (see below).
+- The palette is dark by design: `ink` is ivory text, `paper`/`surface`/`surface-raised` are navy.
+  Modal scrims use `bg-black/60`, never `bg-ink/…` (ink is light).
 
 **Typography roles:**
-- `font-display` (`LP Amiri`) — headings only, used with restraint. It's a Naskh serif; don't
-  reach for it in dense UI (tables, form labels).
-- `font-body` (`LP Plex Arabic`) — everything else, Arabic and Latin both.
+- `font-display` (`LP Cairo` 600/700) — headings only; don't reach for it in dense UI.
+- `font-body` (`LP Tajawal` 400/500/700) — everything else, Arabic and Latin both.
 - `font-mono` (`LP Plex Mono`) — every number, date, ID, licence number, phone number. Always
   wrap the value in `<Ltr>` (`packages/ui/src/components/Ltr.tsx`) so it isolates correctly
   inside RTL paragraphs — this is what prevents numbers/ranges silently reversing in Arabic.
@@ -41,17 +42,13 @@ surfaces — credential cards, the `Card elevated` prop). Don't reintroduce one-
 **Radius/spacing:** `radius.sm/md/lg/xl/full` and `space.1–12` in tokens.json — reuse these, don't
 invent new arbitrary values in component code.
 
-**Light theme only on web.** The `color.dark-*` tokens in `tokens.json` exist and still feed
-`tokens.dart` — **mobile's dark theme is real and wired** (`mobile/lib/core/theme/app_theme.dart`
-builds a genuine `ThemeMode`-aware `ColorScheme` from `LpColorsDark`). Don't delete the dark-*
-tokens or touch `buildTokensDart()` on the assumption dark mode is dead — it's dead on *web*
-specifically, because no web app ever set `data-theme` and the `category.*` tokens have no dark
-variants, so the old `prefers-color-scheme` CSS silently broke rather than working. If web dark
-mode is ever built, add the missing category dark variants first.
+**One theme.** Web and mobile both use the navy palette; the `color.dark-*` tokens mirror the
+main ones so mobile's `LpColorsDark` (wired in `mobile/lib/core/theme/app_theme.dart`) looks the
+same. Keep them in sync when changing a color.
 
 **Fonts:** the real font files are subsetted (Arabic + Latin + digits + punctuation, all Arabic
 shaping features kept) and compressed to `.woff2` in `packages/design-tokens/src/fonts/`, sourced
-from `mobile/assets/fonts/*.ttf`. `build.js` copies them to `dist/fonts/` and emits `@font-face`
+from `mobile/assets/fonts/*.ttf` (Cairo/Tajawal from Google Fonts, OFL). `build.js` copies them to `dist/fonts/` and emits `@font-face`
 rules into `theme.css` from the `fontFace` array in `tokens.json` — add new weights there, not by
 hand-editing generated CSS.
 
