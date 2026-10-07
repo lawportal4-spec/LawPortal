@@ -322,5 +322,19 @@
       "rejectedTitle": "Your registration was rejected",
       "rejectedReason": "Reason:"
     }
+  },
+  "clientPledge": {
+    "title": "Client pledge",
+    "intro": "Before continuing on Law Portal, I pledge to:",
+    "items": [
+      "Pay for legal services through the platform only, and never pay a lawyer outside it.",
+      "Report it to the platform right away if a lawyer asks me to pay or communicate outside it.",
+      "Understand that the platform bears no responsibility for payments or agreements made outside it.",
+      "Not share or ask for personal contact details with a lawyer outside the platform.",
+      "Contact the support team with any question or problem."
+    ],
+    "confirm": "Confirm",
+    "logout": "Sign out",
+    "failed": "Couldn't save the pledge, please try again."
   }
 }

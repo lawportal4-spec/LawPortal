@@ -34,6 +34,7 @@ public class GetMeHandler(ILawPortalDbContext db, ICurrentUser currentUser) : IR
             user.PreferredLocale,
             profileCompleted,
             currentUser.Roles,
-            user.LawyerProfile?.License?.VerificationStatus.ToString());
+            user.LawyerProfile?.License?.VerificationStatus.ToString(),
+            user.ClientProfile?.HasAcceptedCurrentPledge ?? true);
     }
 }
