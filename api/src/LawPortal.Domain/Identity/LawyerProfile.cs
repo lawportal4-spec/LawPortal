@@ -40,6 +40,13 @@ public class LawyerProfile : AggregateRoot<Guid>
     /// with P8's real session scheduling, once there are actual bookable time slots to manage.</summary>
     public bool AcceptingNewRequests { get; set; } = true;
 
+    /// <summary>Profile photo shown to clients on the lawyer card and profile.</summary>
+    public string? PhotoStorageKey { get; set; }
+
+    /// <summary>Office / secretary numbers for the platform to reach the lawyer — admin-only,
+    /// never shown to clients (see the client pledge).</summary>
+    public ICollection<LawyerContactNumber> ContactNumbers { get; set; } = [];
+
     /// <summary>Denormalized for directory sort/display — recomputed once reviews (later
     /// phase) and completed orders (P3+) exist; seeded synthetically for demo data until then.</summary>
     public decimal? AvgRating { get; set; }

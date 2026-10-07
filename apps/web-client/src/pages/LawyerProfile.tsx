@@ -49,7 +49,7 @@ export default function LawyerProfile() {
         <div>
           <div className="relative mb-10 h-28 rounded-xl bg-ink">
             <div className="absolute -bottom-6 start-4">
-              <Avatar initials={initialsOf(lawyer.fullName)} size="md" online />
+              <Avatar initials={initialsOf(lawyer.fullName)} src={lawyer.photoUrl} size="md" online />
             </div>
           </div>
 

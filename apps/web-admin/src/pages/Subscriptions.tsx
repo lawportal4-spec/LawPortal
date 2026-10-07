@@ -4,6 +4,7 @@ import { Pencil } from "lucide-react";
 import { Button, Card, Ltr } from "@law-portal/ui";
 import { useTranslation, formatCurrency } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { RegistrationFeeCard } from "../components/RegistrationFeeCard";
 import { getAdminSubscriptionPlans, updateSubscriptionPlan, type AdminSubscriptionPlanDto } from "../lib/subscriptionsApi";
 
 function PlanCard({ plan, isAr }: { plan: AdminSubscriptionPlanDto; isAr: boolean }) {
@@ -101,6 +102,8 @@ export default function Subscriptions() {
 
   return (
     <AppShell>
+      <RegistrationFeeCard />
+
       <h1 className="mb-6 font-display text-2xl font-bold">{isAr ? "خطط الاشتراك" : "Subscription Plans"}</h1>
 
       {query.isLoading && <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>}

@@ -36,6 +36,10 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddSingleton<IOtpSender, LoggingOtpSender>();
+        if (!string.IsNullOrWhiteSpace(configuration["Email:Smtp:Host"]))
+            services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        else
+            services.AddSingleton<IEmailSender, LoggingEmailSender>();
         services.AddSingleton<IRecaptchaVerifier, NoOpRecaptchaVerifier>();
         services.AddSingleton<IFileStorage, S3FileStorage>();
         services.AddScoped<IVirusScanner, ClamAvVirusScanner>();

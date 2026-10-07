@@ -7,7 +7,7 @@ namespace LawPortal.Application.Lawyers.Queries;
 
 public record GetLawyerProfileQuery(string Slug) : IRequest<LawyerProfileDetailDto>;
 
-public class GetLawyerProfileHandler(ILawPortalDbContext db) : IRequestHandler<GetLawyerProfileQuery, LawyerProfileDetailDto>
+public class GetLawyerProfileHandler(ILawPortalDbContext db, IFileStorage storage) : IRequestHandler<GetLawyerProfileQuery, LawyerProfileDetailDto>
 {
     public async Task<LawyerProfileDetailDto> Handle(GetLawyerProfileQuery request, CancellationToken cancellationToken)
     {
@@ -47,9 +47,11 @@ public class GetLawyerProfileHandler(ILawPortalDbContext db) : IRequestHandler<G
                 l.Qualifications
                     .OrderBy(q => q.SortOrder)
                     .Select(q => new LawyerQualificationDto(q.Kind.ToString(), q.TitleAr, q.TitleEn, q.Institution, q.FromYear, q.ToYear))
-                    .ToList()))
-            .FirstOrDefaultAsync(cancellationToken);
+                    .ToList(),
+                l.PhotoStorageKey))
+            .FirstOrDefaultAsync(cancellationToken)
+            ?? throw new KeyNotFoundException("Lawyer profile not found.");
 
-        return profile ?? throw new KeyNotFoundException("Lawyer profile not found.");
+        return profile.PhotoUrl is null ? profile : profile with { PhotoUrl = storage.CreateDownloadUrl(profile.PhotoUrl, SearchLawyersHandler.PhotoUrlTtl) };
     }
 }

@@ -49,6 +49,8 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<EmailVerificationToken> EmailVerificationTokens => Set<EmailVerificationToken>();
+    public DbSet<LawyerContactNumber> LawyerContactNumbers => Set<LawyerContactNumber>();
     public DbSet<OtpChallenge> OtpChallenges => Set<OtpChallenge>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
 
@@ -70,6 +72,8 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<WalletTransactionEntity> WalletTransactions => Set<WalletTransactionEntity>();
     public DbSet<CommissionPolicy> CommissionPolicies => Set<CommissionPolicy>();
     public DbSet<Invoice> Invoices => Set<Invoice>();
+    public DbSet<DiscountCode> DiscountCodes => Set<DiscountCode>();
+    public DbSet<DiscountRedemption> DiscountRedemptions => Set<DiscountRedemption>();
 
     public DbSet<MessageThread> MessageThreads => Set<MessageThread>();
     public DbSet<Message> Messages => Set<Message>();
@@ -86,6 +90,8 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<SubscriptionPlan> SubscriptionPlans => Set<SubscriptionPlan>();
     public DbSet<LawyerSubscription> LawyerSubscriptions => Set<LawyerSubscription>();
     public DbSet<SubscriptionInvoice> SubscriptionInvoices => Set<SubscriptionInvoice>();
+    public DbSet<RegistrationFeeSetting> RegistrationFeeSettings => Set<RegistrationFeeSetting>();
+    public DbSet<LawyerRegistrationFeeInvoice> RegistrationFeeInvoices => Set<LawyerRegistrationFeeInvoice>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

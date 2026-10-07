@@ -28,6 +28,13 @@ public class Payment : AggregateRoot<Guid>
     public Guid? LawyerProfileId { get; set; }
     public LawyerProfile? LawyerProfile { get; set; }
 
+    /// <summary>The price before any discount code. Equals <see cref="Total"/> when none was used.</summary>
+    public decimal GrossAmount { get; set; }
+    /// <summary>VAT-inclusive amount taken off by <see cref="DiscountCodeId"/>; the platform funds
+    /// it, so <see cref="NetToLawyerAmount"/> is still computed from <see cref="GrossAmount"/>.</summary>
+    public decimal DiscountAmount { get; set; }
+    public Guid? DiscountCodeId { get; set; }
+
     public decimal Total { get; set; }
     public decimal VatAmount { get; set; }
     public decimal CommissionAmount { get; set; }

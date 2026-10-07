@@ -49,6 +49,8 @@ export interface LawyerProfileEditDto {
   acceptingNewRequests: boolean;
   specialtyIds: number[];
   languageIds: number[];
+  /** null until prices have been saved once. */
+  pricing: { writtenPrice: number; price15: number; price30: number; price45: number } | null;
 }
 
 export interface PayoutSummaryDto {
@@ -116,7 +118,7 @@ export async function getMyProfile(): Promise<LawyerProfileEditDto> {
   return data;
 }
 
-export async function updateMyProfile(body: LawyerProfileEditDto): Promise<void> {
+export async function updateMyProfile(body: Omit<LawyerProfileEditDto, "pricing">): Promise<void> {
   await api.put("/api/v1/lawyer/profile", body);
 }
 

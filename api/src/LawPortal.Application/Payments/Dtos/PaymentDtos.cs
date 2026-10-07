@@ -17,7 +17,8 @@ public record InvoiceDto(
     string SellerNameEn,
     string? SellerVatNumber,
     string QrPayloadBase64,
-    DateTime IssuedAtUtc);
+    DateTime IssuedAtUtc,
+    decimal DiscountAmount);
 
 public record PaymentSummaryDto(
     Guid Id,

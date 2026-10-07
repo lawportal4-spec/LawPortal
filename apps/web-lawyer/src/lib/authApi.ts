@@ -84,6 +84,12 @@ export interface LawyerMeDto {
   issueDate: string;
   expiryDate: string;
   documentFileName: string | null;
+  email: string | null;
+  /** After approval: verify the email, then pay the registration fee; null once nothing is left. */
+  onboardingStep: "VerifyEmail" | "PayFee" | null;
+  /** ISO date: licence renewal opens 3 months before expiryDate. */
+  renewalOpensOn: string;
+  renewalPending: boolean;
 }
 
 export async function getLawyerMe(): Promise<LawyerMeDto> {
@@ -130,4 +136,20 @@ export interface RegionDto {
 export async function getRegions(): Promise<RegionDto[]> {
   const { data } = await api.get<RegionDto[]>("/api/v1/catalog/regions");
   return data;
+}
+
+export interface LawyerEmailVerifiedDto {
+  fullName: string;
+  /** "PayFee"; "EmailChanged" for a change-of-address link; null when the account is already open. */
+  nextStep: "PayFee" | "EmailChanged" | null;
+}
+
+/** The "تفعيل الآن" link. Public — the token is the proof, no session needed. */
+export async function verifyLawyerEmail(token: string): Promise<LawyerEmailVerifiedDto> {
+  const { data } = await api.post<LawyerEmailVerifiedDto>("/api/v1/auth/lawyer/email/verify", { token });
+  return data;
+}
+
+export async function resendVerificationEmail(): Promise<void> {
+  await api.post("/api/v1/lawyer/email/resend");
 }

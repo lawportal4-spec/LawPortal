@@ -49,4 +49,8 @@ public record LawyerProfileEditDto(
     string? BioEn,
     bool AcceptingNewRequests,
     IReadOnlyList<int> SpecialtyIds,
-    IReadOnlyList<int> LanguageIds);
+    IReadOnlyList<int> LanguageIds,
+    /// <summary>null until the lawyer has saved prices once.</summary>
+    LawyerPricingEditDto? Pricing);
+
+public record LawyerPricingEditDto(decimal WrittenPrice, decimal Price15, decimal Price30, decimal Price45);

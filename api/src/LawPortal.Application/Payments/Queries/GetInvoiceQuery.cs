@@ -22,7 +22,8 @@ public class GetInvoiceHandler(ILawPortalDbContext db, ICurrentUser currentUser)
 
         return new InvoiceDto(
             invoice.Number, invoice.SubtotalExVat, invoice.VatAmount, invoice.Total, invoice.IsVatApplicable,
-            invoice.SellerNameAr, invoice.SellerNameEn, invoice.SellerVatNumber, invoice.QrPayloadBase64, invoice.IssuedAtUtc);
+            invoice.SellerNameAr, invoice.SellerNameEn, invoice.SellerVatNumber, invoice.QrPayloadBase64, invoice.IssuedAtUtc,
+            invoice.DiscountAmount);
     }
 }
 

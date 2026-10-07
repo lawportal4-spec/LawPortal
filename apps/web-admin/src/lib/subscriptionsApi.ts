@@ -34,3 +34,21 @@ export async function updateSubscriptionPlan(plan: AdminSubscriptionPlanDto): Pr
     isActive: plan.isActive,
   });
 }
+
+export interface RegistrationFeeSettingDto {
+  /** Before VAT. */
+  amount: number;
+  isEnabled: boolean;
+  vatAmount: number;
+  total: number;
+}
+
+export async function getRegistrationFeeSetting(): Promise<RegistrationFeeSettingDto> {
+  const { data } = await api.get<RegistrationFeeSettingDto>("/api/v1/admin/settings/registration-fee");
+  return data;
+}
+
+export async function updateRegistrationFeeSetting(amount: number, isEnabled: boolean): Promise<RegistrationFeeSettingDto> {
+  const { data } = await api.put<RegistrationFeeSettingDto>("/api/v1/admin/settings/registration-fee", { amount, isEnabled });
+  return data;
+}

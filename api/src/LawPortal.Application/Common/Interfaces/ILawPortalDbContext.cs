@@ -50,6 +50,8 @@ public interface ILawPortalDbContext
     DbSet<RolePermission> RolePermissions { get; }
     DbSet<UserRole> UserRoles { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
+    DbSet<EmailVerificationToken> EmailVerificationTokens { get; }
+    DbSet<LawyerContactNumber> LawyerContactNumbers { get; }
     DbSet<OtpChallenge> OtpChallenges { get; }
     DbSet<AuditLog> AuditLogs { get; }
 
@@ -71,6 +73,8 @@ public interface ILawPortalDbContext
     DbSet<WalletTransactionEntity> WalletTransactions { get; }
     DbSet<CommissionPolicy> CommissionPolicies { get; }
     DbSet<Invoice> Invoices { get; }
+    DbSet<DiscountCode> DiscountCodes { get; }
+    DbSet<DiscountRedemption> DiscountRedemptions { get; }
 
     DbSet<MessageThread> MessageThreads { get; }
     DbSet<Message> Messages { get; }
@@ -87,6 +91,8 @@ public interface ILawPortalDbContext
     DbSet<SubscriptionPlan> SubscriptionPlans { get; }
     DbSet<LawyerSubscription> LawyerSubscriptions { get; }
     DbSet<SubscriptionInvoice> SubscriptionInvoices { get; }
+    DbSet<RegistrationFeeSetting> RegistrationFeeSettings { get; }
+    DbSet<LawyerRegistrationFeeInvoice> RegistrationFeeInvoices { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

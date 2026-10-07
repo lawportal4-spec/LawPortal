@@ -90,11 +90,133 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.ToTable("commission_policies", (string)null);
                 });
 
+            modelBuilder.Entity("LawPortal.Domain.Billing.DiscountCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("varchar(40)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("DescriptionAr")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("DescriptionEn")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<DateTime?>("EndsAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<bool>("FirstPaymentOnly")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<decimal?>("MaxDiscountAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal?>("MinAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("PerUserLimit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Scopes")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("StartsAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<int?>("UsageLimit")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("discount_codes", (string)null);
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Billing.DiscountRedemption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("DiscountCodeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid>("ReferenceId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Scope")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReferenceId");
+
+                    b.HasIndex("DiscountCodeId", "Status");
+
+                    b.HasIndex("DiscountCodeId", "UserId");
+
+                    b.ToTable("discount_redemptions", (string)null);
+                });
+
             modelBuilder.Entity("LawPortal.Domain.Billing.Invoice", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<bool>("IsVatApplicable")
                         .HasColumnType("tinyint(1)");
@@ -149,6 +271,109 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("invoices", (string)null);
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Billing.LawyerRegistrationFeeInvoice", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<decimal>("BaseAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<DateTime?>("DeletedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<string>("FailureReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
+
+                    b.Property<string>("GatewayPaymentId")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<string>("GatewayProvider")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<Guid>("LawyerProfileId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("varchar(30)");
+
+                    b.Property<DateTime?>("PaidAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("QrPayloadBase64")
+                        .HasColumnType("longtext");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("SubtotalExVat")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("longtext");
+
+                    b.Property<decimal>("VatAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GatewayPaymentId");
+
+                    b.HasIndex("LawyerProfileId");
+
+                    b.HasIndex("Number")
+                        .IsUnique();
+
+                    b.ToTable("registration_fee_invoices", (string)null);
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Billing.RegistrationFeeSetting", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<bool>("IsEnabled")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateTime>("UpdatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("registration_fee_settings", (string)null);
                 });
 
             modelBuilder.Entity("LawPortal.Domain.Calls.ConsultationSession", b =>
@@ -803,6 +1028,12 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("varchar(200)");
 
+                    b.Property<DateTime?>("PledgeAcceptedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("PledgeVersion")
+                        .HasColumnType("int");
+
                     b.Property<DateTime?>("ProfileCompletedAtUtc")
                         .HasColumnType("datetime(6)");
 
@@ -817,6 +1048,71 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                         .IsUnique();
 
                     b.ToTable("client_profiles", (string)null);
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Identity.EmailVerificationToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<DateTime>("ExpiresAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("NewEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("varchar(200)");
+
+                    b.Property<DateTime?>("UsedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("email_verification_tokens", (string)null);
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Identity.LawyerContactNumber", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ContactName")
+                        .HasMaxLength(100)
+                        .HasColumnType("varchar(100)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("LawyerProfileId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("PhoneE164")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("varchar(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LawyerProfileId");
+
+                    b.ToTable("lawyer_contact_numbers", (string)null);
                 });
 
             modelBuilder.Entity("LawPortal.Domain.Identity.LawyerLanguage", b =>
@@ -971,6 +1267,10 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
 
                     b.Property<bool>("IsVerified")
                         .HasColumnType("tinyint(1)");
+
+                    b.Property<string>("PhotoStorageKey")
+                        .HasMaxLength(300)
+                        .HasColumnType("varchar(300)");
 
                     b.Property<int>("RatingCount")
                         .HasColumnType("int");
@@ -1420,6 +1720,12 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("longtext");
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<Guid?>("DiscountCodeId")
+                        .HasColumnType("char(36)");
+
                     b.Property<string>("FailureReason")
                         .HasMaxLength(500)
                         .HasColumnType("varchar(500)");
@@ -1432,6 +1738,9 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("varchar(30)");
+
+                    b.Property<decimal>("GrossAmount")
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("tinyint(1)");
@@ -1923,6 +2232,9 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.Property<string>("DeletedBy")
                         .HasColumnType("longtext");
 
+                    b.Property<decimal>("DiscountAmount")
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<DateTime>("DueAtUtc")
                         .HasColumnType("datetime(6)");
 
@@ -2177,6 +2489,17 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.ToTable("consultation_requests", (string)null);
                 });
 
+            modelBuilder.Entity("LawPortal.Domain.Billing.DiscountRedemption", b =>
+                {
+                    b.HasOne("LawPortal.Domain.Billing.DiscountCode", "DiscountCode")
+                        .WithMany("Redemptions")
+                        .HasForeignKey("DiscountCodeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DiscountCode");
+                });
+
             modelBuilder.Entity("LawPortal.Domain.Catalog.City", b =>
                 {
                     b.HasOne("LawPortal.Domain.Catalog.Region", "Region")
@@ -2291,6 +2614,15 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.Navigation("City");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("LawPortal.Domain.Identity.LawyerContactNumber", b =>
+                {
+                    b.HasOne("LawPortal.Domain.Identity.LawyerProfile", null)
+                        .WithMany("ContactNumbers")
+                        .HasForeignKey("LawyerProfileId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("LawPortal.Domain.Identity.LawyerLanguage", b =>
@@ -2655,6 +2987,11 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
                     b.Navigation("LawyerProfile");
                 });
 
+            modelBuilder.Entity("LawPortal.Domain.Billing.DiscountCode", b =>
+                {
+                    b.Navigation("Redemptions");
+                });
+
             modelBuilder.Entity("LawPortal.Domain.Catalog.Region", b =>
                 {
                     b.Navigation("Cities");
@@ -2684,6 +3021,8 @@ namespace LawPortal.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("LawPortal.Domain.Identity.LawyerProfile", b =>
                 {
+                    b.Navigation("ContactNumbers");
+
                     b.Navigation("LawyerLanguages");
 
                     b.Navigation("LawyerSpecialties");

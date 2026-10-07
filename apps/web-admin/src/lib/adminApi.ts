@@ -76,6 +76,11 @@ export interface LawyerRegistrationDetailDto {
   correctionRequestedAtUtc: string | null;
   resubmittedAtUtc: string | null;
   decidedAtUtc: string | null;
+  /** Approved but the account isn't open yet: still has to confirm the email, then pay the fee. */
+  onboardingStep: "VerifyEmail" | "PayFee" | null;
+  photoUrl: string | null;
+  /** Office / secretary numbers the lawyer added — admin-only, never shown to clients. */
+  contactNumbers: { kind: "Office" | "Secretary" | "Mobile" | "Other"; contactName: string | null; phoneE164: string }[];
 }
 
 export async function getLawyerRegistrations(params: {

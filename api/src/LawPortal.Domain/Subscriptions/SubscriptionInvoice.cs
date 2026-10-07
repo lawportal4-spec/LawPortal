@@ -28,6 +28,8 @@ public class SubscriptionInvoice : AggregateRoot<Guid>
     public DateTime PeriodEndUtc { get; set; }
 
     public decimal SubtotalExVat { get; set; }
+    /// <summary>VAT-inclusive discount-code reduction; already netted out of <see cref="Total"/> (VAT is backed out of what remains).</summary>
+    public decimal DiscountAmount { get; set; }
     public decimal VatAmount { get; set; }
     public decimal Total { get; set; }
 

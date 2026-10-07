@@ -83,7 +83,12 @@ public record LawyerRegistrationDetailDto(
     string? CorrectionNote,
     DateTime? CorrectionRequestedAtUtc,
     DateTime? ResubmittedAtUtc,
-    DateTime? DecidedAtUtc);
+    DateTime? DecidedAtUtc,
+    /// <summary>Approved but not active yet: "VerifyEmail" or "PayFee" (see LawyerOnboarding).</summary>
+    string? OnboardingStep,
+    string? PhotoUrl,
+    /// <summary>Office / secretary numbers — admin-only, never shown to clients.</summary>
+    IReadOnlyList<LawPortal.Application.Lawyers.Account.ContactNumberDto> ContactNumbers);
 
 public record GetLawyerRegistrationQuery(Guid LawyerProfileId) : IRequest<LawyerRegistrationDetailDto>;
 
@@ -99,6 +104,7 @@ public class GetLawyerRegistrationHandler(ILawPortalDbContext db, IFileStorage s
             .Include(p => p.License)
             .Include(p => p.Region)
             .Include(p => p.City)
+            .Include(p => p.ContactNumbers)
             .FirstOrDefaultAsync(p => p.Id == request.LawyerProfileId, cancellationToken)
             ?? throw new KeyNotFoundException("Lawyer registration not found.");
         var license = l.License ?? throw new KeyNotFoundException("No licence submitted for this lawyer.");
@@ -114,7 +120,10 @@ public class GetLawyerRegistrationHandler(ILawPortalDbContext db, IFileStorage s
             license.RejectionReason,
             CorrectionIssueNames.Of(license.CorrectionIssues),
             license.CorrectionNote, license.CorrectionRequestedAtUtc, license.ResubmittedAtUtc,
-            license.VerifiedAtUtc);
+            license.VerifiedAtUtc,
+            LawPortal.Application.Lawyers.Onboarding.LawyerOnboarding.StepOf(l)?.ToString(),
+            l.PhotoStorageKey is null ? null : storage.CreateDownloadUrl(l.PhotoStorageKey, DocumentUrlTtl),
+            l.ContactNumbers.Select(c => new LawPortal.Application.Lawyers.Account.ContactNumberDto(c.Kind.ToString(), c.ContactName, c.PhoneE164)).ToList());
     }
 }
 

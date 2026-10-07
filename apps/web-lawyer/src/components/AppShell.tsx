@@ -23,6 +23,7 @@ export function AppShell({ children, hideNav = false }: { children: ReactNode; h
         { to: "/earnings", label: t("shell.lawyer.nav.earningsAndReviews") },
         { to: "/subscription", label: t("shell.lawyer.nav.subscription") },
         { to: "/settings", label: t("shell.lawyer.nav.profileAndPricing") },
+        { to: "/account", label: t("shell.lawyer.nav.personalInfo") },
       ]
     : [];
 

@@ -38,7 +38,7 @@ public class RegisterLawyerValidator : AbstractValidator<RegisterLawyerCommand>
     public const long MaxDocumentBytes = 3 * 1024 * 1024;
 
     public static readonly string[] AllowedDocumentTypes =
-        ["image/jpeg", "image/png", "image/jpg", "image/webp", "application/pdf"];
+        ["image/jpeg", "image/png", "image/jpg", "application/pdf"];
 
     public RegisterLawyerValidator()
     {
@@ -59,7 +59,7 @@ public class RegisterLawyerValidator : AbstractValidator<RegisterLawyerCommand>
             .WithMessage("The licence document must be at most 3MB.")
             .When(x => x.LicenseDocument is not null);
         RuleFor(x => x.LicenseDocument!.ContentType).Must(t => AllowedDocumentTypes.Contains(t))
-            .WithMessage("The licence document must be an image (jpeg, png, webp) or a PDF.")
+            .WithMessage("The licence document must be a JPG or PNG image, or a PDF.")
             .When(x => x.LicenseDocument is not null);
         RuleFor(x => x.RecaptchaToken).NotEmpty();
     }

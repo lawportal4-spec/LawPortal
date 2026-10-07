@@ -30,6 +30,15 @@ public class AuthController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>The client accepts the "أتعهد…" pledge shown until they do (see MeDto.PledgeAccepted).</summary>
+    [Authorize]
+    [HttpPost("me/pledge")]
+    public async Task<IActionResult> AcceptPledge(CancellationToken cancellationToken)
+    {
+        await sender.Send(new AcceptClientPledgeCommand(), cancellationToken);
+        return NoContent();
+    }
+
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType<MeDto>(StatusCodes.Status200OK)]

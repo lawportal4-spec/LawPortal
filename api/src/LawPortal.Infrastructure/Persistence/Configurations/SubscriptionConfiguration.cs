@@ -34,6 +34,7 @@ public class SubscriptionInvoiceConfiguration : IEntityTypeConfiguration<Subscri
         builder.HasIndex(i => i.Number).IsUnique();
         builder.HasIndex(i => i.GatewayPaymentId);
         builder.Property(i => i.SubtotalExVat).HasColumnType("decimal(10,2)");
+        builder.Property(i => i.DiscountAmount).HasColumnType("decimal(10,2)");
         builder.Property(i => i.VatAmount).HasColumnType("decimal(10,2)");
         builder.Property(i => i.Total).HasColumnType("decimal(10,2)");
     }

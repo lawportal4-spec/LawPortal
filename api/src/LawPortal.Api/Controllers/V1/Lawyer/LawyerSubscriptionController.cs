@@ -5,6 +5,7 @@ using LawPortal.Application.Subscriptions.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace LawPortal.Api.Controllers.V1.Lawyer;
 
@@ -44,6 +45,9 @@ public class LawyerSubscriptionController(ISender sender) : ControllerBase
 
     [HttpPost("invoices/{id:guid}/pay")]
     [ProducesResponseType<CheckoutResultDto>(StatusCodes.Status200OK)]
-    public async Task<ActionResult<CheckoutResultDto>> PayInvoice(Guid id, CancellationToken cancellationToken)
-        => Ok(await sender.Send(new PaySubscriptionInvoiceCommand(id), cancellationToken));
+    public async Task<ActionResult<CheckoutResultDto>> PayInvoice(
+        Guid id, [FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] PayInvoiceBody? body, CancellationToken cancellationToken)
+        => Ok(await sender.Send(new PaySubscriptionInvoiceCommand(id, body?.DiscountCode), cancellationToken));
+
+    public record PayInvoiceBody(string? DiscountCode);
 }

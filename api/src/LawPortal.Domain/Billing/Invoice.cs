@@ -23,6 +23,8 @@ public class Invoice : Entity<Guid>
 
     public required string Number { get; set; }
     public decimal SubtotalExVat { get; set; }
+    /// <summary>Discount-code reduction shown as its own line; already netted out of <see cref="Total"/>.</summary>
+    public decimal DiscountAmount { get; set; }
     public decimal VatAmount { get; set; }
     public decimal Total { get; set; }
     public bool IsVatApplicable { get; set; }

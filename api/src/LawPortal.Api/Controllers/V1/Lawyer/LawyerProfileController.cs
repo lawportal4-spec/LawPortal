@@ -3,6 +3,8 @@ using LawPortal.Application.Lawyers.Commands;
 using LawPortal.Domain.Identity;
 using LawPortal.Application.Lawyers.Dtos;
 using LawPortal.Application.Lawyers.Queries;
+using LawPortal.Application.Lawyers.Onboarding;
+using LawPortal.Application.Payments.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -39,6 +41,26 @@ public class LawyerProfileController(ISender sender) : ControllerBase
     [ProducesResponseType<LawyerMeDto>(StatusCodes.Status200OK)]
     public async Task<ActionResult<LawyerMeDto>> Me(CancellationToken cancellationToken)
         => Ok(await sender.Send(new GetLawyerMeQuery(), cancellationToken));
+
+    [HttpPost("email/resend")]
+    public async Task<IActionResult> ResendVerificationEmail(CancellationToken cancellationToken)
+    {
+        await sender.Send(new ResendLawyerVerificationEmailCommand(), cancellationToken);
+        return NoContent();
+    }
+
+    /// <summary>The open registration-fee invoice (created on first call), priced from the admin setting.</summary>
+    [HttpGet("registration-fee")]
+    [ProducesResponseType<RegistrationFeeDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<RegistrationFeeDto>> RegistrationFee(CancellationToken cancellationToken)
+        => Ok(await sender.Send(new OpenRegistrationFeeInvoiceCommand(), cancellationToken));
+
+    public record PayRegistrationFeeBody(string? DiscountCode);
+
+    [HttpPost("registration-fee/pay")]
+    [ProducesResponseType<CheckoutResultDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<CheckoutResultDto>> PayRegistrationFee(PayRegistrationFeeBody body, CancellationToken cancellationToken)
+        => Ok(await sender.Send(new PayRegistrationFeeCommand(body.DiscountCode), cancellationToken));
 
     [HttpGet("dashboard")]
     [ProducesResponseType<LawyerDashboardDto>(StatusCodes.Status200OK)]

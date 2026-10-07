@@ -17,8 +17,10 @@ public record SearchLawyersQuery(
     int Page,
     int PageSize) : IRequest<PagedResult<LawyerCardDto>>;
 
-public class SearchLawyersHandler(ILawPortalDbContext db) : IRequestHandler<SearchLawyersQuery, PagedResult<LawyerCardDto>>
+public class SearchLawyersHandler(ILawPortalDbContext db, IFileStorage storage) : IRequestHandler<SearchLawyersQuery, PagedResult<LawyerCardDto>>
 {
+    internal static readonly TimeSpan PhotoUrlTtl = TimeSpan.FromHours(6);
+
     public async Task<PagedResult<LawyerCardDto>> Handle(SearchLawyersQuery request, CancellationToken cancellationToken)
     {
         var page = Math.Max(1, request.Page);
@@ -80,9 +82,12 @@ public class SearchLawyersHandler(ILawPortalDbContext db) : IRequestHandler<Sear
                 l.Pricing!.WrittenPrice,
                 l.IsVatRegistered,
                 l.LawyerSpecialties.Select(ls => ls.Specialty!.NameAr).ToList(),
-                l.LawyerSpecialties.Select(ls => ls.Specialty!.NameEn).ToList()))
+                l.LawyerSpecialties.Select(ls => ls.Specialty!.NameEn).ToList(),
+                l.PhotoStorageKey))
             .ToListAsync(cancellationToken);
 
+        // The projection carries the storage key; swap it for a signed URL here, outside the SQL.
+        items = items.Select(i => i with { PhotoUrl = i.PhotoUrl is null ? null : storage.CreateDownloadUrl(i.PhotoUrl, PhotoUrlTtl) }).ToList();
         return new PagedResult<LawyerCardDto>(items, page, pageSize, totalCount);
     }
 }
