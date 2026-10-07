@@ -85,6 +85,19 @@ public class InitiateCheckoutHandler(
         };
         db.Payments.Add(payment);
 
+        // Fully discounted: nothing to collect from the client, whichever method was picked. The
+        // platform still funds the lawyer's full share (DiscountExpense in the ledger).
+        if (payment.Total == 0)
+        {
+            payment.Status = PaymentStatus.Paid;
+            payment.PaidAtUtc = DateTime.UtcNow;
+            payment.GatewayProvider = "Free";
+            db.LedgerEntries.AddRange(LedgerPostingService.PostCardCheckoutSuccess(payment));
+            await FinalizeSuccessfulPaymentAsync(db, payment, serviceRequest, vatNumber, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            return new CheckoutResultDto(payment.Id, payment.Number, "Paid", null, PaidImmediately: true);
+        }
+
         if (request.PaymentMethod == "Wallet")
         {
             var clientProfile = await db.ClientProfiles.FirstAsync(c => c.Id == clientId, cancellationToken);

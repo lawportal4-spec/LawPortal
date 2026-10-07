@@ -5,6 +5,7 @@ using LawPortal.Application.Payments;
 using LawPortal.Domain.Billing;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LawPortal.Application.Admin.DiscountCodes;
 
@@ -13,7 +14,10 @@ namespace LawPortal.Application.Admin.DiscountCodes;
 public record AdminDiscountCodeDto(
     Guid Id, string Code, string? DescriptionAr, string? DescriptionEn, string Kind, decimal Value,
     decimal? MaxDiscountAmount, decimal? MinAmount, IReadOnlyList<string> Scopes, int? UsageLimit, int? PerUserLimit,
-    bool FirstPaymentOnly, bool IsActive, DateTime? StartsAtUtc, DateTime? EndsAtUtc, int Used, decimal TotalDiscounted, DateTime CreatedAtUtc);
+    bool FirstPaymentOnly, bool IsActive, DateTime? StartsAtUtc, DateTime? EndsAtUtc, int Used, decimal TotalDiscounted, DateTime CreatedAtUtc,
+    /// <summary>Where a shared promotion should send people: the lawyer registration page for
+    /// lawyer-only codes, otherwise the client site.</summary>
+    string ShareUrl);
 
 public record DiscountRedemptionDto(Guid Id, string UserName, string Scope, Guid ReferenceId, decimal Amount, string Status, DateTime CreatedAtUtc);
 
@@ -32,7 +36,7 @@ public record GetDiscountCodesQuery(
     int Page = 1,
     int PageSize = 20) : IRequest<PagedResult<AdminDiscountCodeDto>>;
 
-public class GetDiscountCodesHandler(ILawPortalDbContext db) : IRequestHandler<GetDiscountCodesQuery, PagedResult<AdminDiscountCodeDto>>
+public class GetDiscountCodesHandler(ILawPortalDbContext db, IConfiguration configuration) : IRequestHandler<GetDiscountCodesQuery, PagedResult<AdminDiscountCodeDto>>
 {
     public async Task<PagedResult<AdminDiscountCodeDto>> Handle(GetDiscountCodesQuery request, CancellationToken cancellationToken)
     {
@@ -76,14 +80,22 @@ public class GetDiscountCodesHandler(ILawPortalDbContext db) : IRequestHandler<G
         var rows = await query.OrderByDescending(x => x.Code.CreatedAtUtc)
             .Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
 
-        var items = rows.Select(r => ToDto(r.Code, r.Used, r.Total)).ToList();
+        var items = rows.Select(r => ToDto(r.Code, r.Used, r.Total, configuration)).ToList();
         return new PagedResult<AdminDiscountCodeDto>(items, page, pageSize, total);
     }
 
-    internal static AdminDiscountCodeDto ToDto(DiscountCode c, int used, decimal totalDiscounted) => new(
+    internal static AdminDiscountCodeDto ToDto(DiscountCode c, int used, decimal totalDiscounted, IConfiguration configuration) => new(
         c.Id, c.Code, c.DescriptionAr, c.DescriptionEn, c.Kind.ToString(), c.Value,
         c.MaxDiscountAmount, c.MinAmount, ScopeNames(c.Scopes), c.UsageLimit, c.PerUserLimit,
-        c.FirstPaymentOnly, c.IsActive, c.StartsAtUtc, c.EndsAtUtc, used, totalDiscounted, c.CreatedAtUtc);
+        c.FirstPaymentOnly, c.IsActive, c.StartsAtUtc, c.EndsAtUtc, used, totalDiscounted, c.CreatedAtUtc,
+        ShareUrlOf(c.Scopes, configuration));
+
+    private const DiscountScope LawyerScopes = DiscountScope.LawyerSubscription | DiscountScope.LawyerRegistrationFee;
+
+    private static string ShareUrlOf(DiscountScope scopes, IConfiguration configuration) =>
+        (scopes & ~LawyerScopes) == 0
+            ? (configuration["Payments:LawyerBaseUrl"] ?? "http://localhost:5174").TrimEnd('/') + "/register"
+            : (configuration["Payments:ClientBaseUrl"] ?? "http://localhost:5173").TrimEnd('/');
 
     private static IReadOnlyList<string> ScopeNames(DiscountScope scopes) =>
         Enum.GetValues<DiscountScope>().Where(s => s != DiscountScope.None && scopes.HasFlag(s)).Select(s => s.ToString()).ToList();
@@ -91,7 +103,7 @@ public class GetDiscountCodesHandler(ILawPortalDbContext db) : IRequestHandler<G
 
 public record GetDiscountCodeQuery(Guid Id) : IRequest<AdminDiscountCodeDto>;
 
-public class GetDiscountCodeHandler(ILawPortalDbContext db) : IRequestHandler<GetDiscountCodeQuery, AdminDiscountCodeDto>
+public class GetDiscountCodeHandler(ILawPortalDbContext db, IConfiguration configuration) : IRequestHandler<GetDiscountCodeQuery, AdminDiscountCodeDto>
 {
     public async Task<AdminDiscountCodeDto> Handle(GetDiscountCodeQuery request, CancellationToken cancellationToken)
     {
@@ -104,7 +116,7 @@ public class GetDiscountCodeHandler(ILawPortalDbContext db) : IRequestHandler<Ge
             })
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new KeyNotFoundException("Discount code not found.");
-        return GetDiscountCodesHandler.ToDto(row.Code, row.Used, row.Total);
+        return GetDiscountCodesHandler.ToDto(row.Code, row.Used, row.Total, configuration);
     }
 }
 

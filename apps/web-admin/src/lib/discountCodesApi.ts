@@ -34,6 +34,8 @@ export interface AdminDiscountCodeDto extends DiscountCodeInput {
   used: number;
   totalDiscounted: number;
   createdAtUtc: string;
+  /** Where a shared promotion sends people: lawyer sign-up for lawyer-only codes, else the client site. */
+  shareUrl: string;
 }
 
 export interface DiscountRedemptionDto {
@@ -113,3 +115,24 @@ export async function getDiscountRedemptions(id: string): Promise<DiscountRedemp
   const { data } = await api.get<DiscountRedemptionDto[]>(`/api/v1/admin/discount-codes/${id}/redemptions`);
   return data;
 }
+
+export type DiscountFieldErrors = Partial<Record<"code" | "value" | "scopes" | "dates", string>>;
+
+/** Same rules as the API's validator, checked before sending so each problem shows next to its field.
+ * Returns i18n keys (under discount.admin.errors). */
+export function validateDiscountCode(form: DiscountCodeInput): DiscountFieldErrors {
+  const errors: DiscountFieldErrors = {};
+  if (!/^[A-Z0-9_-]{3,40}$/.test(form.code.trim().toUpperCase())) errors.code = "code";
+  if (!(form.value > 0)) errors.value = "valuePositive";
+  else if (form.kind === "Percentage" && form.value > 100) errors.value = "valuePercent";
+  if (form.scopes.length === 0) errors.scopes = "scopes";
+  if (form.startsAtUtc && form.endsAtUtc && form.endsAtUtc <= form.startsAtUtc) errors.dates = "dates";
+  return errors;
+}
+
+/** The API's reason when it refuses a save, as an i18n key. */
+export function saveErrorKey(error: unknown): string {
+  const detail = (error as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "";
+  return detail.includes("already exists") ? "duplicate" : "saveFailed";
+}
+

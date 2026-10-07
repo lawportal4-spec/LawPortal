@@ -6,26 +6,45 @@ import { Button, Card, SectionHeading } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { DiscountCodeFields } from "../components/DiscountCodeFields";
-import { createDiscountCode, EMPTY_DISCOUNT_CODE, type DiscountCodeInput } from "../lib/discountCodesApi";
+import {
+  createDiscountCode,
+  EMPTY_DISCOUNT_CODE,
+  saveErrorKey,
+  validateDiscountCode,
+  type DiscountCodeInput,
+  type DiscountFieldErrors,
+} from "../lib/discountCodesApi";
 
-/** Create a discount code. On success it opens the new code's own page. */
+/** Create a discount code. On success it returns to the list, which offers to share the new code. */
 export default function DiscountCodeNew() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<DiscountCodeInput>(EMPTY_DISCOUNT_CODE);
+  const [errors, setErrors] = useState<DiscountFieldErrors>({});
+  const [triedSubmit, setTriedSubmit] = useState(false);
 
   const create = useMutation({
     mutationFn: () => createDiscountCode(form),
     onSuccess: (id) => {
       void queryClient.invalidateQueries({ queryKey: ["discountCodes"] });
-      navigate(`/discount-codes/${id}`, { replace: true });
+      navigate("/discount-codes", { replace: true, state: { savedId: id, action: "created" } });
     },
   });
 
   function submit(e: FormEvent) {
     e.preventDefault();
-    create.mutate();
+    const found = validateDiscountCode(form);
+    setErrors(found);
+    setTriedSubmit(true);
+    if (Object.keys(found).length === 0) create.mutate();
+  }
+
+  function change(next: DiscountCodeInput) {
+    create.reset();
+    setForm(next);
+    // Once the admin has tried to save, keep the messages in step with what they fix.
+    if (triedSubmit) setErrors(validateDiscountCode(next));
   }
 
   return (
@@ -36,10 +55,11 @@ export default function DiscountCodeNew() {
       </SectionHeading>
       <Card className="max-w-3xl">
         <form onSubmit={submit}>
-          <DiscountCodeFields form={form} onChange={(next) => { create.reset(); setForm(next); }} />
-          {create.isError && <p className="mt-4 text-sm text-rubric">{t("discount.admin.saveFailed")}</p>}
+          <DiscountCodeFields form={form} onChange={change} errors={errors} />
+          {Object.keys(errors).length > 0 && <p className="mt-4 text-sm text-rubric">{t("discount.admin.errors.fixBelow")}</p>}
+          {create.isError && <p className="mt-4 text-sm text-rubric">{t(`discount.admin.errors.${saveErrorKey(create.error)}`)}</p>}
           <div className="mt-6 flex gap-2">
-            <Button type="submit" disabled={create.isPending || !form.code.trim() || form.scopes.length === 0}>
+            <Button type="submit" disabled={create.isPending}>
               {t("discount.admin.create")}
             </Button>
             <Link to="/discount-codes">
