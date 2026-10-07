@@ -92,6 +92,9 @@ public class S3FileStorage : IFileStorage
             Key = storageKey,
             InputStream = content,
             ContentType = contentType,
+            // Plain signed body instead of streaming "aws-chunked" signing, which Tigris also
+            // rejects. Uploads here are small (licence ≤ 3MB, photo ≤ 2MB), so one body is fine.
+            UseChunkEncoding = false,
         }, cancellationToken);
         return storageKey;
     }
