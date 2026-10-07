@@ -45,6 +45,16 @@ public class PaySubscriptionInvoiceHandler(
         invoice.VatAmount = Math.Round(invoice.Total * PaymentBreakdownCalculator.VatRate / (1 + PaymentBreakdownCalculator.VatRate), 2);
         invoice.SubtotalExVat = invoice.Total - invoice.VatAmount;
 
+        // Fully discounted: nothing to charge — activate the period now instead of via the gateway.
+        if (invoice.Total == 0)
+        {
+            invoice.GatewayProvider = "Free";
+            await Payments.Commands.HandleGatewayWebhookHandler.MarkSubscriptionInvoicePaidAsync(
+                db, invoice, invoice.LawyerSubscription!, configuration, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            return new CheckoutResultDto(invoice.Id, invoice.Number, "Paid", null, PaidImmediately: true);
+        }
+
         var baseUrl = configuration["Payments:PublicBaseUrl"] ?? "http://localhost:5280";
         var callbackUrl = $"{baseUrl}/api/v1/webhooks/payment-gateway";
         var result = await gateway.CreatePaymentAsync(

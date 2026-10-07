@@ -126,6 +126,7 @@ public static class LedgerPostingService
         var balance = entries.Sum(e => e.IsDebit ? e.Amount : -e.Amount);
         if (balance != 0m)
             throw new InvalidOperationException($"Ledger posting is not balanced (off by {balance}) — refusing to write it.");
-        return entries;
+        // A fully discounted order collects nothing: drop zero lines rather than book empty movements.
+        return entries.Where(e => e.Amount != 0m).ToList();
     }
 }

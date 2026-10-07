@@ -93,6 +93,23 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<RegistrationFeeSetting> RegistrationFeeSettings => Set<RegistrationFeeSetting>();
     public DbSet<LawyerRegistrationFeeInvoice> RegistrationFeeInvoices => Set<LawyerRegistrationFeeInvoice>();
 
+    /// <summary>Every DateTime is stored in UTC, but MySQL hands it back without a kind, so the API
+    /// serialized it without a "Z" and browsers read it as local time — every time on every page
+    /// showed 3 hours early in Saudi Arabia. Mark them UTC on the way out of the database.</summary>
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+        configurationBuilder.Properties<DateTime?>().HaveConversion<NullableUtcDateTimeConverter>();
+    }
+
+    private sealed class UtcDateTimeConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+        v => v.Kind == DateTimeKind.Local ? v.ToUniversalTime() : v,
+        v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+    private sealed class NullableUtcDateTimeConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+        v => v.HasValue && v.Value.Kind == DateTimeKind.Local ? v.Value.ToUniversalTime() : v,
+        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());

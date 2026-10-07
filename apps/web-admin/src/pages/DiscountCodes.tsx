@@ -1,17 +1,21 @@
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Search, SlidersHorizontal } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { CircleCheck, ChevronLeft, ChevronRight, Plus, Search, Share2, SlidersHorizontal } from "lucide-react";
 import { Button, Card, Chip, Input, Ltr, SectionHeading, StatusTag } from "@law-portal/ui";
 import { formatCurrency, formatDateTime, useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { Field } from "../components/DiscountCodeFields";
+import { CopyCodeButton } from "../components/CopyCodeButton";
+import { ShareDiscountDialog } from "../components/ShareDiscountDialog";
 import {
   DISCOUNT_SCOPES,
+  getDiscountCode,
   getDiscountCodes,
   statusOf,
   type DiscountCodeListStatus,
   type DiscountKind,
+  type AdminDiscountCodeDto,
   type DiscountScope,
 } from "../lib/discountCodesApi";
 
@@ -33,6 +37,15 @@ export default function DiscountCodes() {
   const [validFrom, setValidFrom] = useState("");
   const [validTo, setValidTo] = useState("");
   const [page, setPage] = useState(1);
+  const [sharing, setSharing] = useState<AdminDiscountCodeDto | null>(null);
+
+  // Just created or edited (see DiscountCodeNew / DiscountCodeEdit): confirm it and offer to share it.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const saved = location.state as { savedId?: string; action?: "created" | "updated" } | null;
+  const createdId = saved?.savedId;
+  const created = useQuery({ queryKey: ["discountCode", createdId], queryFn: () => getDiscountCode(createdId!), enabled: !!createdId });
+  const dismissCreated = () => navigate(location.pathname, { replace: true, state: null });
 
   // Search as the admin types, without a request per keystroke.
   useEffect(() => {
@@ -161,6 +174,24 @@ export default function DiscountCodes() {
         </Card>
       )}
 
+      {created.data && (
+        <div role="status" className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-md border border-seal bg-seal-tint px-4 py-3">
+          <p className="flex items-center gap-2 text-sm font-medium text-seal-strong">
+            <CircleCheck className="h-5 w-5" />
+            {t(saved?.action === "updated" ? "discount.share.updated" : "discount.share.created")}
+            <Ltr className="font-mono">{created.data.code}</Ltr>
+            <CopyCodeButton code={created.data.code} />
+          </p>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setSharing(created.data)}>
+              <Share2 className="h-4 w-4" />
+              {t("discount.share.shareNow")}
+            </Button>
+            <Button variant="ghost" onClick={dismissCreated}>{t("discount.share.close")}</Button>
+          </div>
+        </div>
+      )}
+
       {query.data && <p className="mb-3 text-xs text-ink-faint">{t("discount.admin.results", { count: query.data.totalCount })}</p>}
       {query.isError && <p className="text-sm text-rubric">{t("discount.admin.loadFailed")}</p>}
       {query.data?.items.length === 0 && <p className="text-sm text-ink-faint">{t("discount.admin.empty")}</p>}
@@ -169,11 +200,19 @@ export default function DiscountCodes() {
         {query.data?.items.map((c) => {
           const s = statusOf(c);
           return (
-            <Link key={c.id} to={`/discount-codes/${c.id}`}>
-              <Card className="flex flex-wrap items-center justify-between gap-4 transition-colors hover:border-seal">
+            // The whole card opens the code (a stretched link underneath); copy and share sit above it.
+            <Card
+              key={c.id}
+              className={
+                "relative flex flex-wrap items-center justify-between gap-4 transition-colors hover:border-seal " +
+                (c.id === createdId ? "border-seal ring-2 ring-seal/30" : "")
+              }
+            >
+              <Link to={`/discount-codes/${c.id}`} className="absolute inset-0 z-0 rounded-[inherit]" aria-label={c.code} />
                 <div className="min-w-0">
-                  <p className="flex items-center gap-3">
+                  <p className="flex items-center gap-2">
                     <Ltr className="font-mono font-semibold text-ink">{c.code}</Ltr>
+                    <CopyCodeButton code={c.code} />
                     <Ltr className="font-mono text-sm text-seal">{c.kind === "Percentage" ? `${c.value}%` : formatCurrency(c.value)}</Ltr>
                   </p>
                   <div className="mt-1 flex flex-wrap gap-1">
@@ -198,9 +237,16 @@ export default function DiscountCodes() {
                     </span>
                   )}
                   <StatusTag status={s.tag} label={t(`discount.admin.statusFilter.${s.status}`)} />
+                  <button
+                    type="button"
+                    onClick={() => setSharing(c)}
+                    className="relative z-10 inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-ink-soft hover:border-seal hover:text-seal"
+                  >
+                    <Share2 className="h-3.5 w-3.5" />
+                    {t("discount.share.share")}
+                  </button>
                 </div>
-              </Card>
-            </Link>
+            </Card>
           );
         })}
       </div>
@@ -230,6 +276,7 @@ export default function DiscountCodes() {
           </button>
         </div>
       )}
+      {sharing && <ShareDiscountDialog code={sharing} onClose={() => setSharing(null)} />}
     </AppShell>
   );
 }

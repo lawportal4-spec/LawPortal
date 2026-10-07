@@ -38,9 +38,6 @@ public static class DiscountService
 {
     public static readonly TimeSpan PendingHold = TimeSpan.FromMinutes(30);
 
-    /// <summary>Gateways won't take a zero charge, so a discount always leaves at least this much to pay.</summary>
-    public const decimal MinimumCharge = 1m;
-
     public static string Normalize(string code) => code.Trim().ToUpperInvariant();
 
     public static DiscountScope ScopeOf(ServiceRequest request) => request switch
@@ -59,7 +56,8 @@ public static class DiscountService
             ? Math.Round(gross * code.Value / 100m, 2)
             : code.Value;
         if (code.MaxDiscountAmount is { } cap) amount = Math.Min(amount, cap);
-        return Math.Max(0, Math.Min(amount, gross - MinimumCharge));
+        // May cover the whole price: a zero total settles without the gateway (see the pay commands).
+        return Math.Max(0, Math.Min(amount, gross));
     }
 
     public static async Task<DiscountEvaluation> EvaluateAsync(

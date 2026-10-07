@@ -37,6 +37,8 @@ export default function RegistrationFee() {
   const pay = useMutation({
     mutationFn: () => payRegistrationFee(discountCode),
     onSuccess: (result) => {
+      // Fully discounted: settled on the spot — the refreshed status opens the portal.
+      if (result.paidImmediately) return void me.refetch();
       if (!result.redirectUrl) return;
       setAwaitingGateway(true);
       window.location.href = result.redirectUrl;

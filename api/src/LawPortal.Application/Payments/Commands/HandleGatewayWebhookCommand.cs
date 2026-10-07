@@ -121,16 +121,7 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
 
         if (status == "paid")
         {
-            invoice.Status = RegistrationFeeInvoiceStatus.Paid;
-            invoice.PaidAtUtc = DateTime.UtcNow;
-            invoice.QrPayloadBase64 = ZatcaQrCodeBuilder.Build(
-                "بوابة القانون", configuration["Payments:PlatformVatNumber"] ?? "", invoice.PaidAtUtc.Value, invoice.Total, invoice.VatAmount);
-            db.LedgerEntries.AddRange(LedgerPostingService.PostRegistrationFee(invoice));
-            await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
-
-            // The fee was the last onboarding step: the portal opens and the lawyer becomes bookable.
-            var lawyer = await db.LawyerProfiles.Include(l => l.User).FirstAsync(l => l.Id == invoice.LawyerProfileId, cancellationToken);
-            LawyerOnboarding.Activate(lawyer);
+            await MarkRegistrationFeePaidAsync(db, invoice, configuration, cancellationToken);
         }
         else
         {
@@ -153,19 +144,7 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
 
         if (status == "paid")
         {
-            invoice.Status = SubscriptionInvoiceStatus.Paid;
-            invoice.PaidAtUtc = DateTime.UtcNow;
-
-            var platformVatNumber = configuration["Payments:PlatformVatNumber"] ?? "";
-            invoice.QrPayloadBase64 = ZatcaQrCodeBuilder.Build("بوابة القانون", platformVatNumber, invoice.PaidAtUtc.Value, invoice.Total, invoice.VatAmount);
-
-            subscription.Status = SubscriptionStatus.Active;
-            subscription.CurrentPeriodStartUtc = invoice.PeriodStartUtc;
-            subscription.CurrentPeriodEndUtc = invoice.PeriodEndUtc;
-            subscription.ConsecutiveFailedAttempts = 0;
-
-            db.LedgerEntries.AddRange(LedgerPostingService.PostSubscriptionPayment(invoice));
-            await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
+            await MarkSubscriptionInvoicePaidAsync(db, invoice, subscription, configuration, cancellationToken);
         }
         else
         {
@@ -182,5 +161,40 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
         }
 
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    /// <summary>A paid registration fee — from the gateway webhook, or straight away when a discount
+    /// brought the total to zero. The fee was the last onboarding step: the account opens.</summary>
+    internal static async Task MarkRegistrationFeePaidAsync(
+        ILawPortalDbContext db, LawyerRegistrationFeeInvoice invoice, Microsoft.Extensions.Configuration.IConfiguration configuration, CancellationToken cancellationToken)
+    {
+        invoice.Status = RegistrationFeeInvoiceStatus.Paid;
+        invoice.PaidAtUtc = DateTime.UtcNow;
+        invoice.QrPayloadBase64 = ZatcaQrCodeBuilder.Build(
+            "بوابة القانون", configuration["Payments:PlatformVatNumber"] ?? "", invoice.PaidAtUtc.Value, invoice.Total, invoice.VatAmount);
+        db.LedgerEntries.AddRange(LedgerPostingService.PostRegistrationFee(invoice));
+        await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
+
+        var lawyer = await db.LawyerProfiles.Include(l => l.User).FirstAsync(l => l.Id == invoice.LawyerProfileId, cancellationToken);
+        LawyerOnboarding.Activate(lawyer);
+    }
+
+    /// <summary>A paid subscription invoice — from the webhook, or straight away at a zero total.</summary>
+    internal static async Task MarkSubscriptionInvoicePaidAsync(
+        ILawPortalDbContext db, SubscriptionInvoice invoice, LawyerSubscription subscription,
+        Microsoft.Extensions.Configuration.IConfiguration configuration, CancellationToken cancellationToken)
+    {
+        invoice.Status = SubscriptionInvoiceStatus.Paid;
+        invoice.PaidAtUtc = DateTime.UtcNow;
+        invoice.QrPayloadBase64 = ZatcaQrCodeBuilder.Build(
+            "بوابة القانون", configuration["Payments:PlatformVatNumber"] ?? "", invoice.PaidAtUtc.Value, invoice.Total, invoice.VatAmount);
+
+        subscription.Status = SubscriptionStatus.Active;
+        subscription.CurrentPeriodStartUtc = invoice.PeriodStartUtc;
+        subscription.CurrentPeriodEndUtc = invoice.PeriodEndUtc;
+        subscription.ConsecutiveFailedAttempts = 0;
+
+        db.LedgerEntries.AddRange(LedgerPostingService.PostSubscriptionPayment(invoice));
+        await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
     }
 }

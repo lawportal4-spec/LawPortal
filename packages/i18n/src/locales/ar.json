@@ -366,7 +366,7 @@
       "UsageLimitReached": "استُنفد عدد مرات استخدام هذا الكود.",
       "PerUserLimitReached": "لقد استخدمت هذا الكود من قبل.",
       "BelowMinimum": "المبلغ أقل من الحد الأدنى لاستخدام هذا الكود.",
-      "NotFirstPayment": "هذا الكود مخصص لأول عملية دفع فقط."
+      "NotFirstPayment": "هذا الكود مخصص للعملاء الجدد فقط."
     },
     "scopes": {
       "InstantConsultation": "استشارة فورية",
@@ -398,7 +398,7 @@
       "usageLimit": "عدد مرات الاستخدام الكلي",
       "perUserLimit": "عدد مرات الاستخدام لكل مستخدم",
       "unlimited": "بلا حد",
-      "firstPaymentOnly": "لأول عملية دفع فقط",
+      "firstPaymentOnly": "للعملاء الجدد فقط",
       "isActive": "مفعّل",
       "startsAt": "يبدأ في",
       "endsAt": "ينتهي في",
@@ -447,7 +447,98 @@
         "UsedUp": "مستنفد",
         "Inactive": "موقوف"
       },
-      "createdAt": "تاريخ الإنشاء"
+      "createdAt": "تاريخ الإنشاء",
+      "errors": {
+        "code": "أدخل كودًا من 3 إلى 40 حرفًا إنجليزيًا أو رقمًا (مسموح بـ - و _).",
+        "valuePositive": "أدخل قيمة خصم أكبر من صفر.",
+        "valuePercent": "النسبة المئوية لا تتجاوز 100%.",
+        "scopes": "اختر خدمة واحدة على الأقل ينطبق عليها الكود.",
+        "dates": "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.",
+        "fixBelow": "لم يُحفظ الكود — صحّح الحقول المحددة بالأحمر.",
+        "duplicate": "هذا الكود موجود من قبل — اختر كودًا آخر.",
+        "saveFailed": "تعذّر حفظ الكود."
+      },
+      "allScopes": "الكل"
+    },
+    "share": {
+      "share": "مشاركة",
+      "copy": "نسخ الكود",
+      "copied": "تم النسخ",
+      "copyMessage": "نسخ الرسالة",
+      "copyLink": "نسخ الرابط",
+      "messageCopied": "تم نسخ الرسالة",
+      "title": "شارك الكود",
+      "subtitle": "رسالة تسويقية جاهزة — عدّلها كما تريد ثم شاركها.",
+      "message": "نص الرسالة",
+      "language": "لغة الرسالة",
+      "arabic": "العربية",
+      "english": "English",
+      "more": "مشاركة عبر الجهاز",
+      "close": "إغلاق",
+      "pastedHint": "نسخنا الرسالة — الصقها في منشورك على {{network}}.",
+      "created": "تم إنشاء الكود بنجاح:",
+      "shareNow": "شاركه الآن",
+      "coupon": {
+        "off": "خصم",
+        "upTo": "بحد أقصى ",
+        "validUntil": "ساري حتى {{date}}",
+        "useCode": "استخدم الكود"
+      },
+      "msg": {
+        "ar": {
+          "headlineClient": "🎁 عرض خاص من بوابة القانون",
+          "headlineLawyer": "⚖️ دعوة خاصة للمحامين من بوابة القانون",
+          "offer": "احصل على خصم {{value}} على {{scopes}}",
+          "cap": "(بحد أقصى {{cap}})",
+          "code": "🏷️ استخدم الكود: {{code}}",
+          "until": "⏳ العرض ساري حتى {{date}}",
+          "min": "✔️ الحد الأدنى للطلب {{min}}",
+          "first": "✔️ للعملاء الجدد فقط",
+          "limited": "⚡ عدد محدود من الاستخدامات — لا تفوّت الفرصة!",
+          "ctaClient": "احجز استشارتك القانونية الآن مع محامين مرخّصين وموثوقين 👇",
+          "ctaLawyer": "انضم الآن وابدأ باستقبال طلبات العملاء عبر المنصة 👇",
+          "tagsClient": "#بوابة_القانون #استشارة_قانونية #محامي",
+          "tagsLawyer": "#بوابة_القانون #محامين #فرصة_للمحامين",
+          "and": " و",
+          "sar": "{{amount}} ر.س",
+          "scopes": {
+            "InstantConsultation": "الاستشارات الفورية",
+            "ScheduledConsultation": "الاستشارات المجدولة",
+            "WrittenConsultation": "الاستشارات الكتابية",
+            "BiddingRequest": "طلبات عروض الأسعار",
+            "CatalogService": "خدمات التوثيق والعلامات التجارية",
+            "LawyerSubscription": "الاشتراك الشهري للمحامين",
+            "LawyerRegistrationFee": "رسوم تسجيل المحامين"
+          }
+        },
+        "en": {
+          "headlineClient": "🎁 A special offer from Law Portal",
+          "headlineLawyer": "⚖️ An exclusive invitation for lawyers from Law Portal",
+          "offer": "Get {{value}} off {{scopes}}",
+          "cap": "(up to {{cap}})",
+          "code": "🏷️ Use code: {{code}}",
+          "until": "⏳ Valid until {{date}}",
+          "min": "✔️ Minimum order {{min}}",
+          "first": "✔️ New customers only",
+          "limited": "⚡ Limited number of uses — don't miss out!",
+          "ctaClient": "Book your legal consultation now with licensed, trusted lawyers 👇",
+          "ctaLawyer": "Join now and start receiving client requests through the platform 👇",
+          "tagsClient": "#LawPortal #LegalAdvice #Lawyer",
+          "tagsLawyer": "#LawPortal #Lawyers #LegalCareers",
+          "and": " and ",
+          "sar": "SAR {{amount}}",
+          "scopes": {
+            "InstantConsultation": "instant consultations",
+            "ScheduledConsultation": "scheduled consultations",
+            "WrittenConsultation": "written consultations",
+            "BiddingRequest": "requests for quotes",
+            "CatalogService": "notarization & trademark services",
+            "LawyerSubscription": "the lawyer monthly subscription",
+            "LawyerRegistrationFee": "the lawyer registration fee"
+          }
+        }
+      },
+      "updated": "تم حفظ التعديلات على الكود:"
     }
   },
   "lawyerOnboarding": {

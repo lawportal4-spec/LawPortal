@@ -236,6 +236,15 @@ public class PayRegistrationFeeHandler(ILawPortalDbContext db, ICurrentUser curr
                 currentUser.UserId!.Value, invoice.BaseAmount, invoice.Id, cancellationToken)).Amount;
         LawyerOnboarding.Price(invoice, invoice.BaseAmount, discount);
 
+        // Fully discounted: nothing to charge, so no gateway — settle now and open the account.
+        if (invoice.Total == 0)
+        {
+            invoice.GatewayProvider = "Free";
+            await Payments.Commands.HandleGatewayWebhookHandler.MarkRegistrationFeePaidAsync(db, invoice, configuration, cancellationToken);
+            await db.SaveChangesAsync(cancellationToken);
+            return new CheckoutResultDto(invoice.Id, invoice.Number, "Paid", null, PaidImmediately: true);
+        }
+
         var baseUrl = configuration["Payments:PublicBaseUrl"] ?? "http://localhost:5280";
         var result = await gateway.CreatePaymentAsync(
             invoice.Id, invoice.Total, "SAR", $"Law Portal — registration fee {invoice.Number}",
