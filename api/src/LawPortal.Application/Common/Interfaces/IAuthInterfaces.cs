@@ -26,7 +26,7 @@ public interface IOtpSender
     Task SendAsync(string phoneE164, string code, CancellationToken cancellationToken = default);
 }
 
-/// <summary>Sends transactional email: Brevo's HTTPS API when <c>Email:Brevo:ApiKey</c> is set, else SMTP
+/// <summary>Sends transactional email: Mailjet's or Brevo's HTTPS API when its key is set, else SMTP
 /// when <c>Email:Smtp:Host</c> is, otherwise the message (and any link in it) only goes to the log.</summary>
 public interface IEmailSender
 {

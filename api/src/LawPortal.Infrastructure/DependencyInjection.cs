@@ -36,8 +36,10 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddSingleton<IOtpSender, LoggingOtpSender>();
-        // Brevo (HTTPS) first: Railway blocks SMTP below Pro. SMTP still works locally (MailHog).
-        if (!string.IsNullOrWhiteSpace(configuration["Email:Brevo:ApiKey"]))
+        // HTTPS providers first: Railway blocks SMTP below Pro. SMTP still works locally (MailHog).
+        if (!string.IsNullOrWhiteSpace(configuration["Email:Mailjet:ApiKey"]))
+            services.AddSingleton<IEmailSender, MailjetEmailSender>();
+        else if (!string.IsNullOrWhiteSpace(configuration["Email:Brevo:ApiKey"]))
             services.AddSingleton<IEmailSender, BrevoEmailSender>();
         else if (!string.IsNullOrWhiteSpace(configuration["Email:Smtp:Host"]))
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
