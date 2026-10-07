@@ -36,7 +36,10 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, Argon2PasswordHasher>();
         services.AddSingleton<ITokenService, JwtTokenService>();
         services.AddSingleton<IOtpSender, LoggingOtpSender>();
-        if (!string.IsNullOrWhiteSpace(configuration["Email:Smtp:Host"]))
+        // Brevo (HTTPS) first: Railway blocks SMTP below Pro. SMTP still works locally (MailHog).
+        if (!string.IsNullOrWhiteSpace(configuration["Email:Brevo:ApiKey"]))
+            services.AddSingleton<IEmailSender, BrevoEmailSender>();
+        else if (!string.IsNullOrWhiteSpace(configuration["Email:Smtp:Host"]))
             services.AddSingleton<IEmailSender, SmtpEmailSender>();
         else
             services.AddSingleton<IEmailSender, LoggingEmailSender>();

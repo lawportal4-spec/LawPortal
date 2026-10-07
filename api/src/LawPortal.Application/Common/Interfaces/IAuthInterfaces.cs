@@ -26,8 +26,8 @@ public interface IOtpSender
     Task SendAsync(string phoneE164, string code, CancellationToken cancellationToken = default);
 }
 
-/// <summary>Sends transactional email. SMTP when <c>Email:Smtp:Host</c> is configured, otherwise
-/// the message (and any link in it) only goes to the log — same stopgap as <see cref="IOtpSender"/>.</summary>
+/// <summary>Sends transactional email: Brevo's HTTPS API when <c>Email:Brevo:ApiKey</c> is set, else SMTP
+/// when <c>Email:Smtp:Host</c> is, otherwise the message (and any link in it) only goes to the log.</summary>
 public interface IEmailSender
 {
     Task SendAsync(string to, string subject, string htmlBody, CancellationToken cancellationToken = default);
