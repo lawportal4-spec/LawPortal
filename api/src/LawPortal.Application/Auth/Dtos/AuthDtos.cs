@@ -15,4 +15,7 @@ public record MeDto(
     string PreferredLocale,
     bool ProfileCompleted,
     IReadOnlyList<string> Roles,
-    string? LawyerLicenseStatus);
+    string? LawyerLicenseStatus,
+    /// <summary>Clients only: false until the current platform pledge is accepted. Always true for
+    /// other account types.</summary>
+    bool PledgeAccepted);

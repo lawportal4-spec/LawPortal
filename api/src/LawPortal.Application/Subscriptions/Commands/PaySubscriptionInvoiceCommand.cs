@@ -1,6 +1,8 @@
 using LawPortal.Application.Common.Interfaces;
 using LawPortal.Application.Lawyers.Commands;
+using LawPortal.Application.Payments;
 using LawPortal.Application.Payments.Dtos;
+using LawPortal.Domain.Billing;
 using LawPortal.Domain.Subscriptions;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -13,7 +15,7 @@ namespace LawPortal.Application.Subscriptions.Commands;
 /// subscription's first invoice and every renewal/dunning-retry invoice through the same call,
 /// going through the identical <c>IPaymentGateway</c> + webhook flow every other payment here
 /// uses.</summary>
-public record PaySubscriptionInvoiceCommand(Guid InvoiceId) : IRequest<CheckoutResultDto>;
+public record PaySubscriptionInvoiceCommand(Guid InvoiceId, string? DiscountCode = null) : IRequest<CheckoutResultDto>;
 
 public class PaySubscriptionInvoiceHandler(
     ILawPortalDbContext db, ICurrentUser currentUser, IPaymentGateway gateway, IConfiguration configuration)
@@ -30,6 +32,18 @@ public class PaySubscriptionInvoiceHandler(
 
         if (invoice.Status != SubscriptionInvoiceStatus.Pending)
             throw new InvalidOperationException($"This invoice is {invoice.Status} and cannot be paid.");
+
+        // A retry may bring a different code (or none): start again from the undiscounted price.
+        await DiscountService.ReleaseAsync(db, invoice.Id, cancellationToken);
+        var gross = invoice.Total + invoice.DiscountAmount;
+        var discount = string.IsNullOrWhiteSpace(request.DiscountCode)
+            ? 0
+            : (await DiscountService.ReserveAsync(db, request.DiscountCode, DiscountScope.LawyerSubscription,
+                currentUser.UserId!.Value, gross, invoice.Id, cancellationToken)).Amount;
+        invoice.DiscountAmount = discount;
+        invoice.Total = gross - discount;
+        invoice.VatAmount = Math.Round(invoice.Total * PaymentBreakdownCalculator.VatRate / (1 + PaymentBreakdownCalculator.VatRate), 2);
+        invoice.SubtotalExVat = invoice.Total - invoice.VatAmount;
 
         var baseUrl = configuration["Payments:PublicBaseUrl"] ?? "http://localhost:5280";
         var callbackUrl = $"{baseUrl}/api/v1/webhooks/payment-gateway";

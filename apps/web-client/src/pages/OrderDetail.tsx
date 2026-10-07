@@ -1,13 +1,15 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useParams, useSearchParams } from "react-router-dom";
-import { ArrowLeft, ArrowRight, CreditCard, MessageCircle, Paperclip, Wallet as WalletIcon } from "lucide-react";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { ArrowLeft, ArrowRight, MessageCircle, Paperclip } from "lucide-react";
 import { Button, Card, StatusPill, Ltr, type RequestStatus } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { getRequestDetail } from "../lib/requestsApi";
 import { checkout, getInvoice } from "../lib/paymentsApi";
 import { OfferInbox } from "../components/OfferInbox";
+import { CheckoutPanel, type CheckoutMethod } from "../components/CheckoutPanel";
+import { isAxiosError } from "axios";
 
 /** How long to keep polling for the webhook after the gateway hands the payer back, before
  * falling back to the manual button. Long enough for a slow webhook, short enough that a tab left
@@ -58,7 +60,8 @@ function Row({ label, children }: { label: string; children: ReactNode }) {
 
 export default function OrderDetail() {
   const { id } = useParams<{ id: string }>();
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const isAr = i18n.language === "ar";
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
@@ -84,11 +87,12 @@ export default function OrderDetail() {
   });
 
   const checkoutMutation = useMutation({
-    mutationFn: (method: "Card" | "Wallet") => checkout(id!, method),
+    mutationFn: ({ method, code }: { method: CheckoutMethod; code: string | null }) => checkout(id!, method, code),
     onSuccess: (result) => {
       setCheckoutError(null);
       if (result.paidImmediately) {
-        void queryClient.invalidateQueries({ queryKey: ["requestDetail", id] });
+        if (isInstant) navigate(`/chat/${id}`);
+        else void queryClient.invalidateQueries({ queryKey: ["requestDetail", id] });
       } else if (result.redirectUrl) {
         // Same tab, not a popup: success_url brings them straight back to this page, whereas a
         // popup strands the result in a second tab and trips blockers besides.
@@ -96,7 +100,12 @@ export default function OrderDetail() {
         window.location.href = result.redirectUrl;
       }
     },
-    onError: () => setCheckoutError(isAr ? "تعذّر بدء عملية الدفع." : "Could not start checkout."),
+    onError: (error) =>
+      setCheckoutError(
+        isAxiosError(error) && error.response?.data?.detail === "Insufficient wallet balance."
+          ? t("checkout.insufficientWallet")
+          : t("checkout.failed"),
+      ),
   });
 
   function refreshAfterGateway() {
@@ -105,17 +114,20 @@ export default function OrderDetail() {
   }
 
   const isPaid = query.data?.status === "Paid";
+  // An instant consultation is a live call: once paid, the client belongs in the chat, not here.
+  const isInstant = query.data?.kind === "Consultation" && query.data.consultationType === "Instant";
   useEffect(() => {
     if (!awaitingGateway) return;
     if (isPaid) {
       setAwaitingGateway(false);
+      if (isInstant) navigate(`/chat/${id}`);
       return;
     }
     // A declined payment leaves the request Submitted, so nothing would ever stop the poll on its
     // own — give up after the timeout and fall back to the manual check.
     const timer = setTimeout(() => setAwaitingGateway(false), GATEWAY_POLL_TIMEOUT_MS);
     return () => clearTimeout(timer);
-  }, [awaitingGateway, isPaid]);
+  }, [awaitingGateway, isPaid, isInstant, navigate, id]);
 
   return (
     <AppShell>
@@ -228,44 +240,24 @@ export default function OrderDetail() {
             </div>
           )}
 
-          {(query.data.status === "Submitted" || query.data.status === "Awarded") && query.data.subtotal != null && (
-            <Card className="mb-4">
-              <h2 className="mb-3 text-sm font-semibold text-ink-soft">
-                {isAr ? "الدفع" : "Payment"}
-              </h2>
-              {awaitingGateway ? (
-                <div className="flex flex-col gap-3">
-                  <p className="text-sm text-ink-soft">
-                    {isAr
-                      ? "جارٍ تأكيد الدفع… قد يستغرق ذلك بضع ثوانٍ."
-                      : "Confirming your payment… this can take a few seconds."}
-                  </p>
-                  <Button variant="secondary" onClick={refreshAfterGateway}>
-                    {isAr ? "تحقّق من حالة الدفع" : "Check payment status"}
-                  </Button>
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-3">
-                  <Button
-                    onClick={() => checkoutMutation.mutate("Card")}
-                    disabled={checkoutMutation.isPending}
-                  >
-                    <CreditCard className="h-4 w-4" />
-                    {isAr ? "ادفع بالبطاقة" : "Pay by card"}
-                  </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => checkoutMutation.mutate("Wallet")}
-                    disabled={checkoutMutation.isPending}
-                  >
-                    <WalletIcon className="h-4 w-4" />
-                    {isAr ? "ادفع من المحفظة" : "Pay from wallet"}
-                  </Button>
-                </div>
-              )}
-              {checkoutError && <p className="mt-2 text-sm text-rubric">{checkoutError}</p>}
-            </Card>
-          )}
+          {(query.data.status === "Submitted" || query.data.status === "Awarded") && query.data.subtotal != null &&
+            (awaitingGateway ? (
+              <Card className="mb-4 flex flex-col gap-3">
+                <p className="text-sm text-ink-soft">{t("checkout.confirming")}</p>
+                <Button variant="secondary" onClick={refreshAfterGateway}>
+                  {t("checkout.checkStatus")}
+                </Button>
+              </Card>
+            ) : (
+              <CheckoutPanel
+                requestId={query.data.id}
+                isConsultation={query.data.kind === "Consultation"}
+                isInstant={isInstant}
+                pending={checkoutMutation.isPending}
+                error={checkoutError}
+                onCheckout={(method, code) => checkoutMutation.mutate({ method, code })}
+              />
+            ))}
 
           {query.data.status === "Paid" && invoiceQuery.data && (
             <Card className="mb-4">
@@ -278,6 +270,11 @@ export default function OrderDetail() {
               <Row label={isAr ? "المبلغ قبل الضريبة" : "Subtotal (ex. VAT)"}>
                 <Ltr className="font-mono">{formatCurrency(invoiceQuery.data.subtotalExVat)}</Ltr>
               </Row>
+              {invoiceQuery.data.discountAmount > 0 && (
+                <Row label={t("checkout.discount")}>
+                  <Ltr className="font-mono text-seal">{formatCurrency(-invoiceQuery.data.discountAmount)}</Ltr>
+                </Row>
+              )}
               <Row label={isAr ? "ضريبة القيمة المضافة" : "VAT"}>
                 <Ltr className="font-mono">{formatCurrency(invoiceQuery.data.vatAmount)}</Ltr>
               </Row>

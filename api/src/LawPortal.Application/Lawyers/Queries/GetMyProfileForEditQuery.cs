@@ -14,12 +14,15 @@ public class GetMyProfileForEditHandler(ILawPortalDbContext db, ICurrentUser cur
     public async Task<LawyerProfileEditDto> Handle(GetMyProfileForEditQuery request, CancellationToken cancellationToken)
     {
         var lawyerProfileId = await LawyerRequestGuard.ResolveLawyerProfileIdAsync(db, currentUser, cancellationToken);
-        var lawyer = await db.LawyerProfiles.FirstAsync(l => l.Id == lawyerProfileId, cancellationToken);
+        var lawyer = await db.LawyerProfiles.Include(l => l.Pricing).FirstAsync(l => l.Id == lawyerProfileId, cancellationToken);
 
         var specialtyIds = await db.LawyerSpecialties.Where(s => s.LawyerProfileId == lawyerProfileId).Select(s => s.SpecialtyId).ToListAsync(cancellationToken);
         var languageIds = await db.LawyerLanguages.Where(l => l.LawyerProfileId == lawyerProfileId).Select(l => l.LanguageId).ToListAsync(cancellationToken);
 
-        return new LawyerProfileEditDto(lawyer.BioAr, lawyer.BioEn, lawyer.AcceptingNewRequests, specialtyIds, languageIds);
+        var pricing = lawyer.Pricing is { } p
+            ? new LawyerPricingEditDto(p.WrittenPrice, p.Price15, p.Price30, p.Price45)
+            : null;
+        return new LawyerProfileEditDto(lawyer.BioAr, lawyer.BioEn, lawyer.AcceptingNewRequests, specialtyIds, languageIds, pricing);
     }
 }
 

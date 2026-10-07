@@ -54,6 +54,11 @@ public class FakeGatewayController(IHttpClientFactory httpClientFactory, IConfig
             secret_token = secret,
         }, cancellationToken);
 
+        // Like the real gateway: once the outcome is settled, send the payer back through our return
+        // endpoint, which lands them on the right page (order, wallet, subscription, registration fee).
+        if (response.IsSuccessStatusCode)
+            return Redirect($"{baseUrl}/api/v1/payments/{paymentId}/return");
+
         return Content(
             $"Webhook call returned {(int)response.StatusCode}. Outcome simulated: {outcome}.",
             "text/plain");

@@ -15,7 +15,9 @@ public record LawyerCardDto(
     decimal WrittenPrice,
     bool IsVatRegistered,
     IReadOnlyList<string> SpecialtyNamesAr,
-    IReadOnlyList<string> SpecialtyNamesEn);
+    IReadOnlyList<string> SpecialtyNamesEn,
+    /// <summary>Signed photo URL, or null when the lawyer has no photo.</summary>
+    string? PhotoUrl = null);
 
 public record PagedResult<T>(IReadOnlyList<T> Items, int Page, int PageSize, int TotalCount)
 {
@@ -55,4 +57,5 @@ public record LawyerProfileDetailDto(
     IReadOnlyList<LawyerSpecialtyDto> Specialties,
     IReadOnlyList<string> LanguageNamesAr,
     IReadOnlyList<string> LanguageNamesEn,
-    IReadOnlyList<LawyerQualificationDto> Qualifications);
+    IReadOnlyList<LawyerQualificationDto> Qualifications,
+    string? PhotoUrl = null);

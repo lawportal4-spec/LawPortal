@@ -3,11 +3,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button, Card, Input } from "@law-portal/ui";
 import { useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { LicenseRenewalCard } from "../components/LicenseRenewalCard";
 import {
   getLanguages,
   getMyProfile,
   getSpecialties,
-  renewLicense,
   updateMyProfile,
   updatePricing,
 } from "../lib/lawyerApi";
@@ -45,6 +45,17 @@ export default function Settings() {
   const [price15, setPrice15] = useState("");
   const [price30, setPrice30] = useState("");
   const [price45, setPrice45] = useState("");
+  // The saved prices fill the fields — without this they always opened empty, so a lawyer
+  // couldn't tell their prices were stored.
+  useEffect(() => {
+    const pricing = profileQuery.data?.pricing;
+    if (!pricing) return;
+    setWrittenPrice(String(pricing.writtenPrice));
+    setPrice15(String(pricing.price15));
+    setPrice30(String(pricing.price30));
+    setPrice45(String(pricing.price45));
+  }, [profileQuery.data]);
+
   const pricingMutation = useMutation({
     mutationFn: () =>
       updatePricing({
@@ -53,13 +64,7 @@ export default function Settings() {
         price30: Number(price30),
         price45: Number(price45),
       }),
-  });
-
-  const [licenseNumber, setLicenseNumber] = useState("");
-  const [issueDate, setIssueDate] = useState("");
-  const [expiryDate, setExpiryDate] = useState("");
-  const licenseMutation = useMutation({
-    mutationFn: () => renewLicense({ licenseNumber, issueDate, expiryDate }),
+    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ["myLawyerProfile"] }),
   });
 
   function toggleId(list: number[], setList: (v: number[]) => void, id: number) {
@@ -162,42 +167,7 @@ export default function Settings() {
           {pricingMutation.isSuccess && <p className="mt-2 text-sm text-seal">{isAr ? "تم الحفظ." : "Saved."}</p>}
         </Card>
 
-        <Card>
-          <h2 className="mb-4 text-sm font-semibold text-ink-soft">{isAr ? "تجديد الترخيص" : "Renew licence"}</h2>
-          <div className="flex flex-col gap-3">
-            <Input
-              placeholder={isAr ? "رقم الترخيص" : "Licence number"}
-              dir="ltr"
-              className="font-mono"
-              value={licenseNumber}
-              onChange={(e) => setLicenseNumber(e.target.value)}
-            />
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="date"
-                value={issueDate}
-                onChange={(e) => setIssueDate(e.target.value)}
-                className="rounded-md border border-border bg-surface-raised px-4 py-2.5 text-sm"
-              />
-              <input
-                type="date"
-                value={expiryDate}
-                onChange={(e) => setExpiryDate(e.target.value)}
-                className="rounded-md border border-border bg-surface-raised px-4 py-2.5 text-sm"
-              />
-            </div>
-            <Button
-              onClick={() => licenseMutation.mutate()}
-              disabled={!licenseNumber || !issueDate || !expiryDate || licenseMutation.isPending}
-              className="self-start"
-            >
-              {isAr ? "إرسال للمراجعة" : "Submit for review"}
-            </Button>
-            {licenseMutation.isSuccess && (
-              <p className="text-sm text-seal">{isAr ? "تم الإرسال، بانتظار مراجعة الإدارة." : "Submitted, pending admin review."}</p>
-            )}
-          </div>
-        </Card>
+        <LicenseRenewalCard />
       </div>
     </AppShell>
   );

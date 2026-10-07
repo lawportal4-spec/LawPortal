@@ -40,6 +40,7 @@ export default function LawyerRegistrationDetail() {
           <div className="mb-6 flex flex-wrap items-center gap-3">
             <SectionHeading level={2}>{r.fullName}</SectionHeading>
             <StatusTag status={r.status} label={t(`lawyerReview.statuses.${r.status}`)} />
+            {r.onboardingStep && <StatusTag status="Pending" label={t(`lawyerOnboarding.admin.onboarding.${r.onboardingStep}`)} />}
           </div>
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
@@ -105,6 +106,7 @@ export default function LawyerRegistrationDetail() {
 
             <div className="flex flex-col gap-4">
               <DecisionCard registration={r} />
+              <ContactCard registration={r} />
               <HistoryCard registration={r} />
             </div>
           </div>
@@ -203,6 +205,9 @@ function DecisionCard({ registration: r }: { registration: LawyerRegistrationDet
         <p className="text-sm text-ink-faint">
           {t("lawyerReview.admin.decision.closed", { status: t(`lawyerReview.statuses.${r.status}`) })}
         </p>
+      )}
+      {r.onboardingStep && (
+        <p className="mt-2 text-sm font-medium text-warning">{t(`lawyerOnboarding.admin.onboarding.${r.onboardingStep}`)}</p>
       )}
 
       {canDecide && mode === "idle" && (
@@ -334,6 +339,36 @@ function HistoryCard({ registration: r }: { registration: LawyerRegistrationDeta
           </Item>
         )}
       </dl>
+    </Card>
+  );
+}
+
+/** The lawyer's photo and the extra numbers they added for the platform team. */
+function ContactCard({ registration: r }: { registration: LawyerRegistrationDetailDto }) {
+  const { t } = useTranslation();
+  return (
+    <Card>
+      <SectionHeading level={3} className="mb-3">
+        {t("lawyerAccount.admin.contacts")}
+      </SectionHeading>
+      {r.photoUrl && (
+        <img src={r.photoUrl} alt={t("lawyerAccount.admin.photo")} className="mb-4 h-24 w-24 rounded-full border border-border object-cover" />
+      )}
+      {r.contactNumbers.length === 0 ? (
+        <p className="text-sm text-ink-faint">{t("lawyerAccount.admin.noContacts")}</p>
+      ) : (
+        <ul className="flex flex-col gap-2 text-sm">
+          {r.contactNumbers.map((c) => (
+            <li key={c.phoneE164 + c.kind} className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-ink-soft">
+                {t(`lawyerAccount.kinds.${c.kind}`)}
+                {c.contactName && <span className="text-ink-faint"> · {c.contactName}</span>}
+              </span>
+              <Ltr className="font-mono text-ink">{c.phoneE164}</Ltr>
+            </li>
+          ))}
+        </ul>
+      )}
     </Card>
   );
 }

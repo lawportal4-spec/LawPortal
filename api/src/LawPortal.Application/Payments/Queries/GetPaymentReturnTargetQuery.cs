@@ -40,13 +40,11 @@ public class GetPaymentReturnTargetHandler(ILawPortalDbContext db, IConfiguratio
                 : $"{clientBaseUrl}/wallet{returned}";
         }
 
-        var isSubscriptionInvoice = await db.SubscriptionInvoices
-            .AnyAsync(i => i.Id == request.PaymentId, cancellationToken);
-        if (isSubscriptionInvoice)
-        {
-            var lawyerBaseUrl = (configuration["Payments:LawyerBaseUrl"] ?? "http://localhost:5174").TrimEnd('/');
+        var lawyerBaseUrl = (configuration["Payments:LawyerBaseUrl"] ?? "http://localhost:5174").TrimEnd('/');
+        if (await db.SubscriptionInvoices.AnyAsync(i => i.Id == request.PaymentId, cancellationToken))
             return $"{lawyerBaseUrl}/subscription{returned}";
-        }
+        if (await db.RegistrationFeeInvoices.AnyAsync(i => i.Id == request.PaymentId, cancellationToken))
+            return $"{lawyerBaseUrl}/registration-fee{returned}";
 
         // An unknown id means a stale or hand-edited return URL. Land them somewhere sensible
         // rather than 404-ing a browser that has just finished paying.

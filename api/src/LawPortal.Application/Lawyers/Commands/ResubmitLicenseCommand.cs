@@ -28,7 +28,7 @@ public class ResubmitLicenseValidator : AbstractValidator<ResubmitLicenseCommand
             .WithMessage("The licence document must be at most 3MB.")
             .When(x => x.LicenseDocument is not null);
         RuleFor(x => x.LicenseDocument!.ContentType).Must(t => RegisterLawyerValidator.AllowedDocumentTypes.Contains(t))
-            .WithMessage("The licence document must be an image (jpeg, png, webp) or a PDF.")
+            .WithMessage("The licence document must be a JPG or PNG image, or a PDF.")
             .When(x => x.LicenseDocument is not null);
     }
 }
@@ -54,11 +54,19 @@ public class ResubmitLicenseHandler(
         if ((license.CorrectionIssues & FileIssues) != 0 && request.LicenseDocument is null)
             throw new ValidationException("Please upload a new licence document.");
 
-        if (await db.LawyerLicenses.AnyAsync(
+        // Only what the admin flagged may change; a note with no checklist item leaves everything open.
+        var issues = license.CorrectionIssues;
+        bool Flagged(LicenseCorrectionIssue issue) => issues == LicenseCorrectionIssue.None || issues.HasFlag(issue);
+        var canNumber = Flagged(LicenseCorrectionIssue.LicenseNumberMismatch);
+        var canDates = Flagged(LicenseCorrectionIssue.DatesMismatch);
+        var canType = Flagged(LicenseCorrectionIssue.LicenseTypeMismatch);
+        var canFile = issues == LicenseCorrectionIssue.None || (issues & FileIssues) != 0;
+
+        if (canNumber && await db.LawyerLicenses.AnyAsync(
                 l => l.LicenseNumber == request.LicenseNumber && l.LawyerProfileId != lawyerProfileId, cancellationToken))
             throw new InvalidOperationException("This licence number is already registered.");
 
-        if (request.LicenseDocument is { } document)
+        if (canFile && request.LicenseDocument is { } document)
         {
             using var buffer = new MemoryStream();
             await document.Content.CopyToAsync(buffer, cancellationToken);
@@ -71,10 +79,13 @@ public class ResubmitLicenseHandler(
             license.DocumentContentType = document.ContentType;
         }
 
-        license.LicenseType = request.LicenseType;
-        license.LicenseNumber = request.LicenseNumber;
-        license.IssueDate = request.IssueDate;
-        license.ExpiryDate = request.ExpiryDate;
+        if (canType) license.LicenseType = request.LicenseType;
+        if (canNumber) license.LicenseNumber = request.LicenseNumber;
+        if (canDates)
+        {
+            license.IssueDate = request.IssueDate;
+            license.ExpiryDate = request.ExpiryDate;
+        }
         license.VerificationStatus = LicenseVerificationStatus.PendingReview;
         license.ResubmittedAtUtc = DateTime.UtcNow;
 

@@ -13,7 +13,7 @@ export function LawyerCard({ lawyer }: { lawyer: LawyerCardDto }) {
   return (
     <Card className="flex h-full flex-col">
       <div className="flex items-start gap-3">
-        <Avatar initials={initials} online />
+        <Avatar initials={initials} src={lawyer.photoUrl} online />
         <div>
           <div className="flex items-center gap-1.5 text-sm font-semibold">
             <Link to={`/lawyers/${lawyer.slug}`} className="hover:text-seal">

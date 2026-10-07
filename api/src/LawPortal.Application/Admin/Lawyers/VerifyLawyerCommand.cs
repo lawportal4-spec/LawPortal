@@ -1,13 +1,17 @@
 using LawPortal.Application.Common.Interfaces;
+using LawPortal.Application.Lawyers.Onboarding;
 using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace LawPortal.Application.Admin.Lawyers;
 
 public record VerifyLawyerCommand(Guid LawyerProfileId) : IRequest<Unit>;
 
-public class VerifyLawyerHandler(ILawPortalDbContext db, ICurrentUser currentUser, IAuditLogger auditLogger)
+public class VerifyLawyerHandler(
+    ILawPortalDbContext db, ICurrentUser currentUser, IAuditLogger auditLogger,
+    ITokenService tokenService, IEmailSender emailSender, IConfiguration configuration)
     : IRequestHandler<VerifyLawyerCommand, Unit>
 {
     public async Task<Unit> Handle(VerifyLawyerCommand request, CancellationToken cancellationToken)
@@ -22,14 +26,30 @@ public class VerifyLawyerHandler(ILawPortalDbContext db, ICurrentUser currentUse
         if (profile.License.VerificationStatus == LicenseVerificationStatus.Approved)
             throw new InvalidOperationException("This licence is already approved.");
 
-        profile.IsVerified = true;
         profile.License.VerificationStatus = LicenseVerificationStatus.Approved;
         profile.License.VerifiedByAdminUserId = currentUser.UserId;
         profile.License.VerifiedAtUtc = DateTime.UtcNow;
-        profile.User!.Status = UserStatus.Active;
+
+        // An already-active lawyer whose renewed licence was re-reviewed simply stays active. A new
+        // one isn't let in yet: approval starts onboarding — verify the email, then pay the fee.
+        if (profile.User!.Status == UserStatus.Active)
+            profile.IsVerified = true;
 
         await auditLogger.LogAsync("LawyerLicenseApproved", nameof(LawyerProfile), profile.Id.ToString(), cancellationToken: cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
+
+        if (profile.User.Status == UserStatus.PendingVerification)
+        {
+            if (profile.User.IsEmailVerified)
+            {
+                await LawyerOnboarding.AdvanceAfterEmailAsync(db, profile, cancellationToken);
+                await db.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                await LawyerOnboarding.SendVerificationEmailAsync(db, tokenService, emailSender, configuration, profile.User, profile.FullName, cancellationToken);
+            }
+        }
 
         return Unit.Value;
     }

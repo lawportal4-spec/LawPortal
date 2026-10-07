@@ -19,6 +19,7 @@ export function RequireAuth({ children }: { children: ReactNode }) {
 /** Until an admin approves the licence, the whole portal is replaced by the registration's status:
  * under review, returned for changes (with a form to fix them), or rejected. */
 function RequireApproval({ children }: { children: ReactNode }) {
+  const location = useLocation();
   // gcTime 0: dropped once signed-out pages unmount this, so the next lawyer to sign in on this
   // browser never sees the previous one's approval state, even for a frame.
   const me = useQuery({ queryKey: ["lawyerMe"], queryFn: getLawyerMe, gcTime: 0 });
@@ -27,6 +28,8 @@ function RequireApproval({ children }: { children: ReactNode }) {
   // A failed lookup shouldn't hide the portal from an approved lawyer; the pages' own calls will
   // surface a real problem (and a 401 already signs out via the API interceptor).
   if (me.isError || me.data.isApproved) return <>{children}</>;
+  // The fee checkout is the one page an approved-but-unpaid lawyer may open.
+  if (me.data.onboardingStep === "PayFee" && location.pathname === "/registration-fee") return <>{children}</>;
 
   return <RegistrationStatus me={me.data} />;
 }

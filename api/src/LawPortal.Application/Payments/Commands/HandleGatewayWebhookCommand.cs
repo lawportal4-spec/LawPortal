@@ -1,5 +1,7 @@
 using LawPortal.Application.Common.Interfaces;
+using LawPortal.Application.Lawyers.Onboarding;
 using LawPortal.Application.Subscriptions;
+using LawPortal.Domain.Billing;
 using LawPortal.Domain.Payments;
 using LawPortal.Domain.Subscriptions;
 using MediatR;
@@ -40,10 +42,18 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
             return Unit.Value;
         }
 
+        var feeInvoice = await db.RegistrationFeeInvoices
+            .FirstOrDefaultAsync(i => i.GatewayPaymentId == request.GatewayPaymentId, cancellationToken);
+        if (feeInvoice is not null)
+        {
+            await HandleRegistrationFeeAsync(feeInvoice, request.Status, cancellationToken);
+            return Unit.Value;
+        }
+
         var invoice = await db.SubscriptionInvoices
             .Include(i => i.LawyerSubscription)
             .FirstOrDefaultAsync(i => i.GatewayPaymentId == request.GatewayPaymentId, cancellationToken)
-            ?? throw new KeyNotFoundException("No payment or subscription invoice matches this gateway reference.");
+            ?? throw new KeyNotFoundException("No payment or invoice matches this gateway reference.");
 
         await HandleSubscriptionInvoiceAsync(invoice, request.Status, configuration, cancellationToken);
         return Unit.Value;
@@ -97,7 +107,36 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
         {
             payment.Status = PaymentStatus.Failed;
             payment.FailureReason = "Gateway reported a failed payment (e.g. 3DS declined).";
+            await DiscountService.ReleaseAsync(db, payment.Id, cancellationToken);
             // The request deliberately stays Submitted — the client can simply retry checkout.
+        }
+
+        await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private async Task HandleRegistrationFeeAsync(LawyerRegistrationFeeInvoice invoice, string status, CancellationToken cancellationToken)
+    {
+        if (invoice.Status is not RegistrationFeeInvoiceStatus.Pending)
+            return; // Already settled — a replay must not re-post the ledger.
+
+        if (status == "paid")
+        {
+            invoice.Status = RegistrationFeeInvoiceStatus.Paid;
+            invoice.PaidAtUtc = DateTime.UtcNow;
+            invoice.QrPayloadBase64 = ZatcaQrCodeBuilder.Build(
+                "بوابة القانون", configuration["Payments:PlatformVatNumber"] ?? "", invoice.PaidAtUtc.Value, invoice.Total, invoice.VatAmount);
+            db.LedgerEntries.AddRange(LedgerPostingService.PostRegistrationFee(invoice));
+            await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
+
+            // The fee was the last onboarding step: the portal opens and the lawyer becomes bookable.
+            var lawyer = await db.LawyerProfiles.Include(l => l.User).FirstAsync(l => l.Id == invoice.LawyerProfileId, cancellationToken);
+            LawyerOnboarding.Activate(lawyer);
+        }
+        else
+        {
+            invoice.Status = RegistrationFeeInvoiceStatus.Failed;
+            invoice.FailureReason = "Gateway reported a failed payment (e.g. 3DS declined).";
+            await DiscountService.ReleaseAsync(db, invoice.Id, cancellationToken);
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -126,11 +165,13 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
             subscription.ConsecutiveFailedAttempts = 0;
 
             db.LedgerEntries.AddRange(LedgerPostingService.PostSubscriptionPayment(invoice));
+            await DiscountService.ConfirmAsync(db, invoice.Id, cancellationToken);
         }
         else
         {
             invoice.Status = SubscriptionInvoiceStatus.Failed;
             invoice.FailureReason = "Gateway reported a failed payment (e.g. 3DS declined).";
+            await DiscountService.ReleaseAsync(db, invoice.Id, cancellationToken);
 
             subscription.ConsecutiveFailedAttempts++;
             subscription.Status = subscription.ConsecutiveFailedAttempts >= SubscriptionBillingPolicy.MaxDunningAttempts

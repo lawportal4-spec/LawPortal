@@ -1,3 +1,4 @@
+using LawPortal.Domain.Billing;
 using LawPortal.Domain.Ledger;
 using LawPortal.Domain.Payments;
 using LawPortal.Domain.Subscriptions;
@@ -30,6 +31,9 @@ public static class LedgerPostingService
 
         entries.Add(Entry(LedgerAccount.EscrowPayable, isDebit: false, payment.NetToLawyerAmount, payment.Id, "Payment", "Held in escrow for the lawyer"));
         entries.Add(Entry(LedgerAccount.CommissionRevenue, isDebit: false, payment.CommissionAmount, payment.Id, "Payment", "Platform commission"));
+
+        if (DiscountExpenseOf(payment) is > 0 and var discountExpense)
+            entries.Add(Entry(LedgerAccount.DiscountExpense, isDebit: true, discountExpense, payment.Id, "Payment", "Discount code funded by the platform"));
         return entries;
     }
 
@@ -53,6 +57,17 @@ public static class LedgerPostingService
         return AssertBalanced(entries);
     }
 
+    public static IReadOnlyList<LedgerEntry> PostRegistrationFee(LawyerRegistrationFeeInvoice invoice)
+    {
+        var entries = new List<LedgerEntry>
+        {
+            Entry(LedgerAccount.ClearingGateway, isDebit: true, invoice.Total, invoice.Id, "RegistrationFeeInvoice", "Registration fee collected"),
+            Entry(LedgerAccount.VatPayable, isDebit: false, invoice.VatAmount, invoice.Id, "RegistrationFeeInvoice", "VAT collected on behalf of ZATCA"),
+            Entry(LedgerAccount.RegistrationFeeRevenue, isDebit: false, invoice.SubtotalExVat, invoice.Id, "RegistrationFeeInvoice", "Registration fee revenue"),
+        };
+        return AssertBalanced(entries);
+    }
+
     public static IReadOnlyList<LedgerEntry> PostPayout(Payout payout) => AssertBalanced(
     [
         Entry(LedgerAccount.EscrowPayable, isDebit: true, payout.Amount, payout.Id, "Payout", "Escrow released to lawyer"),
@@ -69,21 +84,31 @@ public static class LedgerPostingService
         var vatPortion = Math.Round(payment.VatAmount * ratio, 2);
         var commissionPortion = Math.Round(payment.CommissionAmount * ratio, 2);
         var netToLawyerPortion = Math.Round(payment.NetToLawyerAmount * ratio, 2);
+        var discountPortion = Math.Round(DiscountExpenseOf(payment) * ratio, 2);
         // Whichever portion rounding leaves over lands back on the escrow leg, which is the
         // largest and least visible amount to a client reading their refund confirmation.
-        netToLawyerPortion += refund.Amount - (vatPortion + commissionPortion + netToLawyerPortion);
+        netToLawyerPortion += refund.Amount - (vatPortion + commissionPortion + netToLawyerPortion - discountPortion);
 
         var entries = new List<LedgerEntry>();
         if (vatPortion > 0)
             entries.Add(Entry(LedgerAccount.VatPayable, isDebit: true, vatPortion, refund.Id, "Refund", "VAT reversed"));
         entries.Add(Entry(LedgerAccount.EscrowPayable, isDebit: true, netToLawyerPortion, refund.Id, "Refund", "Escrow reversed"));
         entries.Add(Entry(LedgerAccount.CommissionRevenue, isDebit: true, commissionPortion, refund.Id, "Refund", "Commission reversed"));
+        if (discountPortion > 0)
+            entries.Add(Entry(LedgerAccount.DiscountExpense, isDebit: false, discountPortion, refund.Id, "Refund", "Discount expense reversed"));
 
         var returnAccount = wasWalletFunded ? LedgerAccount.WalletLiability : LedgerAccount.ClearingGateway;
         entries.Add(Entry(returnAccount, isDebit: false, refund.Amount, refund.Id, "Refund", "Refunded to client"));
 
         return AssertBalanced(entries);
     }
+
+    /// <summary>Recovered from the snapshot rather than stored: a discounted payment pays the
+    /// lawyer and the platform on the gross price, so its legs exceed what the client paid.</summary>
+    private static decimal DiscountExpenseOf(Payment payment) =>
+        payment.Purpose == PaymentPurpose.RequestCheckout
+            ? Math.Max(0, payment.VatAmount + payment.NetToLawyerAmount + payment.CommissionAmount - payment.Total)
+            : 0;
 
     private static LedgerEntry Entry(LedgerAccount account, bool isDebit, decimal amount, Guid referenceId, string referenceType, string description) => new()
     {

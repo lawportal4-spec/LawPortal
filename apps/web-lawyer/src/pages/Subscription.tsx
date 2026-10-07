@@ -5,6 +5,7 @@ import { Check, CreditCard, Megaphone, Percent, TriangleAlert } from "lucide-rea
 import { Button, Card, Ltr, StatusTag } from "@law-portal/ui";
 import { useTranslation, formatCurrency, formatDate } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { DiscountCodeField } from "../components/DiscountCodeField";
 import {
   cancelSubscription,
   getMySubscription,
@@ -83,7 +84,7 @@ export default function Subscription() {
   });
 
   const payMutation = useMutation({
-    mutationFn: (invoiceId: string) => payInvoice(invoiceId),
+    mutationFn: (invoiceId: string) => payInvoice(invoiceId, discountCode),
     onSuccess: (result) => {
       setError(null);
       if (result.redirectUrl) {
@@ -102,6 +103,7 @@ export default function Subscription() {
     invalidateAll();
   }
 
+  const [discountCode, setDiscountCode] = useState<string | null>(null);
   const mine = mineQuery.data;
   const pendingInvoice = invoicesQuery.data?.find((i) => i.status === "Pending");
 
@@ -217,7 +219,7 @@ export default function Subscription() {
       <h2 className="mb-3 text-sm font-semibold text-ink-soft">{isAr ? "الفواتير" : "Invoices"}</h2>
       <div className="flex flex-col gap-2">
         {invoicesQuery.data?.map((invoice) => (
-          <Card key={invoice.id} className="flex items-center justify-between gap-4">
+          <Card key={invoice.id} className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="font-mono text-sm font-medium text-ink">{invoice.number}</p>
               <p className="text-xs text-ink-faint">
@@ -239,6 +241,9 @@ export default function Subscription() {
                 </Button>
               )}
             </div>
+            {invoice.status === "Pending" && (
+              <DiscountCodeField className="w-full" referenceId={invoice.id} onChange={setDiscountCode} />
+            )}
           </Card>
         ))}
         {invoicesQuery.data?.length === 0 && (

@@ -46,6 +46,7 @@ public class LawyerProfileConfiguration : IEntityTypeConfiguration<LawyerProfile
         builder.ToTable("lawyer_profiles");
         builder.HasKey(l => l.Id);
         builder.Property(l => l.FullName).HasMaxLength(200).IsRequired();
+        builder.Property(l => l.PhotoStorageKey).HasMaxLength(300);
         builder.Property(l => l.Slug).HasMaxLength(220).IsRequired();
         builder.HasIndex(l => l.Slug).IsUnique();
         builder.Property(l => l.VatNumber).HasMaxLength(50);

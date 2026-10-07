@@ -1,5 +1,6 @@
 using LawPortal.Application.Auth.Commands;
 using LawPortal.Application.Auth.Dtos;
+using LawPortal.Application.Lawyers.Onboarding;
 using LawPortal.Domain.Identity;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -81,6 +82,14 @@ public class LawyerAuthController(ISender sender) : ControllerBase
     }
 
     public record ResetPasswordBody(string PhoneE164, string Code, string NewPassword);
+
+    public record VerifyEmailBody(string Token);
+
+    /// <summary>The "تفعيل الآن" link from the post-approval email. Public — the token is the proof.</summary>
+    [HttpPost("email/verify")]
+    [ProducesResponseType<LawyerEmailVerifiedDto>(StatusCodes.Status200OK)]
+    public async Task<ActionResult<LawyerEmailVerifiedDto>> VerifyEmail(VerifyEmailBody body, CancellationToken cancellationToken)
+        => Ok(await sender.Send(new VerifyLawyerEmailCommand(body.Token), cancellationToken));
 
     [HttpPost("password/reset")]
     public async Task<IActionResult> ResetPassword(ResetPasswordBody body, CancellationToken cancellationToken)

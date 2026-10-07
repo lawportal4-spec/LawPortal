@@ -62,6 +62,7 @@ export interface LawyerCardDto {
   isVatRegistered: boolean;
   specialtyNamesAr: string[];
   specialtyNamesEn: string[];
+  photoUrl: string | null;
 }
 
 export interface PagedResult<T> {
@@ -135,6 +136,7 @@ export interface LawyerProfileDetailDto {
   languageNamesAr: string[];
   languageNamesEn: string[];
   qualifications: LawyerQualificationDto[];
+  photoUrl: string | null;
 }
 
 export async function searchLawyers(params: LawyerSearchParams): Promise<PagedResult<LawyerCardDto>> {

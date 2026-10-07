@@ -21,7 +21,14 @@ public record LawyerMeDto(
     string LicenseNumber,
     DateOnly IssueDate,
     DateOnly ExpiryDate,
-    string? DocumentFileName);
+    string? DocumentFileName,
+    string? Email,
+    /// <summary>After approval: "VerifyEmail", then "PayFee"; null otherwise.</summary>
+    string? OnboardingStep,
+    /// <summary>First day the licence may be renewed (3 months before <see cref="ExpiryDate"/>).</summary>
+    DateOnly RenewalOpensOn,
+    /// <summary>A submitted renewal is waiting for admin review.</summary>
+    bool RenewalPending);
 
 public record GetLawyerMeQuery : IRequest<LawyerMeDto>;
 
@@ -51,6 +58,10 @@ public class GetLawyerMeHandler(ILawPortalDbContext db, ICurrentUser currentUser
             license.LicenseNumber,
             license.IssueDate,
             license.ExpiryDate,
-            license.DocumentFileName);
+            license.DocumentFileName,
+            lawyer.User.Email,
+            Onboarding.LawyerOnboarding.StepOf(lawyer)?.ToString(),
+            LicenseRenewal.OpensOn(license.ExpiryDate),
+            isApproved && license.VerificationStatus == LicenseVerificationStatus.PendingReview);
     }
 }

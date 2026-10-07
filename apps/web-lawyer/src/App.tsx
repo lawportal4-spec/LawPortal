@@ -12,6 +12,9 @@ import Chat from "./pages/Chat";
 import Settings from "./pages/Settings";
 import Earnings from "./pages/Earnings";
 import Subscription from "./pages/Subscription";
+import VerifyEmail from "./pages/VerifyEmail";
+import RegistrationFee from "./pages/RegistrationFee";
+import Account from "./pages/Account";
 import { AuthProvider } from "./lib/authContext";
 import { RequireAuth } from "./components/RequireAuth";
 
@@ -23,6 +26,23 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
+          <Route
+            path="/account"
+            element={
+              <RequireAuth>
+                <Account />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/registration-fee"
+            element={
+              <RequireAuth>
+                <RegistrationFee />
+              </RequireAuth>
+            }
+          />
           <Route
             path="/"
             element={

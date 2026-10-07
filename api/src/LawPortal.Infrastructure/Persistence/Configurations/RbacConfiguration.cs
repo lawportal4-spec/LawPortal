@@ -75,3 +75,28 @@ public class OtpChallengeConfiguration : IEntityTypeConfiguration<OtpChallenge>
         builder.Ignore(o => o.IsLocked);
     }
 }
+
+public class EmailVerificationTokenConfiguration : IEntityTypeConfiguration<EmailVerificationToken>
+{
+    public void Configure(EntityTypeBuilder<EmailVerificationToken> builder)
+    {
+        builder.ToTable("email_verification_tokens");
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.TokenHash).HasMaxLength(200).IsRequired();
+        builder.HasIndex(t => t.TokenHash).IsUnique();
+        builder.HasIndex(t => t.UserId);
+        builder.Property(t => t.NewEmail).HasMaxLength(256);
+    }
+}
+
+public class LawyerContactNumberConfiguration : IEntityTypeConfiguration<LawyerContactNumber>
+{
+    public void Configure(EntityTypeBuilder<LawyerContactNumber> builder)
+    {
+        builder.ToTable("lawyer_contact_numbers");
+        builder.HasKey(c => c.Id);
+        builder.Property(c => c.ContactName).HasMaxLength(100);
+        builder.Property(c => c.PhoneE164).HasMaxLength(20).IsRequired();
+        builder.HasOne<LawyerProfile>().WithMany(l => l.ContactNumbers).HasForeignKey(c => c.LawyerProfileId).OnDelete(DeleteBehavior.Cascade);
+    }
+}

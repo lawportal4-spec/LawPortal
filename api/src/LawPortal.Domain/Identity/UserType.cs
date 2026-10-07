@@ -53,6 +53,8 @@ public enum OtpPurpose
     LawyerRegistration = 2,
     /// <summary>Proves a lawyer owns their phone before they can set a new password.</summary>
     PasswordReset = 3,
+    /// <summary>Proves a signed-in lawyer owns the new mobile they want to sign in with.</summary>
+    ChangePhone = 4,
 }
 
 public enum LawyerLicenseType

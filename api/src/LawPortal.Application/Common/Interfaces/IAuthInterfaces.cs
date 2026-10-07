@@ -26,6 +26,13 @@ public interface IOtpSender
     Task SendAsync(string phoneE164, string code, CancellationToken cancellationToken = default);
 }
 
+/// <summary>Sends transactional email. SMTP when <c>Email:Smtp:Host</c> is configured, otherwise
+/// the message (and any link in it) only goes to the log — same stopgap as <see cref="IOtpSender"/>.</summary>
+public interface IEmailSender
+{
+    Task SendAsync(string to, string subject, string htmlBody, CancellationToken cancellationToken = default);
+}
+
 /// <summary>No real reCAPTCHA site/secret key exists yet — the dev implementation always
 /// passes. Must be replaced before launch (see plan's open-questions list).</summary>
 public interface IRecaptchaVerifier
