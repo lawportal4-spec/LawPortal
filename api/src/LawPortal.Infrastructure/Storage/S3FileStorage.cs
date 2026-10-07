@@ -1,3 +1,4 @@
+using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using LawPortal.Application.Common.Interfaces;
@@ -32,6 +33,12 @@ public class S3FileStorage : IFileStorage
             ForcePathStyle = section.GetValue("ForcePathStyle", true),
             AuthenticationRegion = section["Region"] ?? "us-east-1",
             UseHttp = _endpointIsHttp,
+            // AWSSDK.S3 3.7.412+ adds integrity checksums to every request by default, sent as
+            // "Content-Encoding: aws-chunked" — which S3-compatible stores outside AWS (Railway's
+            // Tigris buckets) reject with "The Content-Encoding HTTP header is invalid". Only
+            // compute/validate them when the operation actually requires it.
+            RequestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED,
+            ResponseChecksumValidation = ResponseChecksumValidation.WHEN_REQUIRED,
         };
         _client = new AmazonS3Client(section["AccessKey"], section["SecretKey"], config);
     }
