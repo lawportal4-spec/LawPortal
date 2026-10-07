@@ -114,7 +114,7 @@
         "prompt": "اضغط هنا لرفع الملفات",
         "uploaded": "قمت برفع الملفات:",
         "change": "اضغط هنا لتغيير الملفات",
-        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)",
+        "formats": "image/jpeg, image/png, image/jpg, application/pdf (max. 3MB)",
         "required": "المطلوب: ترخيص المحاماة"
       },
       "startDate": "تاريخ البدء",
@@ -141,7 +141,7 @@
         "email": "أدخل بريدًا إلكترونيًا صحيحًا.",
         "password": "كلمة المرور 8 أحرف على الأقل وتحتوي على حرف كبير ورقم.",
         "passwordMismatch": "كلمتا المرور غير متطابقتين.",
-        "fileType": "الملف يجب أن يكون صورة (jpeg, png, webp) أو PDF.",
+        "fileType": "الملف يجب أن يكون صورة (JPG أو PNG) أو ملف PDF.",
         "fileSize": "حجم الملف يجب ألا يتجاوز 3MB.",
         "date": "أدخل تاريخًا هجريًا صحيحًا مثل 22/10/1443.",
         "endAfterStart": "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء.",

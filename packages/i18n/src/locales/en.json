@@ -114,7 +114,7 @@
         "prompt": "Click here to upload files",
         "uploaded": "Uploaded files:",
         "change": "Click here to change the files",
-        "formats": "image/jpeg, image/png, image/jpg, image/webp, application/pdf (max. 3MB)",
+        "formats": "image/jpeg, image/png, image/jpg, application/pdf (max. 3MB)",
         "required": "Required: law practice licence"
       },
       "startDate": "Start date",
@@ -141,7 +141,7 @@
         "email": "Enter a valid email address.",
         "password": "Password must be at least 8 characters with an uppercase letter and a digit.",
         "passwordMismatch": "Passwords do not match.",
-        "fileType": "The file must be an image (jpeg, png, webp) or a PDF.",
+        "fileType": "The file must be a JPG or PNG image, or a PDF.",
         "fileSize": "The file must be 3MB or smaller.",
         "date": "Enter a valid Hijri date, e.g. 22/10/1443.",
         "endAfterStart": "The end date must be after the start date.",

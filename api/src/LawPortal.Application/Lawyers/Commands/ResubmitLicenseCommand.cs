@@ -28,7 +28,7 @@ public class ResubmitLicenseValidator : AbstractValidator<ResubmitLicenseCommand
             .WithMessage("The licence document must be at most 3MB.")
             .When(x => x.LicenseDocument is not null);
         RuleFor(x => x.LicenseDocument!.ContentType).Must(t => RegisterLawyerValidator.AllowedDocumentTypes.Contains(t))
-            .WithMessage("The licence document must be an image (jpeg, png, webp) or a PDF.")
+            .WithMessage("The licence document must be a JPG or PNG image, or a PDF.")
             .When(x => x.LicenseDocument is not null);
     }
 }
