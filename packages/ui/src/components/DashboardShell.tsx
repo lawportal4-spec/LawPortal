@@ -21,16 +21,17 @@ export function DashboardShell({
   return (
     <div className="min-h-screen bg-paper">
       <header className="sticky top-0 z-30 border-b border-border bg-surface-raised">
-        <div className="flex h-16 items-center gap-4 px-4 sm:px-6">
-          <div className="shrink-0 whitespace-nowrap">{brand}</div>
-          <div className="ms-auto flex items-center gap-3">{actions}</div>
+        {/* On a phone the brand gives way first, so the menu button always stays on screen. */}
+        <div className="flex h-16 items-center gap-2 px-3 sm:gap-4 sm:px-6">
+          <div className="min-w-0 overflow-hidden whitespace-nowrap">{brand}</div>
+          <div className="ms-auto flex shrink-0 items-center gap-2 sm:gap-3">{actions}</div>
           {nav && (
             <button
               type="button"
               onClick={() => setOpen((o) => !o)}
               aria-label={menuLabel}
               aria-expanded={open}
-              className="flex h-10 w-10 items-center justify-center rounded-md border border-border text-ink-soft lg:hidden"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-border text-ink-soft lg:hidden"
             >
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d={open ? "M6 6l12 12M18 6L6 18" : "M4 7h16M4 12h16M4 17h16"} />
@@ -75,7 +76,7 @@ export function LocaleToggle({ locale, onChange }: { locale: "ar" | "en"; onChan
           type="button"
           onClick={() => onChange(code)}
           className={clsx(
-            "rounded-full px-3 py-1 text-xs font-medium transition-colors",
+            "rounded-full px-2.5 py-1 text-xs font-medium transition-colors sm:px-3",
             locale === code ? "bg-seal text-seal-on" : "text-ink-soft hover:text-ink",
           )}
         >
