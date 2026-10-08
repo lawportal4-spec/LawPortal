@@ -4,6 +4,7 @@ import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
 import { Button, Card, Ltr } from "@law-portal/ui";
 import { useTranslation, formatCurrency } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/PageHeader";
 import {
   getCategories,
   updateCategory,
@@ -211,12 +212,7 @@ export default function Catalog() {
 
   return (
     <AppShell>
-      <h1 className="mb-1 font-display text-2xl font-bold">{isAr ? "الخدمات والتسعير" : "Catalog & Pricing"}</h1>
-      <p className="mb-6 text-sm text-ink-faint">
-        {isAr
-          ? "إدارة الفئات والخدمات والخيارات المسعّرة. التبديل بين نمط التسعير غير متاح بعد الإنشاء."
-          : "Manage categories, services, and priced variants. Pricing model can't change after a service is created."}
-      </p>
+      <PageHeader page="catalog" />
 
       {query.isLoading && <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>}
 

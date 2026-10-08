@@ -30,6 +30,12 @@ public class LawyerProfile : AggregateRoot<Guid>
 
     /// <summary>ISO 3166-1 alpha-2. Registration only offers Saudi Arabia today.</summary>
     public string CountryCode { get; set; } = "SA";
+    /// <summary>Saudi national ID or Iqama number (10 digits). Unique among accounts.</summary>
+    public string? NationalIdNumber { get; set; }
+    /// <summary>Set at sign-up when the person matches a former account that left owing money; the
+    /// admin sees it when reviewing, and approving moves the debt to this account.</summary>
+    public Guid? PossibleFormerProfileId { get; set; }
+    public DateTime? LastDebtReminderAtUtc { get; set; }
     public DateTime? TermsAcceptedAtUtc { get; set; }
 
     public bool IsVerified { get; set; }

@@ -30,4 +30,10 @@ public interface IPaymentGateway
         string gatewayPaymentId,
         decimal amount,
         CancellationToken cancellationToken = default);
+
+    /// <summary>The bank-side details of the settled payment behind <paramref name="gatewayPaymentId"/>,
+    /// or null when nothing has been paid on it yet.</summary>
+    Task<LawPortal.Domain.Payments.GatewayTransaction?> GetTransactionAsync(
+        string gatewayPaymentId,
+        CancellationToken cancellationToken = default);
 }

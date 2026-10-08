@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Lock, Plus, Trash2 } from "lucide-react";
-import { Avatar, Button, Card, Input, Ltr, SectionHeading } from "@law-portal/ui";
+import { Avatar, Button, Card, ChangePasswordCard, DeleteAccountCard, Input, Ltr, SectionHeading } from "@law-portal/ui";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../lib/authContext";
 import { useTranslation } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
 import { Field, SaudiPhoneInput, Select } from "../components/AuthForm";
@@ -9,6 +11,9 @@ import { OtpCodeInput } from "../components/OtpCodeInput";
 import { getRegions, toSaudiE164 } from "../lib/authApi";
 import {
   CONTACT_KINDS,
+  deleteMyAccount,
+  getDeletionImpact,
+  changeMyPassword,
   confirmPhoneChange,
   getAccount,
   removePhoto,
@@ -30,6 +35,8 @@ const ACCOUNT_KEY = ["lawyerAccount"];
 export default function Account() {
   const { t } = useTranslation();
   const account = useQuery({ queryKey: ACCOUNT_KEY, queryFn: getAccount });
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <AppShell>
@@ -48,8 +55,17 @@ export default function Account() {
               <EmailSection current={account.data.email} pending={account.data.pendingEmail} />
             </div>
           </Card>
+          <ChangePasswordCard onChange={changeMyPassword} />
           <LocationCard account={account.data} />
           <ContactsCard account={account.data} />
+          <DeleteAccountCard
+            loadImpact={getDeletionImpact}
+            onDelete={async () => {
+              await deleteMyAccount();
+              logout();
+              navigate("/login");
+            }}
+          />
         </div>
       )}
     </AppShell>

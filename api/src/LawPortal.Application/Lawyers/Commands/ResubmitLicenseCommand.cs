@@ -62,9 +62,7 @@ public class ResubmitLicenseHandler(
         var canType = Flagged(LicenseCorrectionIssue.LicenseTypeMismatch);
         var canFile = issues == LicenseCorrectionIssue.None || (issues & FileIssues) != 0;
 
-        if (canNumber && await db.LawyerLicenses.AnyAsync(
-                l => l.LicenseNumber == request.LicenseNumber && l.LawyerProfileId != lawyerProfileId, cancellationToken))
-            throw new InvalidOperationException("This licence number is already registered.");
+        if (canNumber) await LicenseNumbers.AssignAsync(db, license, request.LicenseNumber, cancellationToken);
 
         if (canFile && request.LicenseDocument is { } document)
         {
@@ -80,7 +78,6 @@ public class ResubmitLicenseHandler(
         }
 
         if (canType) license.LicenseType = request.LicenseType;
-        if (canNumber) license.LicenseNumber = request.LicenseNumber;
         if (canDates)
         {
             license.IssueDate = request.IssueDate;

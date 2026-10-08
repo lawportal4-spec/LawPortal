@@ -57,9 +57,28 @@ public class LawyerProfileConfiguration : IEntityTypeConfiguration<LawyerProfile
         builder.HasOne(l => l.License).WithOne(lic => lic.LawyerProfile!)
             .HasForeignKey<LawyerLicense>(lic => lic.LawyerProfileId);
 
+        builder.Property(l => l.NationalIdNumber).HasMaxLength(10);
+        builder.HasIndex(l => l.NationalIdNumber).IsUnique();
         builder.HasIndex(l => new { l.IsVerified, l.CityId });
         builder.HasIndex(l => new { l.IsVerified, l.AvgRating });
         builder.HasIndex(l => new { l.IsVerified, l.Gender });
+    }
+}
+
+public class DeletedAccountFingerprintConfiguration : IEntityTypeConfiguration<DeletedAccountFingerprint>
+{
+    public void Configure(EntityTypeBuilder<DeletedAccountFingerprint> builder)
+    {
+        builder.ToTable("deleted_account_fingerprints");
+        builder.HasKey(f => f.Id);
+        builder.Property(f => f.PhoneHash).HasMaxLength(64);
+        builder.Property(f => f.EmailHash).HasMaxLength(64);
+        builder.Property(f => f.NationalIdHash).HasMaxLength(64);
+        builder.Property(f => f.ContactEmail).HasMaxLength(256);
+        builder.Property(f => f.ContactPhone).HasMaxLength(20);
+        builder.HasIndex(f => f.PhoneHash);
+        builder.HasIndex(f => f.EmailHash);
+        builder.HasIndex(f => f.NationalIdHash);
     }
 }
 
@@ -76,6 +95,8 @@ public class LawyerLicenseConfiguration : IEntityTypeConfiguration<LawyerLicense
         builder.Property(l => l.DocumentContentType).HasMaxLength(100);
         builder.Property(l => l.CorrectionNote).HasMaxLength(1000);
         builder.HasIndex(l => l.LicenseNumber).IsUnique();
+        builder.Property(l => l.LicenseNumberKey).HasMaxLength(50);
+        builder.HasIndex(l => l.LicenseNumberKey).IsUnique();
     }
 }
 

@@ -24,7 +24,7 @@ export function formatCurrency(amountSar: number, opts?: { showSymbol?: boolean 
   const amount = new Intl.NumberFormat(LOCALE_NEUTRAL, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(amountSar);
+  }).format(Math.round(amountSar * 100) / 100 || 0); // `|| 0` turns -0 into 0, so a zero never shows as "-0.00"
   return opts?.showSymbol === false ? amount : `${amount} SAR`;
 }
 

@@ -50,6 +50,10 @@ public class Payment : AggregateRoot<Guid>
     public string? FailureReason { get; set; }
     public DateTime? PaidAtUtc { get; set; }
 
+    /// <summary>What the bank side reported for this card payment; null until fetched from the
+    /// gateway (on confirmation, or the first time an admin opens an older payment).</summary>
+    public GatewayTransaction? Transaction { get; set; }
+
     public ICollection<Refund> Refunds { get; set; } = [];
     public Payout? Payout { get; set; }
 }

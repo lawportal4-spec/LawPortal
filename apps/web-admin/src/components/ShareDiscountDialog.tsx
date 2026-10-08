@@ -51,7 +51,7 @@ export function ShareDiscountDialog({ code, onClose }: { code: AdminDiscountCode
   const canNativeShare = typeof navigator !== "undefined" && "share" in navigator;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/50 px-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
@@ -76,7 +76,7 @@ export function ShareDiscountDialog({ code, onClose }: { code: AdminDiscountCode
               <Channel label="WhatsApp" className="bg-[#25D366] text-white hover:opacity-90" onClick={() => open(`https://api.whatsapp.com/send?text=${enc(message)}`)}>
                 <WhatsAppIcon />
               </Channel>
-              <Channel label="X" className="bg-ink text-white hover:opacity-90" onClick={() => open(`https://twitter.com/intent/tweet?text=${enc(buildShortMessage(code, t, lang))}`)}>
+              <Channel label="X" className="bg-black text-white hover:opacity-90" onClick={() => open(`https://twitter.com/intent/tweet?text=${enc(buildShortMessage(code, t, lang))}`)}>
                 <Twitter className="h-5 w-5" />
               </Channel>
               <Channel label="Facebook" className="bg-[#1877F2] text-white hover:opacity-90" onClick={() => linkOnly("Facebook", `https://www.facebook.com/sharer/sharer.php?u=${enc(url)}`)}>

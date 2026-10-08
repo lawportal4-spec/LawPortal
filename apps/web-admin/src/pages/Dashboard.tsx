@@ -44,8 +44,8 @@ export default function Dashboard() {
       {d && (
         <>
           <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-            <StatCard label={isAr ? "العملاء" : "Clients"} value={String(d.totalClients)} />
-            <StatCard label={isAr ? "المحامون الموثّقون" : "Verified lawyers"} value={String(d.totalVerifiedLawyers)} />
+            <StatCard label={isAr ? "العملاء" : "Clients"} value={String(d.totalClients)} to="/clients" />
+            <StatCard label={isAr ? "المحامون الموثّقون" : "Verified lawyers"} value={String(d.totalVerifiedLawyers)} to="/lawyers?status=Approved" />
             <StatCard label={isAr ? "طلبات توثيق معلّقة" : "Pending verifications"} value={String(d.pendingLawyerVerifications)} to="/lawyers" />
             <StatCard label={isAr ? "عدد المسؤولين" : "Admins"} value={String(d.totalAdmins)} to="/users" />
             <StatCard label={isAr ? "عمولة هذا الشهر" : "Commission this month"} value={formatCurrency(d.commissionRevenueThisMonth)} to="/ledger" />

@@ -92,6 +92,10 @@ public class LawPortalDbContext(DbContextOptions<LawPortalDbContext> options)
     public DbSet<SubscriptionInvoice> SubscriptionInvoices => Set<SubscriptionInvoice>();
     public DbSet<RegistrationFeeSetting> RegistrationFeeSettings => Set<RegistrationFeeSetting>();
     public DbSet<LawyerRegistrationFeeInvoice> RegistrationFeeInvoices => Set<LawyerRegistrationFeeInvoice>();
+    public DbSet<LawyerDebtEntry> LawyerDebtEntries => Set<LawyerDebtEntry>();
+    public DbSet<RefundPolicySetting> RefundPolicySettings => Set<RefundPolicySetting>();
+    public DbSet<DeletedAccountFingerprint> DeletedAccountFingerprints => Set<DeletedAccountFingerprint>();
+    public DbSet<AdminNote> AdminNotes => Set<AdminNote>();
 
     /// <summary>Every DateTime is stored in UTC, but MySQL hands it back without a kind, so the API
     /// serialized it without a "Z" and browsers read it as local time — every time on every page

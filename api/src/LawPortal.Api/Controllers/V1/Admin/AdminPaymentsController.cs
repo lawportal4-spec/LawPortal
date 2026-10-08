@@ -14,13 +14,14 @@ namespace LawPortal.Api.Controllers.V1.Admin;
 [Route("api/v1/admin/payments")]
 public class AdminPaymentsController(ISender sender) : ControllerBase
 {
-    public record RefundBody(decimal Amount, string Reason);
+    public record RefundBody(decimal Amount, RefundReason Reason, string? Details, RefundBearer? LawyerShareBearer);
+    public record ReleaseBody(string Reason);
 
     [HttpGet]
     [ProducesResponseType<PagedResult<AdminPaymentSummaryDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<AdminPaymentSummaryDto>>> List(
-        [FromQuery] PaymentStatus? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
-        => Ok(await sender.Send(new GetAdminPaymentsQuery(status, page, pageSize), cancellationToken));
+        [FromQuery] GetAdminPaymentsQuery query, CancellationToken cancellationToken)
+        => Ok(await sender.Send(query, cancellationToken));
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType<AdminPaymentDetailDto>(StatusCodes.Status200OK)]
@@ -30,14 +31,14 @@ public class AdminPaymentsController(ISender sender) : ControllerBase
     [HttpPost("{id:guid}/refund")]
     public async Task<IActionResult> Refund(Guid id, RefundBody body, CancellationToken cancellationToken)
     {
-        await sender.Send(new RefundPaymentCommand(id, body.Amount, body.Reason), cancellationToken);
+        await sender.Send(new RefundPaymentCommand(id, body.Amount, body.Reason, body.Details, body.LawyerShareBearer), cancellationToken);
         return NoContent();
     }
 
     [HttpPost("payouts/{payoutId:guid}/release")]
-    public async Task<IActionResult> ReleasePayout(Guid payoutId, CancellationToken cancellationToken)
+    public async Task<IActionResult> ReleasePayout(Guid payoutId, ReleaseBody body, CancellationToken cancellationToken)
     {
-        await sender.Send(new ReleasePayoutCommand(payoutId), cancellationToken);
+        await sender.Send(new ReleasePayoutCommand(payoutId, body.Reason), cancellationToken);
         return NoContent();
     }
 }

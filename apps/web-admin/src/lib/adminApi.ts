@@ -81,11 +81,24 @@ export interface LawyerRegistrationDetailDto {
   photoUrl: string | null;
   /** Office / secretary numbers the lawyer added — admin-only, never shown to clients. */
   contactNumbers: { kind: "Office" | "Secretary" | "Mobile" | "Other"; contactName: string | null; phoneE164: string }[];
+  /** Last four digits only. */
+  nationalIdMasked: string | null;
+  /** This sign-up matches a former account that left owing money; approving moves the debt here. */
+  formerAccount: { lawyerProfileId: string; fullName: string; debtBalance: number } | null;
+  userId: string;
+  accountStatus: "Active" | "Suspended" | "Deleted" | "Pending";
 }
 
 export async function getLawyerRegistrations(params: {
   status?: LicenseReviewStatus;
   search?: string;
+  regionId?: number;
+  cityId?: number;
+  licenseType?: string;
+  accountStage?: string;
+  licenseExpiry?: string;
+  submittedFrom?: string;
+  submittedTo?: string;
   page: number;
   pageSize: number;
 }): Promise<PagedResult<LawyerRegistrationSummaryDto>> {

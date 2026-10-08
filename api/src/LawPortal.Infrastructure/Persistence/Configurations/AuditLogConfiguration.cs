@@ -18,3 +18,16 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         builder.HasIndex(a => a.OccurredAtUtc);
     }
 }
+
+public class AdminNoteConfiguration : IEntityTypeConfiguration<LawPortal.Domain.Audit.AdminNote>
+{
+    public void Configure(EntityTypeBuilder<LawPortal.Domain.Audit.AdminNote> builder)
+    {
+        builder.ToTable("admin_notes");
+        builder.HasKey(n => n.Id);
+        builder.Property(n => n.EntityType).HasMaxLength(20);
+        builder.Property(n => n.Body).HasMaxLength(2000);
+        builder.Property(n => n.AuthorName).HasMaxLength(200);
+        builder.HasIndex(n => new { n.EntityType, n.EntityId });
+    }
+}

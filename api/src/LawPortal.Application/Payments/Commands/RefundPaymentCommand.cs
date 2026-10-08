@@ -1,6 +1,7 @@
 using FluentValidation;
 using LawPortal.Application.Common.Interfaces;
 using LawPortal.Application.Wallet;
+using LawPortal.Domain.Ledger;
 using LawPortal.Domain.Payments;
 using LawPortal.Domain.Requests;
 using LawPortal.Domain.Wallet;
@@ -9,18 +10,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LawPortal.Application.Payments.Commands;
 
-public record RefundPaymentCommand(Guid PaymentId, decimal Amount, string Reason) : IRequest<Unit>;
+/// <param name="LawyerShareBearer">Only for a payment whose payout was already released: who covers the
+/// lawyer's share. Defaults to the lawyer, who then owes it (deducted from later payouts).</param>
+public record RefundPaymentCommand(Guid PaymentId, decimal Amount, RefundReason Reason, string? Details = null,
+    RefundBearer? LawyerShareBearer = null) : IRequest<Unit>;
 
 public class RefundPaymentValidator : AbstractValidator<RefundPaymentCommand>
 {
     public RefundPaymentValidator()
     {
         RuleFor(x => x.Amount).GreaterThan(0);
-        RuleFor(x => x.Reason).NotEmpty().MaximumLength(500);
+        RuleFor(x => x.Reason).IsInEnum();
+        RuleFor(x => x.LawyerShareBearer).IsInEnum().When(x => x.LawyerShareBearer is not null);
+        RuleFor(x => x.Details).MaximumLength(500);
+        RuleFor(x => x.Details).NotEmpty().When(x => x.Reason == RefundReason.Other).WithMessage("Describe the reason when choosing Other.");
     }
 }
 
-public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gateway) : IRequestHandler<RefundPaymentCommand, Unit>
+public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gateway, ICurrentUser currentUser, IAuditLogger auditLogger) : IRequestHandler<RefundPaymentCommand, Unit>
 {
     public async Task<Unit> Handle(RefundPaymentCommand request, CancellationToken cancellationToken)
     {
@@ -33,9 +40,16 @@ public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gatewa
         if (payment.Status is not (PaymentStatus.Paid or PaymentStatus.PartiallyRefunded))
             throw new InvalidOperationException("Only a paid payment can be refunded.");
 
-        if (payment.Payout is { Status: PayoutStatus.Released })
-            throw new InvalidOperationException(
-                "This payment's escrow has already been released to the lawyer — refunding after payout needs a clawback process this pass doesn't build.");
+        // After the lawyer was paid: only within the refund window, and someone must cover their share.
+        var afterPayout = payment.Payout is { Status: PayoutStatus.Released };
+        if (afterPayout)
+        {
+            var policy = await RefundPolicy.GetAsync(db, cancellationToken);
+            if (DateTime.UtcNow > RefundPolicy.DeadlineFor(payment.Payout!, policy))
+                throw new InvalidOperationException(
+                    $"The refund period ({policy.RefundWindowDays} days after the lawyer was paid) has ended.");
+        }
+        var bearer = afterPayout ? request.LawyerShareBearer ?? RefundBearer.Lawyer : (RefundBearer?)null;
 
         var alreadyRefunded = payment.Refunds.Where(r => r.Status == RefundStatus.Completed).Sum(r => r.Amount);
         if (alreadyRefunded + request.Amount > payment.Total)
@@ -59,13 +73,45 @@ public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gatewa
             PaymentId = payment.Id,
             Amount = request.Amount,
             Reason = request.Reason,
+            Details = string.IsNullOrWhiteSpace(request.Details) ? null : request.Details.Trim(),
+            LawyerShareBearer = bearer,
             Status = RefundStatus.Completed,
             GatewayRefundId = gatewayRefundId,
             CompletedAtUtc = DateTime.UtcNow,
         };
         db.Refunds.Add(refund);
 
-        db.LedgerEntries.AddRange(LedgerPostingService.PostRefund(payment, refund, wasWalletFunded));
+        var lawyerShareAccount = bearer switch
+        {
+            RefundBearer.Lawyer => LedgerAccount.LawyerReceivable,
+            RefundBearer.Platform => LedgerAccount.RefundLossExpense,
+            _ => LedgerAccount.EscrowPayable,
+        };
+        var refundEntries = LedgerPostingService.PostRefund(payment, refund, wasWalletFunded, lawyerShareAccount);
+        db.LedgerEntries.AddRange(refundEntries);
+
+        if (bearer == RefundBearer.Lawyer && payment.Payout is { } paidPayout)
+        {
+            db.LawyerDebtEntries.Add(new LawyerDebtEntry
+            {
+                Id = Guid.NewGuid(),
+                LawyerProfileId = paidPayout.LawyerProfileId,
+                Kind = LawyerDebtEntryKind.RefundAfterPayout,
+                Amount = refundEntries.Where(e => e.Account == LedgerAccount.LawyerReceivable && e.IsDebit).Sum(e => e.Amount),
+                PaymentId = payment.Id,
+                RefundId = refund.Id,
+                Note = request.Reason.ToString(),
+                CreatedByUserId = currentUser.UserId,
+            });
+        }
+
+        // The lawyer's held share shrinks by exactly what the ledger took out of escrow, so the payout
+        // that is eventually released always matches the books.
+        // A suspended payout (lawyer deleted their account) is still in escrow too.
+        if (payment.Payout is { Status: PayoutStatus.Held or PayoutStatus.Suspended } payout)
+        {
+            payout.Amount -= refundEntries.Where(e => e.Account == LedgerAccount.EscrowPayable && e.IsDebit).Sum(e => e.Amount);
+        }
 
         if (wasWalletFunded)
         {
@@ -79,12 +125,17 @@ public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gatewa
                 Type = WalletTransactionType.Refund,
                 Amount = request.Amount,
                 PaymentId = payment.Id,
-                Description = $"Refund: {request.Reason}",
+                Description = $"Refund: {request.Reason}" + (string.IsNullOrWhiteSpace(request.Details) ? "" : $" — {request.Details.Trim()}"),
             });
         }
 
         var totalRefunded = alreadyRefunded + request.Amount;
         payment.Status = totalRefunded >= payment.Total ? PaymentStatus.Refunded : PaymentStatus.PartiallyRefunded;
+        if (payment.Status == PaymentStatus.Refunded && payment.Payout is { Status: PayoutStatus.Held or PayoutStatus.Suspended } fullyRefunded)
+        {
+            fullyRefunded.Status = PayoutStatus.Cancelled;
+            fullyRefunded.Amount = 0;
+        }
 
         if (payment.Status == PaymentStatus.Refunded && payment.ServiceRequestId is { } requestId)
         {
@@ -94,6 +145,8 @@ public class RefundPaymentHandler(ILawPortalDbContext db, IPaymentGateway gatewa
         }
 
         await db.SaveChangesAsync(cancellationToken);
+        await auditLogger.LogAsync("PaymentRefunded", nameof(Payment), payment.Id.ToString(),
+            $"{refund.Amount:0.00} SAR · {refund.Reason}{(refund.Details is null ? "" : " · " + refund.Details)}", cancellationToken);
         return Unit.Value;
     }
 }

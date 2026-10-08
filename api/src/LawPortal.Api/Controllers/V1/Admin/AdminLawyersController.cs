@@ -18,9 +18,8 @@ public class AdminLawyersController(ISender sender) : ControllerBase
     [HttpGet]
     [ProducesResponseType<PagedResult<LawyerRegistrationSummaryDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<PagedResult<LawyerRegistrationSummaryDto>>> List(
-        [FromQuery] LicenseVerificationStatus? status, [FromQuery] string? search,
-        [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
-        => Ok(await sender.Send(new ListLawyerRegistrationsQuery(status, search, page, pageSize), cancellationToken));
+        [FromQuery] ListLawyerRegistrationsQuery query, CancellationToken cancellationToken)
+        => Ok(await sender.Send(query, cancellationToken));
 
     [HttpGet("{lawyerProfileId:guid}")]
     [ProducesResponseType<LawyerRegistrationDetailDto>(StatusCodes.Status200OK)]

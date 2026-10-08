@@ -22,6 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? [
           { to: "/orders", label: t("nav.orders") },
           { to: "/wallet", label: t("nav.wallet") },
+          { to: "/account", label: t("nav.account") },
         ]
       : []),
   ];
@@ -40,9 +41,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-paper">
       <header className="border-b border-border bg-surface-raised">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-          <Link to="/" className="flex items-baseline gap-2 font-display text-xl font-bold">
-            <span>{isAr ? "بوابة القانون" : "Law Portal"}</span>
-            <span className="text-sm font-normal text-ink-faint">
+          <Link to="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap font-display text-xl font-bold">
+            <img src="/favicon.svg" alt="" className="h-9 w-8" />
+            <span className="text-seal-strong">{isAr ? "بوابة القانون" : "Law Portal"}</span>
+            <span className="hidden text-sm font-normal text-ink-faint lg:inline">
               {isAr ? "Law Portal" : "بوابة القانون"}
             </span>
           </Link>

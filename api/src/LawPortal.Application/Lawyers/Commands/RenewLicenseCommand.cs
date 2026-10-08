@@ -46,7 +46,7 @@ public class RenewLicenseHandler(ILawPortalDbContext db, ICurrentUser currentUse
         if (request.ExpiryDate <= license.ExpiryDate)
             throw new InvalidOperationException("The renewed licence must expire after the current one.");
 
-        license.LicenseNumber = request.LicenseNumber;
+        await LicenseNumbers.AssignAsync(db, license, request.LicenseNumber, cancellationToken);
         license.IssueDate = request.IssueDate;
         license.ExpiryDate = request.ExpiryDate;
         license.VerificationStatus = LicenseVerificationStatus.PendingReview;

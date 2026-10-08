@@ -12,6 +12,7 @@ import { ACCEPTED_TYPES, MAX_FILE_BYTES } from "../lib/licenseFile";
 import { useCountdown } from "../lib/useCountdown";
 import {
   getRegions,
+  isValidNationalId,
   registerLawyer,
   resendLawyerRegistrationCode,
   toSaudiE164,
@@ -46,6 +47,7 @@ export default function Register() {
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [nationalId, setNationalId] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   // Step 2
@@ -63,6 +65,7 @@ export default function Register() {
   const req = t("lawyerAuth.register.errors.required");
   const step1Errors = {
     fullName: fullName.trim() ? null : req,
+    nationalId: !nationalId.trim() ? req : isValidNationalId(nationalId) ? null : t("lawyerAuth.register.errors.nationalId"),
     phone: phoneE164 ? null : t("lawyerAuth.register.errors.phone"),
     email: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) ? null : t("lawyerAuth.register.errors.email"),
     password: password.length >= 8 && /[A-Z]/.test(password) && /\d/.test(password) ? null : t("lawyerAuth.register.errors.password"),
@@ -119,6 +122,7 @@ export default function Register() {
         cityId: cityId!,
         licenseType,
         licenseNumber: licenseNumber.trim(),
+        nationalIdNumber: nationalId.trim(),
         issueDate: issueIso!,
         expiryDate: expiryIso!,
         countryCode: "SA",
@@ -162,6 +166,9 @@ export default function Register() {
         <form className="flex flex-col gap-4" onSubmit={(e) => goNext(e, step1Errors, 2)} noValidate>
           <Field label={t("lawyerAuth.register.fullName")} required error={err(step1Errors.fullName)}>
             <Input value={fullName} onChange={(e) => setFullName(e.target.value)} autoComplete="name" />
+          </Field>
+          <Field label={t("lawyerAuth.register.nationalId")} required error={err(step1Errors.nationalId)}>
+            <Input dir="ltr" className="font-mono" inputMode="numeric" maxLength={10} value={nationalId} onChange={(e) => setNationalId(e.target.value)} />
           </Field>
           <Field label={t("lawyerAuth.register.phone")} required error={err(step1Errors.phone)}>
             <SaudiPhoneInput value={phone} onChange={(e) => setPhone(e.target.value)} />
@@ -351,7 +358,7 @@ function SuccessDialog({ onDone }: { onDone: () => void }) {
     return () => clearTimeout(timer);
   }, [onDone]);
   return (
-    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 px-4">
+    <div role="dialog" aria-modal="true" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
       <Card elevated className="flex w-full max-w-sm flex-col items-center gap-3 py-8 text-center">
         <CircleCheck className="h-12 w-12 text-seal" />
         <p className="text-base font-semibold text-ink">{t("lawyerAuth.success.title")}</p>

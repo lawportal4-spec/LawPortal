@@ -28,12 +28,28 @@ export interface RegisterLawyerBody {
   cityId: number;
   licenseType: LicenseType;
   licenseNumber: string;
+  /** Saudi national ID or Iqama number. */
+  nationalIdNumber: string;
   /** Gregorian ISO date (yyyy-mm-dd) — the wizard converts from the Hijri the lawyer typed. */
   issueDate: string;
   expiryDate: string;
   countryCode: "SA";
   acceptedTerms: boolean;
   licenseDocument: File;
+}
+
+/** Saudi national ID (starts with 1) or Iqama (starts with 2): 10 digits with a check digit —
+ * the same rule the API applies (NationalIds.IsValid). Arabic digits are accepted. */
+export function isValidNationalId(raw: string): boolean {
+  const id = raw.replace(/[\u0660-\u0669]/g, (d) => String(d.charCodeAt(0) - 0x0660)).replace(/\s/g, "");
+  if (!/^[12]\d{9}$/.test(id)) return false;
+  let sum = 0;
+  for (let i = 0; i < 10; i++) {
+    let d = Number(id[i]);
+    if (i % 2 === 0) { d *= 2; if (d > 9) d -= 9; }
+    sum += d;
+  }
+  return sum % 10 === 0;
 }
 
 /** Creates the (unactivated) account and texts an activation code to `phoneE164`. */

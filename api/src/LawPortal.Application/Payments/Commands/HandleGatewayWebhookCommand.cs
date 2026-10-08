@@ -23,7 +23,7 @@ namespace LawPortal.Application.Payments.Commands;
 /// </summary>
 public record HandleGatewayWebhookCommand(string GatewayPaymentId, string Status, string SecretToken) : IRequest<Unit>;
 
-public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Extensions.Configuration.IConfiguration configuration)
+public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Extensions.Configuration.IConfiguration configuration, IPaymentGateway gateway)
     : IRequestHandler<HandleGatewayWebhookCommand, Unit>
 {
     public async Task<Unit> Handle(HandleGatewayWebhookCommand request, CancellationToken cancellationToken)
@@ -72,6 +72,7 @@ public class HandleGatewayWebhookHandler(ILawPortalDbContext db, Microsoft.Exten
         {
             payment.Status = PaymentStatus.Paid;
             payment.PaidAtUtc = DateTime.UtcNow;
+            payment.Transaction = await PaymentTransactionDetails.TryFetchAsync(gateway, payment, cancellationToken);
 
             if (payment.Purpose == PaymentPurpose.WalletTopUp)
             {

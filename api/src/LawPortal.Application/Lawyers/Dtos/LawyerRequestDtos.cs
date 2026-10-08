@@ -40,7 +40,12 @@ public record LawyerDashboardDto(
     decimal AvgRating,
     int RatingCount);
 
-public record PayoutSummaryDto(Guid Id, string RequestNumber, decimal Amount, string Status, DateTime CreatedAtUtc, DateTime? ReleasedAtUtc);
+/// <param name="DebtOffset">Deducted at release to settle a debt to the platform; paid = Amount − DebtOffset.</param>
+public record PayoutSummaryDto(Guid Id, string RequestNumber, decimal Amount, string Status, DateTime CreatedAtUtc, DateTime? ReleasedAtUtc, decimal DebtOffset);
+
+/// <summary>What the lawyer owes the platform (refunds after they were paid) and its history.</summary>
+public record MyDebtDto(decimal Balance, IReadOnlyList<MyDebtEntryDto> Entries);
+public record MyDebtEntryDto(string Kind, decimal Amount, string? RequestNumber, DateTime CreatedAtUtc);
 
 public record LawyerReviewDto(Guid Id, string RequestNumber, int Rating, string? Comment, DateTime CreatedAtUtc);
 

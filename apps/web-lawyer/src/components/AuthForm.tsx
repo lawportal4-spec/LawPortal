@@ -10,7 +10,8 @@ export function AuthLayout({ title, hideNav, children }: { title?: string; hideN
   return (
     <AppShell hideNav={hideNav}>
       <div className="mx-auto flex max-w-md flex-col items-center py-6">
-        <p className="font-display text-4xl font-bold text-ink">{i18n.language === "ar" ? t("app.nameAr") : t("app.nameEn")}</p>
+        <img src="/favicon.svg" alt="" className="mb-3 h-24 w-20" />
+        <p className="font-display text-4xl font-bold text-seal-strong">{i18n.language === "ar" ? t("app.nameAr") : t("app.nameEn")}</p>
         {title && <h1 className="mt-3 text-xl text-ink-soft">{title}</h1>}
         <div className="mt-8 w-full">{children}</div>
       </div>

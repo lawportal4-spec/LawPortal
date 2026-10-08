@@ -18,7 +18,20 @@ public record LawyerRegistrationSummaryDto(
 
 /// <summary>Every lawyer registration an admin can act on, newest first. Sign-ups that never
 /// confirmed their phone are left out — they aren't real applicants yet.</summary>
-public record ListLawyerRegistrationsQuery(LicenseVerificationStatus? Status, string? Search, int Page, int PageSize)
+/// <remarks>Bound from the query string. <c>AccountStage</c>: VerifyEmail / PayFee (approved, still
+/// onboarding) or Active. <c>LicenseExpiry</c>: Valid, ExpiringSoon (within 90 days) or Expired.</remarks>
+public record ListLawyerRegistrationsQuery(
+    LicenseVerificationStatus? Status = null,
+    string? Search = null,
+    int? RegionId = null,
+    int? CityId = null,
+    LawyerLicenseType? LicenseType = null,
+    string? AccountStage = null,
+    string? LicenseExpiry = null,
+    DateTime? SubmittedFrom = null,
+    DateTime? SubmittedTo = null,
+    int Page = 1,
+    int PageSize = 20)
     : IRequest<PagedResult<LawyerRegistrationSummaryDto>>;
 
 public class ListLawyerRegistrationsHandler(ILawPortalDbContext db)
@@ -31,6 +44,32 @@ public class ListLawyerRegistrationsHandler(ILawPortalDbContext db)
 
         if (request.Status is { } status)
             query = query.Where(l => l.License!.VerificationStatus == status);
+
+        if (request.RegionId is { } regionId) query = query.Where(l => l.RegionId == regionId);
+        if (request.CityId is { } cityId) query = query.Where(l => l.CityId == cityId);
+        if (request.LicenseType is { } licenseType) query = query.Where(l => l.License!.LicenseType == licenseType);
+        if (request.SubmittedFrom is { } from) query = query.Where(l => l.CreatedAtUtc >= from);
+        if (request.SubmittedTo is { } to) query = query.Where(l => l.CreatedAtUtc <= to);
+
+        // Mirrors LawyerOnboarding.StepOf, as a query.
+        var approved = LicenseVerificationStatus.Approved;
+        query = request.AccountStage switch
+        {
+            "VerifyEmail" => query.Where(l => l.License!.VerificationStatus == approved && l.User!.Status == UserStatus.PendingVerification && !l.User.IsEmailVerified),
+            "PayFee" => query.Where(l => l.License!.VerificationStatus == approved && l.User!.Status == UserStatus.PendingVerification && l.User.IsEmailVerified),
+            "Active" => query.Where(l => l.User!.Status == UserStatus.Active),
+            _ => query,
+        };
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var soon = today.AddDays(90);
+        query = request.LicenseExpiry switch
+        {
+            "Expired" => query.Where(l => l.License!.ExpiryDate < today),
+            "ExpiringSoon" => query.Where(l => l.License!.ExpiryDate >= today && l.License.ExpiryDate <= soon),
+            "Valid" => query.Where(l => l.License!.ExpiryDate > soon),
+            _ => query,
+        };
 
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
@@ -88,7 +127,15 @@ public record LawyerRegistrationDetailDto(
     string? OnboardingStep,
     string? PhotoUrl,
     /// <summary>Office / secretary numbers — admin-only, never shown to clients.</summary>
-    IReadOnlyList<LawPortal.Application.Lawyers.Account.ContactNumberDto> ContactNumbers);
+    IReadOnlyList<LawPortal.Application.Lawyers.Account.ContactNumberDto> ContactNumbers,
+    /// <summary>Last four digits only.</summary>
+    string? NationalIdMasked,
+    /// <summary>Set when this sign-up matches a former account that left owing money.</summary>
+    FormerAccountMatchDto? FormerAccount,
+    Guid UserId,
+    string AccountStatus);
+
+public record FormerAccountMatchDto(Guid LawyerProfileId, string FullName, decimal DebtBalance);
 
 public record GetLawyerRegistrationQuery(Guid LawyerProfileId) : IRequest<LawyerRegistrationDetailDto>;
 
@@ -123,7 +170,18 @@ public class GetLawyerRegistrationHandler(ILawPortalDbContext db, IFileStorage s
             license.VerifiedAtUtc,
             LawPortal.Application.Lawyers.Onboarding.LawyerOnboarding.StepOf(l)?.ToString(),
             l.PhotoStorageKey is null ? null : storage.CreateDownloadUrl(l.PhotoStorageKey, DocumentUrlTtl),
-            l.ContactNumbers.Select(c => new LawPortal.Application.Lawyers.Account.ContactNumberDto(c.Kind.ToString(), c.ContactName, c.PhoneE164)).ToList());
+            l.ContactNumbers.Select(c => new LawPortal.Application.Lawyers.Account.ContactNumberDto(c.Kind.ToString(), c.ContactName, c.PhoneE164)).ToList(),
+            l.NationalIdNumber is { Length: >= 4 } nid ? "••••••" + nid[^4..] : null,
+            await FormerMatchAsync(l.PossibleFormerProfileId, cancellationToken),
+            l.UserId,
+            Directory.AccountStatus.Of(l.User.Status, l.User.IsDeleted));
+    }
+
+    private async Task<FormerAccountMatchDto?> FormerMatchAsync(Guid? formerId, CancellationToken cancellationToken)
+    {
+        if (formerId is not { } id) return null;
+        var name = await db.LawyerProfiles.IgnoreQueryFilters().Where(p => p.Id == id).Select(p => p.FullName).FirstOrDefaultAsync(cancellationToken);
+        return name is null ? null : new FormerAccountMatchDto(id, name, await Payments.LawyerDebts.BalanceAsync(db, id, cancellationToken));
     }
 }
 

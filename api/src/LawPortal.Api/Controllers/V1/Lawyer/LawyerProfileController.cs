@@ -93,6 +93,11 @@ public class LawyerProfileController(ISender sender) : ControllerBase
         return NoContent();
     }
 
+    /// <summary>What the lawyer owes the platform from refunds made after they were paid.</summary>
+    [HttpGet("debt")]
+    public async Task<ActionResult<MyDebtDto>> MyDebt(CancellationToken cancellationToken)
+        => Ok(await sender.Send(new GetMyDebtQuery(), cancellationToken));
+
     [HttpGet("earnings")]
     [ProducesResponseType<IReadOnlyList<PayoutSummaryDto>>(StatusCodes.Status200OK)]
     public async Task<ActionResult<IReadOnlyList<PayoutSummaryDto>>> Earnings(CancellationToken cancellationToken)

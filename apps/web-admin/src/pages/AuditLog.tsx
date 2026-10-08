@@ -1,42 +1,43 @@
 import { useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Card, Ltr } from "@law-portal/ui";
+import { Card, Input, Ltr } from "@law-portal/ui";
 import { useTranslation, formatDateTime } from "@law-portal/i18n";
 import { AppShell } from "../components/AppShell";
+import { PageHeader } from "../components/PageHeader";
+import { Field } from "../components/DiscountCodeFields";
+import { FilterBar } from "../components/FilterBar";
+import { dayEnd, dayStart } from "../lib/api";
 import { getAuditLogs } from "../lib/auditApi";
 
 export default function AuditLog() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isAr = i18n.language === "ar";
   const [action, setAction] = useState("");
+  const [from, setFrom] = useState("");
+  const [to, setTo] = useState("");
   const [page, setPage] = useState(1);
   const pageSize = 20;
 
   const query = useQuery({
-    queryKey: ["auditLogs", { action, page }],
-    queryFn: () => getAuditLogs({ action: action || undefined, page, pageSize }),
+    queryKey: ["auditLogs", { action, from, to, page }],
+    queryFn: () => getAuditLogs({ action: action || undefined, from: dayStart(from), to: dayEnd(to), page, pageSize }),
     placeholderData: keepPreviousData,
   });
 
   return (
     <AppShell>
-      <h1 className="mb-1 font-display text-2xl font-bold">{isAr ? "سجل التدقيق" : "Audit Log"}</h1>
-      <p className="mb-6 text-sm text-ink-faint">
-        {isAr ? `${query.data?.totalCount ?? "…"} حدث مسجَّل` : `${query.data?.totalCount ?? "…"} recorded events`}
-      </p>
+      <PageHeader page="audit" />
 
-      <div className="mb-6">
-        <input
-          value={action}
-          onChange={(e) => {
-            setAction(e.target.value);
-            setPage(1);
-          }}
-          placeholder={isAr ? "تصفية حسب اسم الإجراء (مثل LawyerVerified)" : "Filter by action name (e.g. LawyerVerified)"}
-          className="w-full max-w-md rounded-md border border-border bg-surface-raised px-3 py-2.5 text-sm font-mono"
-        />
-      </div>
+      <FilterBar search={action} onSearch={(v) => { setAction(v); setPage(1); }} placeholder={t("auditLog.search")}
+        advancedActive={!!(from || to)} canClear={!!(action || from || to)} onClear={() => { setAction(""); setFrom(""); setTo(""); setPage(1); }}>
+        <Field label={t("directory.from")}>
+          <Input id="audit-from" dir="ltr" type="date" value={from} onChange={(e) => { setFrom(e.target.value); setPage(1); }} />
+        </Field>
+        <Field label={t("directory.to")}>
+          <Input id="audit-to" dir="ltr" type="date" value={to} onChange={(e) => { setTo(e.target.value); setPage(1); }} />
+        </Field>
+      </FilterBar>
 
       {query.isLoading && <p className="text-sm text-ink-faint">{isAr ? "جارٍ التحميل…" : "Loading…"}</p>}
 
