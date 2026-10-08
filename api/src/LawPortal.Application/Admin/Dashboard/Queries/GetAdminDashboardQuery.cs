@@ -32,7 +32,9 @@ public class GetAdminDashboardHandler(ILawPortalDbContext db) : IRequestHandler<
     public async Task<AdminDashboardDto> Handle(GetAdminDashboardQuery request, CancellationToken cancellationToken)
     {
         var now = DateTime.UtcNow;
-        var monthStart = new DateTime(now.Year, now.Month, 1, 0, 0, 0, DateTimeKind.Utc);
+        // The month starts at midnight Riyadh time (UTC+3, no DST) — the same boundary as the ledger's «هذا الشهر».
+        var riyadhNow = now.AddHours(3);
+        var monthStart = new DateTime(riyadhNow.Year, riyadhNow.Month, 1, 0, 0, 0, DateTimeKind.Utc).AddHours(-3);
 
         var totalClients = await db.Users.CountAsync(u => u.UserType == UserType.Client, cancellationToken);
         var totalVerifiedLawyers = await db.LawyerProfiles.CountAsync(l => l.IsVerified, cancellationToken);
@@ -47,12 +49,13 @@ public class GetAdminDashboardHandler(ILawPortalDbContext db) : IRequestHandler<
             .Select(g => new RequestStatusCountDto(g.Key.ToString(), g.Count()))
             .ToListAsync(cancellationToken);
 
+        // Net of reversals (refunds debit the revenue account), so it matches the ledger page.
         var commissionThisMonth = await db.LedgerEntries
-            .Where(e => e.Account == LedgerAccount.CommissionRevenue && !e.IsDebit && e.CreatedAtUtc >= monthStart)
-            .SumAsync(e => e.Amount, cancellationToken);
+            .Where(e => e.Account == LedgerAccount.CommissionRevenue && e.CreatedAtUtc >= monthStart)
+            .SumAsync(e => e.IsDebit ? -e.Amount : e.Amount, cancellationToken);
         var subscriptionRevenueThisMonth = await db.LedgerEntries
-            .Where(e => e.Account == LedgerAccount.SubscriptionRevenue && !e.IsDebit && e.CreatedAtUtc >= monthStart)
-            .SumAsync(e => e.Amount, cancellationToken);
+            .Where(e => e.Account == LedgerAccount.SubscriptionRevenue && e.CreatedAtUtc >= monthStart)
+            .SumAsync(e => e.IsDebit ? -e.Amount : e.Amount, cancellationToken);
 
         var totalDebits = await db.LedgerEntries.Where(e => e.IsDebit).SumAsync(e => e.Amount, cancellationToken);
         var totalCredits = await db.LedgerEntries.Where(e => !e.IsDebit).SumAsync(e => e.Amount, cancellationToken);

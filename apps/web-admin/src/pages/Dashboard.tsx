@@ -48,8 +48,8 @@ export default function Dashboard() {
             <StatCard label={isAr ? "المحامون الموثّقون" : "Verified lawyers"} value={String(d.totalVerifiedLawyers)} to="/lawyers?status=Approved" />
             <StatCard label={isAr ? "طلبات توثيق معلّقة" : "Pending verifications"} value={String(d.pendingLawyerVerifications)} to="/lawyers" />
             <StatCard label={isAr ? "عدد المسؤولين" : "Admins"} value={String(d.totalAdmins)} to="/users" />
-            <StatCard label={isAr ? "عمولة هذا الشهر" : "Commission this month"} value={formatCurrency(d.commissionRevenueThisMonth)} to="/ledger" />
-            <StatCard label={isAr ? "إيراد الاشتراكات هذا الشهر" : "Subscription revenue this month"} value={formatCurrency(d.subscriptionRevenueThisMonth)} to="/subscriptions" />
+            <StatCard label={isAr ? "عمولة هذا الشهر" : "Commission this month"} value={formatCurrency(d.commissionRevenueThisMonth)} to="/ledger?period=month" />
+            <StatCard label={isAr ? "إيراد الاشتراكات هذا الشهر" : "Subscription revenue this month"} value={formatCurrency(d.subscriptionRevenueThisMonth)} to="/ledger?period=month" />
           </div>
 
           <Card className="mb-6 flex items-center gap-3">
