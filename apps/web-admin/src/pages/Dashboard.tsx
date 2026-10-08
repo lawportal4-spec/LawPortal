@@ -50,6 +50,7 @@ export default function Dashboard() {
             <StatCard label={isAr ? "عدد المسؤولين" : "Admins"} value={String(d.totalAdmins)} to="/users" />
             <StatCard label={isAr ? "عمولة هذا الشهر" : "Commission this month"} value={formatCurrency(d.commissionRevenueThisMonth)} to="/ledger?period=month" />
             <StatCard label={isAr ? "إيراد الاشتراكات هذا الشهر" : "Subscription revenue this month"} value={formatCurrency(d.subscriptionRevenueThisMonth)} to="/ledger?period=month" />
+            <StatCard label={isAr ? "إيراد رسوم التسجيل هذا الشهر" : "Registration fees this month"} value={formatCurrency(d.registrationFeeRevenueThisMonth)} to="/ledger?period=month" />
           </div>
 
           <Card className="mb-6 flex items-center gap-3">

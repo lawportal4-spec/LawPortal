@@ -18,6 +18,7 @@ export interface AdminDashboardDto {
   requestsByStatus: RequestStatusCountDto[];
   commissionRevenueThisMonth: number;
   subscriptionRevenueThisMonth: number;
+  registrationFeeRevenueThisMonth: number;
   ledgerIsBalanced: boolean;
   activeSubscriptionsByPlan: SubscriptionPlanCountDto[];
 }

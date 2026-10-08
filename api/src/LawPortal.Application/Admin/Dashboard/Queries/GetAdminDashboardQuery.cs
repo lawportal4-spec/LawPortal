@@ -18,6 +18,7 @@ public record AdminDashboardDto(
     IReadOnlyList<RequestStatusCountDto> RequestsByStatus,
     decimal CommissionRevenueThisMonth,
     decimal SubscriptionRevenueThisMonth,
+    decimal RegistrationFeeRevenueThisMonth,
     bool LedgerIsBalanced,
     IReadOnlyList<SubscriptionPlanCountDto> ActiveSubscriptionsByPlan);
 
@@ -56,6 +57,9 @@ public class GetAdminDashboardHandler(ILawPortalDbContext db) : IRequestHandler<
         var subscriptionRevenueThisMonth = await db.LedgerEntries
             .Where(e => e.Account == LedgerAccount.SubscriptionRevenue && e.CreatedAtUtc >= monthStart)
             .SumAsync(e => e.IsDebit ? -e.Amount : e.Amount, cancellationToken);
+        var registrationFeeRevenueThisMonth = await db.LedgerEntries
+            .Where(e => e.Account == LedgerAccount.RegistrationFeeRevenue && e.CreatedAtUtc >= monthStart)
+            .SumAsync(e => e.IsDebit ? -e.Amount : e.Amount, cancellationToken);
 
         var totalDebits = await db.LedgerEntries.Where(e => e.IsDebit).SumAsync(e => e.Amount, cancellationToken);
         var totalCredits = await db.LedgerEntries.Where(e => !e.IsDebit).SumAsync(e => e.Amount, cancellationToken);
@@ -69,7 +73,7 @@ public class GetAdminDashboardHandler(ILawPortalDbContext db) : IRequestHandler<
 
         return new AdminDashboardDto(
             totalClients, totalVerifiedLawyers, pendingVerifications, totalAdmins,
-            requestsByStatus, commissionThisMonth, subscriptionRevenueThisMonth, totalDebits == totalCredits,
+            requestsByStatus, commissionThisMonth, subscriptionRevenueThisMonth, registrationFeeRevenueThisMonth, totalDebits == totalCredits,
             activeSubscriptions);
     }
 }
