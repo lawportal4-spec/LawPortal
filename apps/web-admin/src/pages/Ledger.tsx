@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowUpLeft, BookOpen, Check, ChevronDown, ChevronLeft, ChevronRight, CircleCheck, Equal, Percent, Plus, TableProperties, TriangleAlert,
 } from "lucide-react";
@@ -36,11 +36,16 @@ const PERIODS = ["month", "quarter", "year", "all"] as const;
 type Period = (typeof PERIODS)[number];
 const selectClass = "rounded-md border border-border bg-surface-raised px-3 py-2.5 text-sm";
 
+/** Riyadh is UTC+3 with no DST; periods start at Riyadh midnight, like the dashboard's «هذا الشهر». */
+const RIYADH_MS = 3 * 60 * 60 * 1000;
+const riyadhStart = (year: number, month: number) => new Date(Date.UTC(year, month, 1) - RIYADH_MS).toISOString();
+
 function periodStart(p: Period): string | undefined {
   const now = new Date();
-  if (p === "month") return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const riyadh = new Date(now.getTime() + RIYADH_MS);
+  if (p === "month") return riyadhStart(riyadh.getUTCFullYear(), riyadh.getUTCMonth());
   if (p === "quarter") return new Date(now.getFullYear(), now.getMonth() - 3, now.getDate()).toISOString();
-  if (p === "year") return new Date(now.getFullYear(), 0, 1).toISOString();
+  if (p === "year") return riyadhStart(riyadh.getUTCFullYear(), 0);
   return undefined;
 }
 
@@ -81,7 +86,11 @@ function moneyGroups(summary: LedgerSummaryDto) {
 
 export default function Ledger() {
   const { t } = useTranslation();
-  const [period, setPeriod] = useState<Period>("all");
+  const [params] = useSearchParams();
+  const [period, setPeriod] = useState<Period>(() => {
+    const p = params.get("period");
+    return PERIODS.includes(p as Period) ? (p as Period) : "all";
+  });
   const summary = useQuery({ queryKey: ["ledgerSummary", period], queryFn: () => getLedgerSummary(periodStart(period)), placeholderData: keepPreviousData });
 
   return (
