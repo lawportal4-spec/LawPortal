@@ -32,7 +32,7 @@ export function AppShell({ children, hideNav = false }: { children: ReactNode; h
     <DashboardShell
       menuLabel={t("nav.openMenu")}
       brand={
-        <Link to="/" className="flex items-center gap-2 font-display text-xl font-bold">
+        <Link to="/" className="flex items-center gap-2 font-display text-lg font-bold sm:text-xl">
           <img src="/favicon.svg" alt="" className="h-9 w-8" />
           <span className="text-seal-strong">{locale === "ar" ? "بوابة القانون" : "Law Portal"}</span>
           <span className="hidden text-sm font-normal text-ink-faint sm:inline">{t("shell.lawyer.tagline")}</span>
@@ -51,7 +51,7 @@ export function AppShell({ children, hideNav = false }: { children: ReactNode; h
       actions={
         <>
           <LocaleToggle locale={locale} onChange={setLocale} />
-          <button onClick={handleAuthClick} className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-ink-soft hover:border-seal hover:text-seal">
+          <button onClick={handleAuthClick} className="rounded-md border border-border px-2.5 py-1.5 text-sm font-medium text-ink-soft hover:border-seal hover:text-seal sm:px-3">
             {isAuthenticated ? t("nav.logout") : t("nav.login")}
           </button>
         </>
